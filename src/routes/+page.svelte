@@ -37,7 +37,32 @@
   let isLoggedIn = false;
   let profile: { name?: string; about?: string; picture?: string; } | undefined;
   let userPosts: NDKEvent[] = [];
-  let userLists: { [key: string]: NDKEvent[] } = {};
+  let userLists: { [key: string]: NDKEvent[] } = {
+    followSets: [],
+    pins: [],
+    relaySets: [],
+    bookmarkSets: [],
+    curationSets: [],
+    videoSets: [],
+    muteSets: [],
+    interestSets: [],
+    emojiSets: [],
+    releaseSets: [],
+    mutes: [],
+    bookmarks: [],
+    communities: [],
+    contacts: [],
+    people: [],
+    chats: [],
+    blockedRelays: [],
+    searchRelays: [],
+    groups: [],
+    interests: [],
+    emojis: [],
+    dmRelays: [],
+    wikiAuthors: [],
+    wikiRelays: []
+  };
   let revealedSections: Set<string> = new Set();
 
   const LIST_TYPES = {
@@ -158,14 +183,28 @@
 
   async function login() {
     try {
+      console.log('Starting login process...');
       await ndk.connect();
+      console.log('NDK connected');
+      
       user = await ndk.signer?.user();
+      console.log('User obtained:', user);
+      
       if (user) {
         isLoggedIn = true;
+        console.log('User logged in, fetching profile...');
+        
         // Fetch profile data
         const profileData = await user.fetchProfile();
         profile = profileData;
+        console.log('Profile fetched:', profile);
+        
+        // Initialize user content
         await fetchUserContent();
+        console.log('User content fetched');
+        
+        // Force a UI update
+        userLists = { ...userLists };
       }
     } catch (error) {
       console.error('Login failed:', error);
