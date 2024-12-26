@@ -29,7 +29,8 @@
     bookmarks: [],
     mutes: [],
     pins: [],
-    contacts: []
+    contacts: [],
+    communities: []
   };
 
   async function fetchUserContent() {
@@ -49,7 +50,8 @@
       { kind: 30001, name: 'bookmarks' }, // Bookmarks
       { kind: 10000, name: 'mutes' },     // Mute Lists
       { kind: 10001, name: 'pins' },      // Pin Lists
-      { kind: 3, name: 'contacts' }       // Contacts/Following
+      { kind: 3, name: 'contacts' },      // Contacts/Following
+      { kind: 34550, name: 'communities'} // Communities
     ];
 
     for (const { kind, name } of listKinds) {
@@ -373,6 +375,54 @@
             </div>
           {:else}
             <p class="text-gray-500">No contacts found</p>
+          {/if}
+        </div>
+
+        <!-- Communities -->
+        <div>
+          <h4 class="text-xl font-semibold mb-4">Communities</h4>
+          {#if userLists.communities.length > 0}
+            <div class="space-y-4">
+              {#each userLists.communities as community}
+                <div class="bg-gray-50 p-4 rounded-lg text-left">
+                  <h5 class="font-semibold">{community.tags.find(t => t[0] === 'name')?.[1] || 'Unnamed Community'}</h5>
+                  <p class="text-gray-800 mt-2">{community.content}</p>
+                  
+                  <div class="mt-4 space-y-2">
+                    <!-- Community Details -->
+                    {#if community.tags.find(t => t[0] === 'description')}
+                      <p class="text-sm text-gray-600">
+                        {community.tags.find(t => t[0] === 'description')?.[1]}
+                      </p>
+                    {/if}
+                    
+                    <!-- Community Moderators -->
+                    {#if community.tags.filter(t => t[0] === 'p').length > 0}
+                      <div>
+                        <span class="text-sm font-medium">Moderators:</span>
+                        <span class="text-sm text-gray-600 ml-2">
+                          {community.tags.filter(t => t[0] === 'p').length} moderators
+                        </span>
+                      </div>
+                    {/if}
+                    
+                    <!-- Community Rules -->
+                    {#if community.tags.filter(t => t[0] === 'rules').length > 0}
+                      <div>
+                        <span class="text-sm font-medium">Rules:</span>
+                        <div class="mt-1 space-y-1">
+                          {#each community.tags.filter(t => t[0] === 'rules') as rule}
+                            <p class="text-sm text-gray-600">{rule[1]}</p>
+                          {/each}
+                        </div>
+                      </div>
+                    {/if}
+                  </div>
+                </div>
+              {/each}
+            </div>
+          {:else}
+            <p class="text-gray-500">No communities found</p>
           {/if}
         </div>
       </div>
