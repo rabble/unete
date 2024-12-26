@@ -2,20 +2,51 @@
   import { i18n } from "$lib/i18n";
   import { ParaglideJS } from "@inlang/paraglide-sveltekit";
   import { page } from '$app/stores';
+  import { onMount } from 'svelte';
+  import NDK, { NDKNip07Signer } from '@nostr-dev-kit/ndk';
   import '../app.css';
   
-  let isLoggedIn = false; // This should be connected to your auth state management
+  let ndk;
+  let isLoggedIn = false;
+  let profile;
+  
+  onMount(() => {
+    ndk = new NDK({
+      explicitRelayUrls: [
+        'wss://relay.nos.social',
+        'wss://relay.damus.io',
+        'wss://relay.nostr.band'
+      ],
+      signer: new NDKNip07Signer()
+    });
+    ndk.connect();
+  });
+
+  async function login() {
+    try {
+      await ndk.connect();
+      const user = await ndk.signer?.user();
+      
+      if (user) {
+        isLoggedIn = true;
+        profile = await user.fetchProfile();
+      }
+    } catch (error) {
+      console.error('Login failed:', error);
+    }
+  }
 </script>
 
 <div>
   <nav class="bg-white shadow-lg">
     <div class="max-w-7xl mx-auto px-4">
       <div class="flex justify-between h-16">
-        <div class="flex items-center">
-          <div class="flex-shrink-0 flex items-center">
-            <img src="https://allofus.directory/logo.png" alt="All of Us Logo" class="h-8 w-8 mr-2" />
-            <a href="/" class="text-xl font-bold text-purple-600">All of Us Directory</a>
-          </div>
+        <div class="flex items-center justify-between flex-1">
+          <div class="flex items-center">
+            <div class="flex-shrink-0 flex items-center">
+              <img src="https://allofus.directory/logo.png" alt="All of Us Logo" class="h-8 w-8 mr-2" />
+              <a href="/" class="text-xl font-bold text-purple-600">All of Us Directory</a>
+            </div>
           <div class="hidden sm:ml-6 sm:flex sm:space-x-8">
             <!-- Organizations Dropdown -->
             <div class="relative group">
@@ -95,6 +126,32 @@
                 <a href="/add-organization" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Add Organization</a>
               </div>
             </div>
+          </div>
+          
+          <!-- Right side navigation items -->
+          <div class="flex items-center">
+            {#if isLoggedIn}
+              <a 
+                href="/profile" 
+                class="flex items-center text-gray-700 hover:text-purple-600 transition-colors"
+              >
+                {#if profile?.picture}
+                  <img 
+                    src={profile.picture} 
+                    alt="Profile" 
+                    class="w-8 h-8 rounded-full mr-2"
+                  />
+                {/if}
+                <span class="text-sm font-medium">{profile?.name || 'Profile'}</span>
+              </a>
+            {:else}
+              <button
+                on:click={login}
+                class="text-gray-700 hover:text-purple-600 transition-colors text-sm font-medium"
+              >
+                Login with Nostr
+              </button>
+            {/if}
           </div>
         </div>
       </div>
