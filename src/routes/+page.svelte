@@ -57,7 +57,8 @@
     relaySets: [],
     bookmarkSets: [],
     curationSets: [],
-    videoSets: []
+    videoSets: [],
+    muteSets: []
   };
 
   function extractRelaySets(events: NDKEvent[]): RelaySet[] {
@@ -111,7 +112,8 @@
       { kind: 30002, name: 'relaySets' },     // Relay Sets
       { kind: 30003, name: 'bookmarkSets' },   // Bookmark Sets
       { kind: 30004, name: 'curationSets' },    // Curation Sets
-      { kind: 30005, name: 'videoSets' }        // Video Sets
+      { kind: 30005, name: 'videoSets' },       // Video Sets
+      { kind: 30007, name: 'muteSets' }         // Kind-specific Mute Sets
     ];
 
     for (const { kind, name } of listKinds) {
@@ -1011,6 +1013,54 @@
             </div>
           {:else}
             <p class="text-gray-500">No video sets found</p>
+          {/if}
+        </div>
+
+        <!-- Kind-specific Mute Sets -->
+        <div>
+          <h4 class="text-xl font-semibold mb-4">Kind-specific Mute Sets</h4>
+          {#if userLists.muteSets.length > 0}
+            <div class="space-y-4">
+              {#each userLists.muteSets as muteSet}
+                <div class="bg-gray-50 p-4 rounded-lg text-left">
+                  <div class="mb-4">
+                    <h5 class="font-semibold text-red-800">
+                      {muteSet.content || 'Unnamed Mute Set'}
+                    </h5>
+                    {#if muteSet.tags.find(t => t[0] === 'description')}
+                      <p class="mt-2 text-sm text-gray-600">
+                        {muteSet.tags.find(t => t[0] === 'description')?.[1]}
+                      </p>
+                    {/if}
+                  </div>
+                  
+                  <!-- Display muted pubkeys by kind -->
+                  {#if muteSet.tags.filter(t => t[0] === 'p').length > 0}
+                    <div class="mt-3">
+                      <span class="text-sm font-medium">Muted Users by Kind:</span>
+                      <div class="mt-2 space-y-2">
+                        {#each muteSet.tags.filter(t => t[0] === 'p') as [_, pubkey, kind]}
+                          <div class="bg-white p-2 rounded border border-red-200">
+                            <div class="flex justify-between items-center">
+                              <span class="font-mono text-sm text-red-600">{pubkey}</span>
+                              {#if kind}
+                                <span class="bg-red-100 text-red-800 text-xs px-2 py-1 rounded">
+                                  Kind: {kind}
+                                </span>
+                              {/if}
+                            </div>
+                          </div>
+                        {/each}
+                      </div>
+                    </div>
+                  {:else}
+                    <p class="text-gray-500">No muted users in this set</p>
+                  {/if}
+                </div>
+              {/each}
+            </div>
+          {:else}
+            <p class="text-gray-500">No kind-specific mute sets found</p>
           {/if}
         </div>
 
