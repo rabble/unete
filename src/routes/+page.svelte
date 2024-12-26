@@ -33,7 +33,8 @@
     communities: [],
     chats: [],
     blockedRelays: [],
-    searchRelays: []
+    searchRelays: [],
+    groups: []
   };
 
   async function fetchUserContent() {
@@ -57,7 +58,8 @@
       { kind: 34550, name: 'communities'}, // Communities
       { kind: 40, name: 'chats' },        // Public Chat Channels
       { kind: 10006, name: 'blockedRelays' }, // Blocked Relays
-      { kind: 10007, name: 'searchRelays' }   // Search Relays
+      { kind: 10007, name: 'searchRelays' },  // Search Relays
+      { kind: 10009, name: 'groups' }         // Simple Groups
     ];
 
     for (const { kind, name } of listKinds) {
@@ -481,6 +483,50 @@
             </div>
           {:else}
             <p class="text-gray-500">No search relays found</p>
+          {/if}
+        </div>
+
+        <!-- Simple Groups -->
+        <div>
+          <h4 class="text-xl font-semibold mb-4">Groups</h4>
+          {#if userLists.groups.length > 0}
+            <div class="space-y-4">
+              {#each userLists.groups as group}
+                <div class="bg-gray-50 p-4 rounded-lg text-left">
+                  <div class="space-y-2">
+                    {#each group.tags.filter(t => t[0] === 'group') as [_, groupId, relay, name]}
+                      <div class="bg-white p-3 rounded border border-green-200">
+                        <div class="flex flex-col gap-2">
+                          <div class="flex items-center justify-between">
+                            <span class="font-medium text-green-700">{name || 'Unnamed Group'}</span>
+                            <span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded">Group</span>
+                          </div>
+                          <span class="font-mono text-sm text-gray-600">ID: {groupId}</span>
+                          <span class="font-mono text-sm text-gray-600">Relay: {relay}</span>
+                        </div>
+                      </div>
+                    {/each}
+                    {#if group.tags.filter(t => t[0] === 'r').length > 0}
+                      <div class="mt-4">
+                        <span class="text-sm font-medium">Additional Relays:</span>
+                        <div class="mt-2 space-y-2">
+                          {#each group.tags.filter(t => t[0] === 'r') as [_, relay]}
+                            <div class="bg-white p-2 rounded border border-green-100">
+                              <span class="font-mono text-sm text-gray-600">{relay}</span>
+                            </div>
+                          {/each}
+                        </div>
+                      </div>
+                    {/if}
+                  </div>
+                  {#if group.content}
+                    <p class="text-sm text-gray-600 mt-2">Note: {group.content}</p>
+                  {/if}
+                </div>
+              {/each}
+            </div>
+          {:else}
+            <p class="text-gray-500">No groups found</p>
           {/if}
         </div>
 
