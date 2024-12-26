@@ -190,8 +190,73 @@
             <div class="space-y-4">
               {#each userLists.bookmarks as list}
                 <div class="bg-gray-50 p-4 rounded-lg text-left">
-                  <h5 class="font-semibold">{list.tags.find(t => t[0] === 'd')?.[1] || 'Unnamed List'}</h5>
+                  <h5 class="font-semibold">{list.tags.find(t => t[0] === 'd')?.[1] || 'Saved Items'}</h5>
                   <p class="text-gray-800">{list.content}</p>
+                  
+                  <div class="mt-4 space-y-3">
+                    <!-- Saved Notes -->
+                    {#if list.tags.filter(t => t[0] === 'e').length > 0}
+                      <div>
+                        <span class="font-medium">Saved Notes ({list.tags.filter(t => t[0] === 'e').length}):</span>
+                        <div class="mt-2 space-y-2">
+                          {#each list.tags.filter(t => t[0] === 'e') as tag}
+                            <div class="bg-white p-2 rounded border border-gray-200">
+                              <span class="text-sm font-mono text-gray-600">{tag[1].slice(0, 8)}...</span>
+                            </div>
+                          {/each}
+                        </div>
+                      </div>
+                    {/if}
+                    
+                    <!-- Saved Articles -->
+                    {#if list.tags.filter(t => t[0] === 'a').length > 0}
+                      <div>
+                        <span class="font-medium">Saved Articles ({list.tags.filter(t => t[0] === 'a').length}):</span>
+                        <div class="mt-2 space-y-2">
+                          {#each list.tags.filter(t => t[0] === 'a') as tag}
+                            <div class="bg-white p-2 rounded border border-gray-200">
+                              <span class="text-sm font-mono text-gray-600">{tag[1].slice(0, 8)}...</span>
+                            </div>
+                          {/each}
+                        </div>
+                      </div>
+                    {/if}
+                    
+                    <!-- Saved Hashtags -->
+                    {#if list.tags.filter(t => t[0] === 't').length > 0}
+                      <div>
+                        <span class="font-medium">Saved Hashtags:</span>
+                        <div class="flex flex-wrap gap-2 mt-2">
+                          {#each list.tags.filter(t => t[0] === 't') as tag}
+                            <span class="bg-gray-200 px-2 py-1 rounded-md text-sm">#{tag[1]}</span>
+                          {/each}
+                        </div>
+                      </div>
+                    {/if}
+                    
+                    <!-- Saved URLs -->
+                    {#if list.tags.filter(t => t[0] === 'r').length > 0}
+                      <div>
+                        <span class="font-medium">Saved Links:</span>
+                        <div class="mt-2 space-y-2">
+                          {#each list.tags.filter(t => t[0] === 'r') as tag}
+                            <a 
+                              href={tag[1]} 
+                              target="_blank" 
+                              rel="noopener noreferrer" 
+                              class="block bg-white p-2 rounded border border-gray-200 text-blue-600 hover:text-blue-800 text-sm truncate"
+                            >
+                              {tag[1]}
+                            </a>
+                          {/each}
+                        </div>
+                      </div>
+                    {/if}
+                    
+                    {#if !list.tags.some(t => ['e', 'a', 't', 'r'].includes(t[0]))}
+                      <p class="text-gray-500">No items saved in this list</p>
+                    {/if}
+                  </div>
                 </div>
               {/each}
             </div>
