@@ -1,4 +1,5 @@
 <script lang="ts">
+  import type { OrganizationContent, OrganizationCategory } from '$lib/nostr/kinds';
   import { createOrganization } from '$lib/nostr/organizations';
   import { getTopics } from '$lib/topics';
   import NDK, { NDKNip07Signer } from '@nostr-dev-kit/ndk';
@@ -218,6 +219,9 @@
     }
   }
 </script>
+
+<style lang="postcss">
+</style>
 
 <div class="max-w-4xl mx-auto px-4 py-12">
   <h1 class="text-4xl font-bold mb-8">Apply to Join the All of Us Directory</h1>
