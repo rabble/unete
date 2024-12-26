@@ -60,7 +60,8 @@
     videoSets: [],
     muteSets: [],
     interestSets: [],
-    emojiSets: []
+    emojiSets: [],
+    releaseSets: []
   };
 
   function extractRelaySets(events: NDKEvent[]): RelaySet[] {
@@ -117,7 +118,8 @@
       { kind: 30005, name: 'videoSets' },       // Video Sets
       { kind: 30007, name: 'muteSets' },        // Kind-specific Mute Sets
       { kind: 30015, name: 'interestSets' },    // Interest Sets
-      { kind: 30030, name: 'emojiSets' }        // Emoji Sets
+      { kind: 30030, name: 'emojiSets' },       // Emoji Sets
+      { kind: 30063, name: 'releaseSets' }      // Release Artifact Sets
     ];
 
     for (const { kind, name } of listKinds) {
@@ -1099,6 +1101,72 @@
             </div>
           {:else}
             <p class="text-gray-500">No emoji sets found</p>
+          {/if}
+        </div>
+
+        <!-- Release Artifact Sets -->
+        <div>
+          <h4 class="text-xl font-semibold mb-4">Release Artifact Sets</h4>
+          {#if userLists.releaseSets.length > 0}
+            <div class="space-y-4">
+              {#each userLists.releaseSets as releaseSet}
+                <div class="bg-gray-50 p-4 rounded-lg text-left">
+                  <div class="mb-4">
+                    <h5 class="font-semibold text-purple-800">
+                      {releaseSet.content || 'Unnamed Release Set'}
+                    </h5>
+                    {#if releaseSet.tags.find(t => t[0] === 'description')}
+                      <p class="mt-2 text-sm text-gray-600">
+                        {releaseSet.tags.find(t => t[0] === 'description')?.[1]}
+                      </p>
+                    {/if}
+                  </div>
+
+                  <!-- Application Info -->
+                  {#if releaseSet.tags.find(t => t[0] === 'i')}
+                    <div class="mt-3">
+                      <span class="text-sm font-medium">Application:</span>
+                      <span class="ml-2 font-mono text-sm text-purple-600">
+                        {releaseSet.tags.find(t => t[0] === 'i')?.[1]}
+                      </span>
+                    </div>
+                  {/if}
+
+                  <!-- Version Info -->
+                  {#if releaseSet.tags.find(t => t[0] === 'version')}
+                    <div class="mt-2">
+                      <span class="text-sm font-medium">Version:</span>
+                      <span class="ml-2 bg-purple-100 text-purple-800 px-2 py-1 rounded text-sm">
+                        {releaseSet.tags.find(t => t[0] === 'version')?.[1]}
+                      </span>
+                    </div>
+                  {/if}
+                  
+                  <!-- Release Files -->
+                  {#if releaseSet.tags.filter(t => t[0] === 'e').length > 0}
+                    <div class="mt-4">
+                      <span class="text-sm font-medium">Release Files:</span>
+                      <div class="mt-2 space-y-2">
+                        {#each releaseSet.tags.filter(t => t[0] === 'e') as [_, fileId]}
+                          <div class="bg-white p-3 rounded border border-purple-200">
+                            <div class="flex items-center justify-between">
+                              <span class="font-mono text-sm text-purple-600">{fileId}</span>
+                              <span class="bg-purple-100 text-purple-800 text-xs px-2 py-1 rounded">
+                                kind:1063
+                              </span>
+                            </div>
+                          </div>
+                        {/each}
+                      </div>
+                    </div>
+                  {:else}
+                    <p class="text-gray-500 mt-2">No files in this release</p>
+                  {/if}
+                </div>
+              {/each}
+            </div>
+          {:else}
+            <p class="text-gray-500">No release artifact sets found</p>
           {/if}
         </div>
 
