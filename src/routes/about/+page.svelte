@@ -38,7 +38,7 @@
         and they are able to welcome and involve people who would fit well.
       </p>
       <p class="text-gray-700">
-        Want to add your organization to the directory? <a href="/join-directory" class="text-purple-600 hover:text-purple-800">Learn about joining the
+        Want to add your organization to the directory? <a href="/add-organization" class="text-purple-600 hover:text-purple-800">Learn about adding your organization to the
         directory</a> or <a href="/add-organization" class="text-purple-600 hover:text-purple-800">add your organization
         now</a>.
       </p>
