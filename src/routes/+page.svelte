@@ -7,6 +7,9 @@
   interface RelaySet {
     id: string;
     name: string;
+    title?: string;
+    image?: string;
+    description?: string;
     relays: string[];
   }
 
@@ -61,6 +64,9 @@
         sets.push({
           id: setId,
           name: event.content || setId,
+          title: event.tags.find(t => t[0] === 'title')?.[1],
+          image: event.tags.find(t => t[0] === 'image')?.[1],
+          description: event.tags.find(t => t[0] === 'description')?.[1],
           relays
         });
       }
@@ -228,7 +234,23 @@
               <!-- Group lists by their 'd' identifier -->
               {#each Array.from(new Set(userLists.people.map(list => list.tags.find(t => t[0] === 'd')?.[1] || 'default'))).sort() as setId}
                 <div class="border-l-4 border-blue-400 pl-4">
-                  <h5 class="font-semibold text-blue-800 mb-3">Set: {setId}</h5>
+                  <div class="mb-4">
+                    <h5 class="font-semibold text-blue-800">
+                      {list.tags.find(t => t[0] === 'title')?.[1] || `Set: ${setId}`}
+                    </h5>
+                    {#if list.tags.find(t => t[0] === 'image')}
+                      <img 
+                        src={list.tags.find(t => t[0] === 'image')?.[1]} 
+                        alt="Set image"
+                        class="mt-2 w-24 h-24 object-cover rounded-lg"
+                      />
+                    {/if}
+                    {#if list.tags.find(t => t[0] === 'description')}
+                      <p class="mt-2 text-sm text-gray-600">
+                        {list.tags.find(t => t[0] === 'description')?.[1]}
+                      </p>
+                    {/if}
+                  </div>
                   <div class="space-y-3">
                     {#each userLists.people.filter(list => (list.tags.find(t => t[0] === 'd')?.[1] || 'default') === setId) as list}
                       <div class="bg-gray-50 p-4 rounded-lg text-left">
@@ -547,7 +569,9 @@
                 >
                   <option value={null}>Select Relay Set</option>
                   {#each relaySets as set}
-                    <option value={set}>{set.name}</option>
+                    <option value={set}>
+                      {set.name} {set.title ? `- ${set.title}` : ''}
+                    </option>
                   {/each}
                 </select>
               </div>
