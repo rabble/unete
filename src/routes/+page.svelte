@@ -37,7 +37,8 @@
     groups: [],
     interests: [],
     emojis: [],
-    dmRelays: []
+    dmRelays: [],
+    wikiAuthors: []
   };
 
   async function fetchUserContent() {
@@ -65,7 +66,8 @@
       { kind: 10009, name: 'groups' },        // Simple Groups
       { kind: 10015, name: 'interests' },     // Interests
       { kind: 10030, name: 'emojis' },        // Emoji Preferences
-      { kind: 10050, name: 'dmRelays' }       // DM Relay Preferences
+      { kind: 10050, name: 'dmRelays' },      // DM Relay Preferences
+      { kind: 10101, name: 'wikiAuthors' }    // Wiki Author Preferences
     ];
 
     for (const { kind, name } of listKinds) {
@@ -649,6 +651,38 @@
             </div>
           {:else}
             <p class="text-gray-500">No DM relay preferences found</p>
+          {/if}
+        </div>
+
+        <!-- Wiki Author Preferences -->
+        <div>
+          <h4 class="text-xl font-semibold mb-4">Recommended Wiki Authors</h4>
+          {#if userLists.wikiAuthors.length > 0}
+            <div class="space-y-4">
+              {#each userLists.wikiAuthors as authorList}
+                <div class="bg-gray-50 p-4 rounded-lg text-left">
+                  <div class="space-y-2">
+                    {#if authorList.tags.filter(t => t[0] === 'p').length > 0}
+                      <div>
+                        <span class="font-medium">Trusted Authors:</span>
+                        <div class="mt-2 space-y-2">
+                          {#each authorList.tags.filter(t => t[0] === 'p') as [_, pubkey]}
+                            <div class="bg-white p-3 rounded border border-teal-200">
+                              <span class="font-mono text-sm text-teal-600">{pubkey}</span>
+                            </div>
+                          {/each}
+                        </div>
+                      </div>
+                    {/if}
+                  </div>
+                  {#if authorList.content}
+                    <p class="text-sm text-gray-600 mt-2">Note: {authorList.content}</p>
+                  {/if}
+                </div>
+              {/each}
+            </div>
+          {:else}
+            <p class="text-gray-500">No wiki author preferences found</p>
           {/if}
         </div>
 
