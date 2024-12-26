@@ -53,7 +53,8 @@
     dmRelays: [],
     wikiAuthors: [],
     wikiRelays: [],
-    followSets: []
+    followSets: [],
+    relaySets: []
   };
 
   function extractRelaySets(events: NDKEvent[]): RelaySet[] {
@@ -103,7 +104,8 @@
       { kind: 10050, name: 'dmRelays' },      // DM Relay Preferences
       { kind: 10101, name: 'wikiAuthors' },   // Wiki Author Preferences
       { kind: 10102, name: 'wikiRelays' },    // Wiki Relay Preferences
-      { kind: 30000, name: 'followSets' }     // Follow Sets
+      { kind: 30000, name: 'followSets' },    // Follow Sets
+      { kind: 30002, name: 'relaySets' }      // Relay Sets
     ];
 
     for (const { kind, name } of listKinds) {
@@ -864,6 +866,47 @@
             </div>
           {:else}
             <p class="text-gray-500">No follow sets found</p>
+          {/if}
+        </div>
+
+        <!-- Relay Sets -->
+        <div>
+          <h4 class="text-xl font-semibold mb-4">Relay Sets</h4>
+          {#if userLists.relaySets.length > 0}
+            <div class="space-y-4">
+              {#each userLists.relaySets as relaySet}
+                <div class="bg-gray-50 p-4 rounded-lg text-left">
+                  <div class="mb-4">
+                    <h5 class="font-semibold text-blue-800">
+                      {relaySet.content || 'Unnamed Set'}
+                    </h5>
+                    {#if relaySet.tags.find(t => t[0] === 'description')}
+                      <p class="mt-2 text-sm text-gray-600">
+                        {relaySet.tags.find(t => t[0] === 'description')?.[1]}
+                      </p>
+                    {/if}
+                  </div>
+                  
+                  <!-- Display relays in the set -->
+                  {#if relaySet.tags.filter(t => t[0] === 'relay').length > 0}
+                    <div class="mt-3">
+                      <span class="text-sm font-medium">Relays in set ({relaySet.tags.filter(t => t[0] === 'relay').length}):</span>
+                      <div class="mt-2 space-y-2">
+                        {#each relaySet.tags.filter(t => t[0] === 'relay') as [_, relay]}
+                          <div class="bg-white p-2 rounded border border-blue-200">
+                            <span class="font-mono text-sm text-blue-600">{relay}</span>
+                          </div>
+                        {/each}
+                      </div>
+                    </div>
+                  {:else}
+                    <p class="text-gray-500">No relays in this set</p>
+                  {/if}
+                </div>
+              {/each}
+            </div>
+          {:else}
+            <p class="text-gray-500">No relay sets found</p>
           {/if}
         </div>
 
