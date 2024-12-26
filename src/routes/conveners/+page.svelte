@@ -33,13 +33,13 @@
     <section class="bg-white rounded-lg shadow-lg p-8">
       <div class="flex items-start gap-6">
         <img 
-          src="https://rabble.io/images/rabble.jpg" 
+          src="https://assets-global.website-files.com/5fb11c2f34bc790615fa8ca2/5fb1225c8e1c0ca58c8a0a56_18C2E038-2DA0-4887-AB49-21D9ABF9A79D.jpeg" 
           alt="Evan Henshaw-Plath"
           class="w-32 h-32 object-cover rounded-lg"
         />
         <div>
           <h2 class="text-2xl font-bold mb-4">
-            <a href="https://en.wikipedia.org/wiki/Evan_Henshaw-Plath" class="hover:text-purple-600 transition-colors">
+            <a href="https://evan.henshaw-plath.com" class="hover:text-purple-600 transition-colors">
               Evan Henshaw-Plath
             </a>
           </h2>
