@@ -96,7 +96,8 @@
       { kind: 30001, name: 'communities', d: 'community' },     // Communities Lists
       { kind: 10000, name: 'muteList' },     // Mute List (pubkeys, hashtags, words, threads)
       { kind: 10001, name: 'pinnedNotes' },     // Pinned Notes (kind:1 notes for profile)
-      { kind: 10003, name: 'bookmarkList' }     // Bookmarks (notes, articles, hashtags, URLs)
+      { kind: 10003, name: 'bookmarkList' },     // Bookmarks (notes, articles, hashtags, URLs)
+      { kind: 10004, name: 'communityList' }     // NIP-72 Communities (kind:34550 definitions)
     ];
 
     for (const { kind, name } of listKinds) {
