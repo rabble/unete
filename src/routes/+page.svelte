@@ -370,9 +370,9 @@
         <!-- Mute Lists -->
         <div>
           <h4 class="text-xl font-semibold mb-4">Mute Lists</h4>
-          {#if userLists.mutes.length > 0}
+          {#if userLists.mutes?.filter(list => list.tags.find(t => t[0] === 'd')?.[1] === 'mute').length > 0}
             <div class="space-y-4">
-              {#each userLists.mutes as list}
+              {#each userLists.mutes.filter(list => list.tags.find(t => t[0] === 'd')?.[1] === 'mute') as list}
                 <div class="bg-gray-50 p-4 rounded-lg text-left">
                   <h5 class="font-semibold">{list.tags.find(t => t[0] === 'd')?.[1] || 'Unnamed List'}</h5>
                   <p class="text-gray-800">{list.content}</p>
