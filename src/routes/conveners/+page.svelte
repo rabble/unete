@@ -128,24 +128,18 @@
     <section class="bg-white rounded-lg shadow-lg p-8">
       <div class="flex items-start gap-6">
         <img 
-          src="https://znetwork.org/wp-content/uploads/2018/05/michael-albert.jpg" 
+          src="https://znetwork.org/wp-content/uploads/2023/12/michael-albert-profile.jpg" 
           alt="Michael Albert"
           class="w-32 h-32 object-cover rounded-lg"
         />
         <div>
           <h2 class="text-2xl font-bold mb-4">
-            <a href="https://en.wikipedia.org/wiki/Michael_Albert" class="hover:text-purple-600 transition-colors">
+            <a href="https://znetwork.org/author/malbert/" class="hover:text-purple-600 transition-colors">
               Michael Albert
             </a>
           </h2>
           <p class="text-gray-700">
-        Michael Albert's political involvements have ranged from local,
-        regional, and national organizing projects and campaigns to co-founding
-        South End Press, Z Magazine, the Z Media Institute, and ZNet, and to
-        working on all these projects, writing for various publications and
-        publishers, giving public talks, etc. Albert is the co-author of the
-        post capitalist vision, participatory economics. Michael is currently
-        host of the podcast RevolutionZ.
+        Michael Albert's radicalization occurred during the 1960s. His political involvements, starting then and continuing to the present, have ranged from local, regional, and national organizing projects and campaigns to co-founding South End Press, Z Magazine, the Z Media Institute, and ZNet, and to working on all these projects, writing for various publications and publishers, giving public talks, etc. His personal interests, outside the political realm, focus on general science reading (with an emphasis on physics, math, and matters of evolution and cognitive science), computers, mystery and thriller/adventure novels, sea kayaking, and the more sedentary but no less challenging game of GO. Albert is the author of 21 books which include: No Bosses: A New Economy for a Better World; Fanfare for the Future; Remembering Tomorrow; Realizing Hope; and Parecon: Life After Capitalism. Michael is currently host of the podcast Revolution Z and is a Friend of ZNetwork.
       </p>
     </section>
   </div>
