@@ -128,7 +128,7 @@
     <section class="bg-white rounded-lg shadow-lg p-8">
       <div class="flex items-start gap-6">
         <img 
-          src="https://znetwork.org/wp-content/uploads/2023/12/michael-albert-profile.jpg" 
+          src="https://znetwork.org/wp-content/uploads/avatars/michael_albert-cropped.jpg" 
           alt="Michael Albert"
           class="w-32 h-32 object-cover rounded-lg"
         />
