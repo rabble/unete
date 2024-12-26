@@ -3,9 +3,6 @@
   import { goto } from '$app/navigation';
   import NDK, { NDKNip07Signer, type NDKUser, type NDKEvent } from '@nostr-dev-kit/ndk';
 
-  // Initialize NDK
-  let ndk: NDK;
-
   // Interface for relay sets
   interface RelaySet {
     id: string;
@@ -35,7 +32,6 @@
     return null;
   }
 
-  let ndk: NDK;
   let user: NDKUser | undefined;
   let isLoggedIn = false;
   let profile: { name?: string; about?: string; picture?: string; } | undefined;

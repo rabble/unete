@@ -32,7 +32,6 @@
     return null;
   }
 
-  let ndk: NDK;
   let user: NDKUser | undefined;
   let isLoggedIn = false;
   let profile: { name?: string; about?: string; picture?: string; } | undefined;
