@@ -53,7 +53,8 @@
       { kind: 10001, name: 'pins' },      // Pin Lists
       { kind: 3, name: 'contacts' },      // Contacts/Following
       { kind: 34550, name: 'communities'}, // Communities
-      { kind: 40, name: 'chats' }         // Public Chat Channels
+      { kind: 40, name: 'chats' },        // Public Chat Channels
+      { kind: 10006, name: 'blockedRelays' } // Blocked Relays
     ];
 
     for (const { kind, name } of listKinds) {
@@ -425,6 +426,32 @@
             </div>
           {:else}
             <p class="text-gray-500">No communities found</p>
+          {/if}
+        </div>
+
+        <!-- Blocked Relays -->
+        <div>
+          <h4 class="text-xl font-semibold mb-4">Blocked Relays</h4>
+          {#if userLists.blockedRelays.length > 0}
+            <div class="space-y-4">
+              {#each userLists.blockedRelays as blockedRelay}
+                <div class="bg-gray-50 p-4 rounded-lg text-left">
+                  <div class="space-y-2">
+                    {#each blockedRelay.tags.filter(t => t[0] === 'relay') as [_, relay]}
+                      <div class="flex items-center justify-between bg-white p-3 rounded border border-red-200">
+                        <span class="font-mono text-sm text-red-600">{relay}</span>
+                        <span class="bg-red-100 text-red-800 text-xs px-2 py-1 rounded">Blocked</span>
+                      </div>
+                    {/each}
+                  </div>
+                  {#if blockedRelay.content}
+                    <p class="text-sm text-gray-600 mt-2">Reason: {blockedRelay.content}</p>
+                  {/if}
+                </div>
+              {/each}
+            </div>
+          {:else}
+            <p class="text-gray-500">No blocked relays found</p>
           {/if}
         </div>
 
