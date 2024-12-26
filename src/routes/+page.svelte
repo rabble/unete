@@ -3,6 +3,8 @@
   import { goto } from '$app/navigation';
   import NDK, { NDKNip07Signer, type NDKUser, type NDKEvent } from '@nostr-dev-kit/ndk';
 
+  let ndk: NDK;
+  
   // Interface for relay sets
   interface RelaySet {
     id: string;

@@ -3,6 +3,8 @@
   import type { NDKUser, NDKEvent } from '@nostr-dev-kit/ndk';
   import { onMount } from 'svelte';
 
+  let ndk: NDK;
+  
   // Interface for relay sets
   interface RelaySet {
     id: string;
