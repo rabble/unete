@@ -364,7 +364,19 @@
 
   // Form fields
   let name = '';
-  let category = '';
+  let category: OrganizationCategory = 'Nonprofit';
+  
+  const categoryOptions: OrganizationCategory[] = [
+    'Nonprofit',
+    'Mutual Aid',
+    'Coalition',
+    'Community Organization', 
+    'Advocacy Group',
+    'Labor Union',
+    'Worker Cooperative',
+    'Social Movement',
+    'Other'
+  ];
   let description = '';
   let selectedFocusAreas: string[] = [];
   let locations: string[] = [];
@@ -462,6 +474,55 @@
     error = null;
     success = false;
     loading = true;
+    
+    // Validate URLs
+    const urlFields = {
+      website,
+      picture,
+      'Twitter URL': socialLinks.twitter,
+      'GitHub URL': socialLinks.github,
+      'LinkedIn URL': socialLinks.linkedin,
+      'Facebook URL': socialLinks.facebook,
+      'Instagram URL': socialLinks.instagram
+    };
+
+    const urlPattern = /^https?:\/\/.+/i;
+    for (const [field, url] of Object.entries(urlFields)) {
+      if (url && !urlPattern.test(url)) {
+        error = `${field} must be a valid URL starting with http:// or https://`;
+        loading = false;
+        return;
+      }
+    }
+
+    // Validate email
+    if (email) {
+      const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailPattern.test(email)) {
+        error = 'Please enter a valid email address';
+        loading = false;
+        return;
+      }
+    }
+
+    // Validate required arrays
+    if (!selectedFocusAreas.length) {
+      error = 'Please select at least one focus area';
+      loading = false;
+      return;
+    }
+
+    if (!locations.length) {
+      error = 'Please select at least one location';
+      loading = false;
+      return;
+    }
+
+    if (!engagementTypes.length) {
+      error = 'Please select at least one engagement type';
+      loading = false;
+      return;
+    }
 
     try {
       const content: OrganizationContent = {
@@ -564,14 +625,16 @@
 
         <div>
           <label for="category" class="block text-sm font-medium text-gray-700">Category *</label>
-          <input
-            type="text"
+          <select
             id="category"
             bind:value={category}
             required
-            placeholder="e.g., Nonprofit, Mutual Aid, Coalition"
             class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500"
-          />
+          >
+            {#each categoryOptions as option}
+              <option value={option}>{option}</option>
+            {/each}
+          </select>
         </div>
 
         <div>

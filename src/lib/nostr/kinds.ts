@@ -17,9 +17,20 @@ export const TOPICS_TAGS = {
 };
 
 // Organization event content schema
+export type OrganizationCategory = 
+  | 'Nonprofit'
+  | 'Mutual Aid'
+  | 'Coalition'
+  | 'Community Organization'
+  | 'Advocacy Group'
+  | 'Labor Union'
+  | 'Worker Cooperative'
+  | 'Social Movement'
+  | 'Other';
+
 export interface OrganizationContent {
   name: string;
-  category: string;
+  category: OrganizationCategory;
   description: string;
   focusAreas: string[];
   locations: string[];
