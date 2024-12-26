@@ -38,7 +38,8 @@
     interests: [],
     emojis: [],
     dmRelays: [],
-    wikiAuthors: []
+    wikiAuthors: [],
+    wikiRelays: []
   };
 
   async function fetchUserContent() {
@@ -67,7 +68,8 @@
       { kind: 10015, name: 'interests' },     // Interests
       { kind: 10030, name: 'emojis' },        // Emoji Preferences
       { kind: 10050, name: 'dmRelays' },      // DM Relay Preferences
-      { kind: 10101, name: 'wikiAuthors' }    // Wiki Author Preferences
+      { kind: 10101, name: 'wikiAuthors' },   // Wiki Author Preferences
+      { kind: 10102, name: 'wikiRelays' }     // Wiki Relay Preferences
     ];
 
     for (const { kind, name } of listKinds) {
@@ -683,6 +685,38 @@
             </div>
           {:else}
             <p class="text-gray-500">No wiki author preferences found</p>
+          {/if}
+        </div>
+
+        <!-- Wiki Relay Preferences -->
+        <div>
+          <h4 class="text-xl font-semibold mb-4">Recommended Wiki Relays</h4>
+          {#if userLists.wikiRelays.length > 0}
+            <div class="space-y-4">
+              {#each userLists.wikiRelays as relayList}
+                <div class="bg-gray-50 p-4 rounded-lg text-left">
+                  <div class="space-y-2">
+                    {#if relayList.tags.filter(t => t[0] === 'relay').length > 0}
+                      <div>
+                        <span class="font-medium">Trusted Wiki Relays:</span>
+                        <div class="mt-2 space-y-2">
+                          {#each relayList.tags.filter(t => t[0] === 'relay') as [_, relay]}
+                            <div class="bg-white p-3 rounded border border-cyan-200">
+                              <span class="font-mono text-sm text-cyan-600">{relay}</span>
+                            </div>
+                          {/each}
+                        </div>
+                      </div>
+                    {/if}
+                  </div>
+                  {#if relayList.content}
+                    <p class="text-sm text-gray-600 mt-2">Note: {relayList.content}</p>
+                  {/if}
+                </div>
+              {/each}
+            </div>
+          {:else}
+            <p class="text-gray-500">No wiki relay preferences found</p>
           {/if}
         </div>
 
