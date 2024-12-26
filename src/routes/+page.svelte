@@ -100,7 +100,8 @@
       { kind: 10004, name: 'communityList' },     // NIP-72 Communities (kind:34550 definitions)
       { kind: 10005, name: 'chatList' },     // NIP-28 Chat Channels (kind:40 definitions)
       { kind: 10006, name: 'blockedRelayList' },     // Blocked Relays (never connect to these)
-      { kind: 10007, name: 'searchRelayList' }     // Search Relays (for search queries)
+      { kind: 10007, name: 'searchRelayList' },     // Search Relays (for search queries)
+      { kind: 10009, name: 'groupList' }     // NIP-29 Groups (group id + relay URL + name)
     ];
 
     for (const { kind, name } of listKinds) {
