@@ -18,6 +18,7 @@
   let loading = false;
 
   // Form data object
+  let otherLocation = '';
   let formData: OrganizationContent = {
     name: '',
     category: 'Nonprofit',
@@ -246,6 +247,40 @@
             <span>{location}</span>
           </label>
         {/each}
+      </div>
+      
+      <!-- Other Location -->
+      <div class="mt-4">
+        <label class="flex items-center space-x-2 mb-2">
+          <input
+            type="checkbox"
+            checked={formData.locations.includes(otherLocation)}
+            on:change={() => {
+              if (otherLocation.trim()) {
+                toggleSelection(formData.locations, otherLocation);
+              }
+            }}
+            class="rounded border-gray-300 text-purple-600 focus:ring-purple-500"
+          />
+          <span>Other:</span>
+        </label>
+        <input
+          type="text"
+          bind:value={otherLocation}
+          placeholder="Enter other location"
+          on:input={() => {
+            // Remove old other location if it exists
+            const oldOtherIndex = formData.locations.indexOf(otherLocation);
+            if (oldOtherIndex !== -1) {
+              formData.locations.splice(oldOtherIndex, 1);
+            }
+            // Add new location if checkbox is checked and text is not empty
+            if (formData.locations.includes(otherLocation) && otherLocation.trim()) {
+              formData.locations = [...formData.locations, otherLocation];
+            }
+          }}
+          class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500"
+        />
       </div>
     </div>
 
