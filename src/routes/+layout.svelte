@@ -27,7 +27,7 @@
               </button>
               <div class="absolute hidden group-hover:block w-48 bg-white shadow-lg py-2 rounded-md" style="top: 100%; margin-top: -2px;">
                 <a href="/organizations" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Search</a>
-                <a href="/join-directory" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Add Your Organization</a>
+                <a href="/add-organization" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Add Your Organization</a>
                 {#if isLoggedIn}
                   <a href="/organizations/manage" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Manage Your Organizations</a>
                 {/if}
@@ -89,7 +89,7 @@
               <div class="absolute hidden group-hover:block w-48 bg-white shadow-lg py-2 rounded-md" style="top: 100%; margin-top: -2px;">
                 <a href="/about" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">About</a>
                 <a href="/contact" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Contact</a>
-                <a href="/join-directory" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Join Directory</a>
+                <a href="/add-organization" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Add Organization</a>
               </div>
             </div>
           </div>
@@ -106,7 +106,7 @@
     <div class="max-w-7xl mx-auto py-12 px-4 sm:px-6 md:flex md:items-center md:justify-between lg:px-8">
       <div class="flex justify-center space-x-6 md:order-2">
         <a href="/contact" class="text-gray-400 hover:text-gray-500">Contact</a>
-        <a href="/join-directory" class="text-gray-400 hover:text-gray-500">Join Directory</a>
+        <a href="/add-organization" class="text-gray-400 hover:text-gray-500">Add Organization</a>
       </div>
       <div class="mt-8 md:mt-0 md:order-1">
         <p class="text-center text-base text-gray-400">
