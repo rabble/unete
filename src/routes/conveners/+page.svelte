@@ -6,13 +6,13 @@
     <section class="bg-white rounded-lg shadow-lg p-8">
       <div class="flex items-start gap-6">
         <img 
-          src="https://znetwork.org/wp-content/uploads/2023/02/alexandria-shaner.jpg" 
+          src="https://znetwork.org/wp-content/uploads/avatars/5c486759-6221-410b-b54f-569ac0e77f48.jpeg" 
           alt="Alexandria Shaner"
           class="w-32 h-32 object-cover rounded-lg"
         />
         <div>
           <h2 class="text-2xl font-bold mb-4">
-            <a href="https://znetwork.org/author/alexandria-shaner/" class="hover:text-purple-600 transition-colors">
+            <a href="https://znetwork.org/author/alexandria/" class="hover:text-purple-600 transition-colors">
               Alexandria Shaner
             </a>
           </h2>
