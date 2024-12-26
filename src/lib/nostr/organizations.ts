@@ -3,23 +3,82 @@ import { ORGANIZATION, type OrganizationContent, ORGANIZATION_TAGS } from './kin
 import { SignerRequiredError, ValidationError, PublishError } from './errors';
 
 function validateOrganizationContent(content: OrganizationContent): void {
-  if (!content.name?.trim()) {
-    throw new ValidationError('Organization name is required');
+  // Required string fields
+  const requiredStrings = {
+    name: 'Organization name',
+    category: 'Organization category',
+    description: 'Organization description'
+  } as const;
+
+  for (const [field, label] of Object.entries(requiredStrings)) {
+    if (!content[field as keyof typeof requiredStrings]?.trim()) {
+      throw new ValidationError(`${label} is required`);
+    }
+    if (content[field as keyof typeof requiredStrings].length < 3) {
+      throw new ValidationError(`${label} must be at least 3 characters long`);
+    }
+    if (content[field as keyof typeof requiredStrings].length > 500) {
+      throw new ValidationError(`${label} must be less than 500 characters`);
+    }
   }
-  if (!content.category?.trim()) {
-    throw new ValidationError('Organization category is required');
+
+  // Required array fields
+  const requiredArrays = {
+    focusAreas: 'Focus areas',
+    locations: 'Locations',
+    engagementTypes: 'Engagement types'
+  } as const;
+
+  for (const [field, label] of Object.entries(requiredArrays)) {
+    if (!Array.isArray(content[field as keyof typeof requiredArrays])) {
+      throw new ValidationError(`${label} must be an array`);
+    }
+    if (content[field as keyof typeof requiredArrays].length === 0) {
+      throw new ValidationError(`At least one ${label.toLowerCase()} is required`);
+    }
+    if (content[field as keyof typeof requiredArrays].length > 20) {
+      throw new ValidationError(`Maximum of 20 ${label.toLowerCase()} allowed`);
+    }
+    // Validate each item in the array
+    content[field as keyof typeof requiredArrays].forEach((item: string) => {
+      if (!item?.trim()) {
+        throw new ValidationError(`Empty ${label.toLowerCase()} are not allowed`);
+      }
+      if (item.length < 2) {
+        throw new ValidationError(`${label} must be at least 2 characters long`);
+      }
+      if (item.length > 100) {
+        throw new ValidationError(`${label} must be less than 100 characters`);
+      }
+    });
   }
-  if (!content.description?.trim()) {
-    throw new ValidationError('Organization description is required');
+
+  // Optional URL fields
+  const urlFields = ['website', 'picture'] as const;
+  const urlPattern = /^https?:\/\/.+/i;
+
+  for (const field of urlFields) {
+    if (content[field] && !urlPattern.test(content[field]!)) {
+      throw new ValidationError(`${field} must be a valid URL starting with http:// or https://`);
+    }
   }
-  if (!Array.isArray(content.focusAreas) || content.focusAreas.length === 0) {
-    throw new ValidationError('At least one focus area is required');
+
+  // Optional email field
+  if (content.email) {
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailPattern.test(content.email)) {
+      throw new ValidationError('Invalid email address format');
+    }
   }
-  if (!Array.isArray(content.locations) || content.locations.length === 0) {
-    throw new ValidationError('At least one location is required');
-  }
-  if (!Array.isArray(content.engagementTypes) || content.engagementTypes.length === 0) {
-    throw new ValidationError('At least one engagement type is required');
+
+  // Optional social links
+  if (content.socialLinks) {
+    const socialPattern = /^https?:\/\/([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}(\/\S*)?$/;
+    for (const [platform, url] of Object.entries(content.socialLinks)) {
+      if (url && !socialPattern.test(url)) {
+        throw new ValidationError(`Invalid ${platform} URL format`);
+      }
+    }
   }
 }
 
