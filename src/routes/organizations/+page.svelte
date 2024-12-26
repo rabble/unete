@@ -18,6 +18,28 @@
     }
   });
 
+  // Import default topics as initial focus areas
+  const focusAreas = [
+    'Housing',
+    'Racial Justice', 
+    'Economic Democracy',
+    'Community',
+    'Immigration',
+    'Youth',
+    'Climate Justice',
+    'Workplace Justice',
+    'Feminism',
+    'LGBTQIA+',
+    'Indigenous',
+    'Food',
+    'Healthcare',
+    'Education',
+    'Democracy',
+    'Palestine Solidarity',
+    'Legal',
+    'International'
+  ];
+
   // Filter options  
   const locations = [
     'National',
