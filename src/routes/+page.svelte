@@ -35,7 +35,8 @@
     blockedRelays: [],
     searchRelays: [],
     groups: [],
-    interests: []
+    interests: [],
+    emojis: []
   };
 
   async function fetchUserContent() {
@@ -61,7 +62,8 @@
       { kind: 10006, name: 'blockedRelays' }, // Blocked Relays
       { kind: 10007, name: 'searchRelays' },  // Search Relays
       { kind: 10009, name: 'groups' },        // Simple Groups
-      { kind: 10015, name: 'interests' }      // Interests
+      { kind: 10015, name: 'interests' },     // Interests
+      { kind: 10030, name: 'emojis' }         // Emoji Preferences
     ];
 
     for (const { kind, name } of listKinds) {
@@ -574,6 +576,51 @@
             </div>
           {:else}
             <p class="text-gray-500">No interests found</p>
+          {/if}
+        </div>
+
+        <!-- Emoji Preferences -->
+        <div>
+          <h4 class="text-xl font-semibold mb-4">Emoji Preferences</h4>
+          {#if userLists.emojis.length > 0}
+            <div class="space-y-4">
+              {#each userLists.emojis as emojiPref}
+                <div class="bg-gray-50 p-4 rounded-lg text-left">
+                  <div class="space-y-4">
+                    <!-- Individual Emojis -->
+                    {#if emojiPref.tags.filter(t => t[0] === 'emoji').length > 0}
+                      <div>
+                        <span class="font-medium">Favorite Emojis:</span>
+                        <div class="flex flex-wrap gap-2 mt-2">
+                          {#each emojiPref.tags.filter(t => t[0] === 'emoji') as [_, emoji]}
+                            <span class="bg-yellow-100 text-yellow-800 px-3 py-1 rounded-md text-lg">{emoji}</span>
+                          {/each}
+                        </div>
+                      </div>
+                    {/if}
+
+                    <!-- Emoji Sets -->
+                    {#if emojiPref.tags.filter(t => t[0] === 'a').length > 0}
+                      <div>
+                        <span class="font-medium">Emoji Sets:</span>
+                        <div class="mt-2 space-y-2">
+                          {#each emojiPref.tags.filter(t => t[0] === 'a') as [_, setId]}
+                            <div class="bg-white p-2 rounded border border-yellow-200">
+                              <span class="font-mono text-sm text-yellow-600">{setId}</span>
+                            </div>
+                          {/each}
+                        </div>
+                      </div>
+                    {/if}
+                  </div>
+                  {#if emojiPref.content}
+                    <p class="text-sm text-gray-600 mt-4">Note: {emojiPref.content}</p>
+                  {/if}
+                </div>
+              {/each}
+            </div>
+          {:else}
+            <p class="text-gray-500">No emoji preferences found</p>
           {/if}
         </div>
 
