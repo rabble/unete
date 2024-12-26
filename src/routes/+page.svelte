@@ -24,7 +24,13 @@
   let isLoggedIn = false;
   let profile: { name?: string; about?: string; picture?: string; } | undefined;
   let userPosts: NDKEvent[] = [];
-  let userLists: NDKEvent[] = [];
+  let userLists: { [key: string]: NDKEvent[] } = {
+    people: [],
+    bookmarks: [],
+    mutes: [],
+    pins: [],
+    contacts: []
+  };
 
   async function fetchUserContent() {
     if (!user) return;
@@ -37,12 +43,22 @@
     });
     userPosts = Array.from(postsEvents);
 
-    // Fetch lists (kind 30001)
-    const listsEvents = await ndk.fetchEvents({
-      kinds: [30001],
-      authors: [user.pubkey]
-    });
-    userLists = Array.from(listsEvents);
+    // Fetch all types of lists
+    const listKinds = [
+      { kind: 30000, name: 'people' },    // People Lists
+      { kind: 30001, name: 'bookmarks' }, // Bookmarks
+      { kind: 10000, name: 'mutes' },     // Mute Lists
+      { kind: 10001, name: 'pins' },      // Pin Lists
+      { kind: 3, name: 'contacts' }       // Contacts/Following
+    ];
+
+    for (const { kind, name } of listKinds) {
+      const events = await ndk.fetchEvents({
+        kinds: [kind],
+        authors: [user.pubkey]
+      });
+      userLists[name] = Array.from(events);
+    }
   }
 
   onMount(() => {
@@ -147,20 +163,92 @@
       </div>
 
       <!-- Lists -->
-      <div>
-        <h3 class="text-xl font-semibold mb-4">Lists</h3>
-        {#if userLists.length > 0}
-          <div class="space-y-4">
-            {#each userLists as list}
-              <div class="bg-gray-50 p-4 rounded-lg text-left">
-                <h4 class="font-semibold">{list.tags.find(t => t[0] === 'd')?.[1] || 'Unnamed List'}</h4>
-                <p class="text-gray-800">{list.content}</p>
-              </div>
-            {/each}
-          </div>
-        {:else}
-          <p class="text-gray-500">No lists found</p>
-        {/if}
+      <div class="space-y-8">
+        <h3 class="text-2xl font-semibold mb-6">Lists</h3>
+        
+        <!-- People Lists -->
+        <div>
+          <h4 class="text-xl font-semibold mb-4">People Lists</h4>
+          {#if userLists.people.length > 0}
+            <div class="space-y-4">
+              {#each userLists.people as list}
+                <div class="bg-gray-50 p-4 rounded-lg text-left">
+                  <h5 class="font-semibold">{list.tags.find(t => t[0] === 'd')?.[1] || 'Unnamed List'}</h5>
+                  <p class="text-gray-800">{list.content}</p>
+                </div>
+              {/each}
+            </div>
+          {:else}
+            <p class="text-gray-500">No people lists found</p>
+          {/if}
+        </div>
+
+        <!-- Bookmarks -->
+        <div>
+          <h4 class="text-xl font-semibold mb-4">Bookmarks</h4>
+          {#if userLists.bookmarks.length > 0}
+            <div class="space-y-4">
+              {#each userLists.bookmarks as list}
+                <div class="bg-gray-50 p-4 rounded-lg text-left">
+                  <h5 class="font-semibold">{list.tags.find(t => t[0] === 'd')?.[1] || 'Unnamed List'}</h5>
+                  <p class="text-gray-800">{list.content}</p>
+                </div>
+              {/each}
+            </div>
+          {:else}
+            <p class="text-gray-500">No bookmarks found</p>
+          {/if}
+        </div>
+
+        <!-- Mute Lists -->
+        <div>
+          <h4 class="text-xl font-semibold mb-4">Mute Lists</h4>
+          {#if userLists.mutes.length > 0}
+            <div class="space-y-4">
+              {#each userLists.mutes as list}
+                <div class="bg-gray-50 p-4 rounded-lg text-left">
+                  <h5 class="font-semibold">{list.tags.find(t => t[0] === 'd')?.[1] || 'Unnamed List'}</h5>
+                  <p class="text-gray-800">{list.content}</p>
+                </div>
+              {/each}
+            </div>
+          {:else}
+            <p class="text-gray-500">No mute lists found</p>
+          {/if}
+        </div>
+
+        <!-- Pin Lists -->
+        <div>
+          <h4 class="text-xl font-semibold mb-4">Pin Lists</h4>
+          {#if userLists.pins.length > 0}
+            <div class="space-y-4">
+              {#each userLists.pins as list}
+                <div class="bg-gray-50 p-4 rounded-lg text-left">
+                  <h5 class="font-semibold">{list.tags.find(t => t[0] === 'd')?.[1] || 'Unnamed List'}</h5>
+                  <p class="text-gray-800">{list.content}</p>
+                </div>
+              {/each}
+            </div>
+          {:else}
+            <p class="text-gray-500">No pin lists found</p>
+          {/if}
+        </div>
+
+        <!-- Contacts/Following -->
+        <div>
+          <h4 class="text-xl font-semibold mb-4">Contacts</h4>
+          {#if userLists.contacts.length > 0}
+            <div class="space-y-4">
+              {#each userLists.contacts as list}
+                <div class="bg-gray-50 p-4 rounded-lg text-left">
+                  <p class="text-gray-800">Following {list.tags.filter(t => t[0] === 'p').length} people</p>
+                </div>
+              {/each}
+            </div>
+          {:else}
+            <p class="text-gray-500">No contacts found</p>
+          {/if}
+        </div>
       </div>
     </div>
   {:else}
