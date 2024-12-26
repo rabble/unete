@@ -24,15 +24,39 @@
 
   async function login() {
     try {
+      // First check if window.nostr is available
+      if (!window.nostr) {
+        throw new Error('No Nostr extension found. Please install Alby or another Nostr extension.');
+      }
+
+      // Connect NDK
       await ndk.connect();
-      const user = await ndk.signer?.user();
       
-      if (user) {
+      // Try to get user with explicit error handling
+      try {
+        const user = await ndk.signer?.user();
+        if (!user) {
+          throw new Error('Failed to get user information');
+        }
+        
         isLoggedIn = true;
-        profile = await user.fetchProfile();
+        try {
+          profile = await user.fetchProfile();
+        } catch (profileError) {
+          console.warn('Could not fetch profile:', profileError);
+          // Don't fail login if profile fetch fails
+          profile = { name: 'Anonymous User' };
+        }
+      } catch (userError) {
+        if (userError.message.includes('Rejected by user')) {
+          throw new Error('Login cancelled by user');
+        } else {
+          throw new Error('Failed to authenticate with Nostr');
+        }
       }
     } catch (error) {
       console.error('Login failed:', error);
+      alert(error.message); // Show error to user
     }
   }
 </script>
