@@ -34,7 +34,8 @@
     chats: [],
     blockedRelays: [],
     searchRelays: [],
-    groups: []
+    groups: [],
+    interests: []
   };
 
   async function fetchUserContent() {
@@ -59,7 +60,8 @@
       { kind: 40, name: 'chats' },        // Public Chat Channels
       { kind: 10006, name: 'blockedRelays' }, // Blocked Relays
       { kind: 10007, name: 'searchRelays' },  // Search Relays
-      { kind: 10009, name: 'groups' }         // Simple Groups
+      { kind: 10009, name: 'groups' },        // Simple Groups
+      { kind: 10015, name: 'interests' }      // Interests
     ];
 
     for (const { kind, name } of listKinds) {
@@ -527,6 +529,51 @@
             </div>
           {:else}
             <p class="text-gray-500">No groups found</p>
+          {/if}
+        </div>
+
+        <!-- Interests -->
+        <div>
+          <h4 class="text-xl font-semibold mb-4">Interests</h4>
+          {#if userLists.interests.length > 0}
+            <div class="space-y-4">
+              {#each userLists.interests as interest}
+                <div class="bg-gray-50 p-4 rounded-lg text-left">
+                  <div class="space-y-4">
+                    <!-- Hashtag Interests -->
+                    {#if interest.tags.filter(t => t[0] === 't').length > 0}
+                      <div>
+                        <span class="font-medium">Topics of Interest:</span>
+                        <div class="flex flex-wrap gap-2 mt-2">
+                          {#each interest.tags.filter(t => t[0] === 't') as [_, tag]}
+                            <span class="bg-purple-100 text-purple-800 px-2 py-1 rounded-md text-sm">#{tag}</span>
+                          {/each}
+                        </div>
+                      </div>
+                    {/if}
+
+                    <!-- Interest Sets -->
+                    {#if interest.tags.filter(t => t[0] === 'a').length > 0}
+                      <div>
+                        <span class="font-medium">Interest Sets:</span>
+                        <div class="mt-2 space-y-2">
+                          {#each interest.tags.filter(t => t[0] === 'a') as [_, setId]}
+                            <div class="bg-white p-2 rounded border border-purple-200">
+                              <span class="font-mono text-sm text-purple-600">{setId}</span>
+                            </div>
+                          {/each}
+                        </div>
+                      </div>
+                    {/if}
+                  </div>
+                  {#if interest.content}
+                    <p class="text-sm text-gray-600 mt-4">Note: {interest.content}</p>
+                  {/if}
+                </div>
+              {/each}
+            </div>
+          {:else}
+            <p class="text-gray-500">No interests found</p>
           {/if}
         </div>
 
