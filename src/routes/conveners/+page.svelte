@@ -105,13 +105,13 @@
     <section class="bg-white rounded-lg shadow-lg p-8">
       <div class="flex items-start gap-6">
         <img 
-          src="https://www.peaceworkmagazine.org/sites/default/files/styles/large/public/Leslie%20Cagan.jpg" 
+          src="https://znetwork.org/wp-content/uploads/avatars/39497603855_d5a2c452a2_n-cropped.jpg" 
           alt="Leslie Cagan"
           class="w-32 h-32 object-cover rounded-lg"
         />
         <div>
           <h2 class="text-2xl font-bold mb-4">
-            <a href="https://en.wikipedia.org/wiki/Leslie_Cagan" class="hover:text-purple-600 transition-colors">
+            <a href="https://znetwork.org/author/lesliecagan/" class="hover:text-purple-600 transition-colors">
               Leslie Cagan
             </a>
           </h2>
