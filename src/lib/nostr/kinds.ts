@@ -1,6 +1,6 @@
 // Organization event kind (31000-32000 range for addressable events)
 export const ORGANIZATION = 31312;
-export const TOPICS = 30079;
+export const TOPICS = 31313;
 
 // Topics event content schema
 export interface TopicsContent {
