@@ -30,7 +30,8 @@
     mutes: [],
     pins: [],
     contacts: [],
-    communities: []
+    communities: [],
+    chats: []
   };
 
   async function fetchUserContent() {
@@ -51,7 +52,8 @@
       { kind: 10000, name: 'mutes' },     // Mute Lists
       { kind: 10001, name: 'pins' },      // Pin Lists
       { kind: 3, name: 'contacts' },      // Contacts/Following
-      { kind: 34550, name: 'communities'} // Communities
+      { kind: 34550, name: 'communities'}, // Communities
+      { kind: 40, name: 'chats' }         // Public Chat Channels
     ];
 
     for (const { kind, name } of listKinds) {
@@ -423,6 +425,68 @@
             </div>
           {:else}
             <p class="text-gray-500">No communities found</p>
+          {/if}
+        </div>
+
+        <!-- Public Chats -->
+        <div>
+          <h4 class="text-xl font-semibold mb-4">Public Chat Channels</h4>
+          {#if userLists.chats.length > 0}
+            <div class="space-y-4">
+              {#each userLists.chats as chat}
+                <div class="bg-gray-50 p-4 rounded-lg text-left">
+                  <!-- Channel Name -->
+                  <h5 class="font-semibold">
+                    {chat.tags.find(t => t[0] === 'name')?.[1] || 'Unnamed Channel'}
+                  </h5>
+                  
+                  <!-- Channel Description -->
+                  <p class="text-gray-800 mt-2">{chat.content}</p>
+                  
+                  <div class="mt-4 space-y-2">
+                    <!-- Channel Picture -->
+                    {#if chat.tags.find(t => t[0] === 'picture')}
+                      <div class="mb-3">
+                        <img 
+                          src={chat.tags.find(t => t[0] === 'picture')?.[1]} 
+                          alt="Channel picture" 
+                          class="w-16 h-16 rounded-lg object-cover"
+                        />
+                      </div>
+                    {/if}
+                    
+                    <!-- Channel Details -->
+                    <div class="text-sm text-gray-600">
+                      <!-- Moderators -->
+                      {#if chat.tags.filter(t => t[0] === 'p').length > 0}
+                        <div class="flex items-center gap-2">
+                          <span class="font-medium">Moderators:</span>
+                          <span>{chat.tags.filter(t => t[0] === 'p').length}</span>
+                        </div>
+                      {/if}
+                      
+                      <!-- Message Types -->
+                      {#if chat.tags.find(t => t[0] === 'message_types')}
+                        <div class="flex items-center gap-2">
+                          <span class="font-medium">Allowed Content:</span>
+                          <span>{chat.tags.find(t => t[0] === 'message_types')?.[1]}</span>
+                        </div>
+                      {/if}
+                      
+                      <!-- Status -->
+                      {#if chat.tags.find(t => t[0] === 'status')}
+                        <div class="flex items-center gap-2">
+                          <span class="font-medium">Status:</span>
+                          <span class="capitalize">{chat.tags.find(t => t[0] === 'status')?.[1]}</span>
+                        </div>
+                      {/if}
+                    </div>
+                  </div>
+                </div>
+              {/each}
+            </div>
+          {:else}
+            <p class="text-gray-500">No public chat channels found</p>
           {/if}
         </div>
       </div>
