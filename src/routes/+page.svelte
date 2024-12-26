@@ -1,5 +1,5 @@
 <script lang="ts">
-  import NDK from '@nostr-dev-kit/ndk';
+  import NDK, { NDKNip07Signer } from '@nostr-dev-kit/ndk';
   import type { NDKUser } from '@nostr-dev-kit/ndk';
   import { onMount } from 'svelte';
 
@@ -12,8 +12,10 @@
       explicitRelayUrls: [
         'wss://relay.damus.io',
         'wss://relay.nostr.band'
-      ]
+      ],
+      signer: new NDKNip07Signer()
     });
+    ndk.connect();
   });
 
   async function login() {
