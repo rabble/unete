@@ -9,35 +9,63 @@
   <nav class="bg-white shadow-lg">
     <div class="max-w-7xl mx-auto px-4">
       <div class="flex justify-between h-16">
-        <div class="flex">
+        <div class="flex items-center">
           <div class="flex-shrink-0 flex items-center">
-            <a href="/" class="text-xl font-bold text-purple-600">All of Us</a>
+            <img src="https://allofus.directory/logo.png" alt="All of Us Logo" class="h-8 w-8 mr-2" />
+            <a href="/" class="text-xl font-bold text-purple-600">All of Us Directory</a>
           </div>
           <div class="hidden sm:ml-6 sm:flex sm:space-x-8">
-            <a 
-              href="/" 
-              class="inline-flex items-center px-1 pt-1 border-b-2 {$page.url.pathname === '/' ? 'border-purple-500 text-gray-900' : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'}"
-            >
-              Home
-            </a>
-            <a 
-              href="/about" 
-              class="inline-flex items-center px-1 pt-1 border-b-2 {$page.url.pathname === '/about' ? 'border-purple-500 text-gray-900' : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'}"
-            >
-              About
-            </a>
-            <a 
-              href="/organizations" 
-              class="inline-flex items-center px-1 pt-1 border-b-2 {$page.url.pathname === '/organizations' ? 'border-purple-500 text-gray-900' : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'}"
-            >
-              Organizations
-            </a>
-            <a 
-              href="/profile" 
-              class="inline-flex items-center px-1 pt-1 border-b-2 {$page.url.pathname === '/profile' ? 'border-purple-500 text-gray-900' : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'}"
-            >
-              Profile
-            </a>
+            <!-- Organizations Dropdown -->
+            <div class="relative group">
+              <button class="inline-flex items-center px-1 pt-1 border-b-2 border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700">
+                Organizations
+                <svg class="ml-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                  <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+                </svg>
+              </button>
+              <div class="absolute hidden group-hover:block w-48 bg-white shadow-lg py-2 mt-1 rounded-md">
+                <!-- Dropdown items will go here -->
+              </div>
+            </div>
+
+            <!-- Topics Dropdown -->
+            <div class="relative group">
+              <button class="inline-flex items-center px-1 pt-1 border-b-2 border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700">
+                Topics
+                <svg class="ml-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                  <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+                </svg>
+              </button>
+              <div class="absolute hidden group-hover:block w-48 bg-white shadow-lg py-2 mt-1 rounded-md">
+                <!-- Dropdown items will go here -->
+              </div>
+            </div>
+
+            <!-- Social Media Dropdown -->
+            <div class="relative group">
+              <button class="inline-flex items-center px-1 pt-1 border-b-2 border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700">
+                Social Media
+                <svg class="ml-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                  <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+                </svg>
+              </button>
+              <div class="absolute hidden group-hover:block w-48 bg-white shadow-lg py-2 mt-1 rounded-md">
+                <!-- Dropdown items will go here -->
+              </div>
+            </div>
+
+            <!-- About Dropdown -->
+            <div class="relative group">
+              <button class="inline-flex items-center px-1 pt-1 border-b-2 border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700">
+                About
+                <svg class="ml-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                  <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+                </svg>
+              </button>
+              <div class="absolute hidden group-hover:block w-48 bg-white shadow-lg py-2 mt-1 rounded-md">
+                <!-- Dropdown items will go here -->
+              </div>
+            </div>
           </div>
         </div>
       </div>
