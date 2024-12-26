@@ -867,40 +867,41 @@
           </div>
           {#if revealedSections.has('followSets')}
             {#if userLists.followSets?.length > 0}
-            <div class="space-y-4">
-              {#each userLists.followSets as followSet}
-                <div class="bg-gray-50 p-4 rounded-lg text-left">
-                  <div class="mb-4">
-                    <h5 class="font-semibold text-blue-800">
-                      {followSet.content || 'Unnamed Set'}
-                    </h5>
-                    {#if followSet.tags.find(t => t[0] === 'description')}
-                      <p class="mt-2 text-sm text-gray-600">
-                        {followSet.tags.find(t => t[0] === 'description')?.[1]}
-                      </p>
+              <div class="space-y-4">
+                {#each userLists.followSets as followSet}
+                  <div class="bg-gray-50 p-4 rounded-lg text-left">
+                    <div class="mb-4">
+                      <h5 class="font-semibold text-blue-800">
+                        {followSet.content || 'Unnamed Set'}
+                      </h5>
+                      {#if followSet.tags.find(t => t[0] === 'description')}
+                        <p class="mt-2 text-sm text-gray-600">
+                          {followSet.tags.find(t => t[0] === 'description')?.[1]}
+                        </p>
+                      {/if}
+                    </div>
+                    
+                    <!-- Display users in the set -->
+                    {#if followSet.tags.filter(t => t[0] === 'p').length > 0}
+                      <div class="mt-3">
+                        <span class="text-sm font-medium">People in set ({followSet.tags.filter(t => t[0] === 'p').length}):</span>
+                        <div class="mt-2 space-y-2">
+                          {#each followSet.tags.filter(t => t[0] === 'p') as [_, pubkey]}
+                            <div class="bg-white p-2 rounded border border-blue-200">
+                              <span class="font-mono text-sm text-blue-600">{pubkey}</span>
+                            </div>
+                          {/each}
+                        </div>
+                      </div>
+                    {:else}
+                      <p class="text-gray-500">No users in this set</p>
                     {/if}
                   </div>
-                  
-                  <!-- Display users in the set -->
-                  {#if followSet.tags.filter(t => t[0] === 'p').length > 0}
-                    <div class="mt-3">
-                      <span class="text-sm font-medium">People in set ({followSet.tags.filter(t => t[0] === 'p').length}):</span>
-                      <div class="mt-2 space-y-2">
-                        {#each followSet.tags.filter(t => t[0] === 'p') as [_, pubkey]}
-                          <div class="bg-white p-2 rounded border border-blue-200">
-                            <span class="font-mono text-sm text-blue-600">{pubkey}</span>
-                          </div>
-                        {/each}
-                      </div>
-                    </div>
-                  {:else}
-                    <p class="text-gray-500">No users in this set</p>
-                  {/if}
-                </div>
-              {/each}
-            </div>
-          {:else}
-            <p class="text-gray-500">No follow sets found</p>
+                {/each}
+              </div>
+            {:else}
+              <p class="text-gray-500">No follow sets found</p>
+            {/if}
           {/if}
         </div>
 
