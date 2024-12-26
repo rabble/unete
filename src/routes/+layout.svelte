@@ -19,13 +19,13 @@
           <div class="hidden sm:ml-6 sm:flex sm:space-x-8">
             <!-- Organizations Dropdown -->
             <div class="relative group">
-              <button class="inline-flex items-center px-1 pt-1 border-b-2 border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700">
+              <button class="inline-flex items-center px-1 pt-1 border-b-2 border-transparent text-gray-500 group-hover:border-gray-300 group-hover:text-gray-700">
                 Organizations
                 <svg class="ml-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
                   <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
                 </svg>
               </button>
-              <div class="absolute hidden group-hover:block w-48 bg-white shadow-lg py-2 mt-1 rounded-md">
+              <div class="absolute hidden group-hover:block w-48 bg-white shadow-lg py-2 rounded-md" style="top: 100%; margin-top: -2px;">
                 <a href="/organizations" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Search</a>
                 <a href="/join-directory" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Add Your Organization</a>
                 {#if isLoggedIn}
@@ -36,13 +36,13 @@
 
             <!-- Topics Dropdown -->
             <div class="relative group">
-              <button class="inline-flex items-center px-1 pt-1 border-b-2 border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700">
+              <button class="inline-flex items-center px-1 pt-1 border-b-2 border-transparent text-gray-500 group-hover:border-gray-300 group-hover:text-gray-700">
                 Topics
                 <svg class="ml-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
                   <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
                 </svg>
               </button>
-              <div class="absolute hidden group-hover:block w-64 bg-white shadow-lg py-2 mt-1 rounded-md">
+              <div class="absolute hidden group-hover:block w-64 bg-white shadow-lg py-2 rounded-md" style="top: 100%; margin-top: -2px;">
                 <a href="/topics" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">All Topics</a>
                 <div class="border-t border-gray-100 my-1"></div>
                 <a href="/focus-areas/climate" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Climate Justice</a>
@@ -67,26 +67,26 @@
 
             <!-- Social Media Dropdown -->
             <div class="relative group">
-              <button class="inline-flex items-center px-1 pt-1 border-b-2 border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700">
+              <button class="inline-flex items-center px-1 pt-1 border-b-2 border-transparent text-gray-500 group-hover:border-gray-300 group-hover:text-gray-700">
                 Social Media
                 <svg class="ml-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
                   <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
                 </svg>
               </button>
-              <div class="absolute hidden group-hover:block w-48 bg-white shadow-lg py-2 mt-1 rounded-md">
+              <div class="absolute hidden group-hover:block w-48 bg-white shadow-lg py-2 rounded-md" style="top: 100%; margin-top: -2px;">
                 <!-- Dropdown items will go here -->
               </div>
             </div>
 
             <!-- About Dropdown -->
             <div class="relative group">
-              <button class="inline-flex items-center px-1 pt-1 border-b-2 border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700">
+              <button class="inline-flex items-center px-1 pt-1 border-b-2 border-transparent text-gray-500 group-hover:border-gray-300 group-hover:text-gray-700">
                 About
                 <svg class="ml-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
                   <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
                 </svg>
               </button>
-              <div class="absolute hidden group-hover:block w-48 bg-white shadow-lg py-2 mt-1 rounded-md">
+              <div class="absolute hidden group-hover:block w-48 bg-white shadow-lg py-2 rounded-md" style="top: 100%; margin-top: -2px;">
                 <!-- Dropdown items will go here -->
               </div>
             </div>
