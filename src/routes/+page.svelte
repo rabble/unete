@@ -1,14 +1,13 @@
 <script lang="ts">
-  import { NDKUser } from '@nostr-dev-kit/ndk';
+  import { NDKUser, NDK } from '@nostr-dev-kit/ndk';
   import { onMount } from 'svelte';
-  import { NDKSvelte } from '@nostr-dev-kit/ndk-svelte';
 
-  let ndk: NDKSvelte;
+  let ndk: NDK;
   let user: NDKUser | undefined;
   let isLoggedIn = false;
 
   onMount(() => {
-    ndk = new NDKSvelte({
+    ndk = new NDK({
       explicitRelayUrls: [
         'wss://relay.damus.io',
         'wss://relay.nostr.band'
