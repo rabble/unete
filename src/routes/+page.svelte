@@ -56,7 +56,8 @@
     followSets: [],
     relaySets: [],
     bookmarkSets: [],
-    curationSets: []
+    curationSets: [],
+    videoSets: []
   };
 
   function extractRelaySets(events: NDKEvent[]): RelaySet[] {
@@ -109,7 +110,8 @@
       { kind: 30000, name: 'followSets' },    // Follow Sets
       { kind: 30002, name: 'relaySets' },     // Relay Sets
       { kind: 30003, name: 'bookmarkSets' },   // Bookmark Sets
-      { kind: 30004, name: 'curationSets' }    // Curation Sets
+      { kind: 30004, name: 'curationSets' },    // Curation Sets
+      { kind: 30005, name: 'videoSets' }        // Video Sets
     ];
 
     for (const { kind, name } of listKinds) {
@@ -968,6 +970,47 @@
             </div>
           {:else}
             <p class="text-gray-500">No curation sets found</p>
+          {/if}
+        </div>
+
+        <!-- Video Sets -->
+        <div>
+          <h4 class="text-xl font-semibold mb-4">Video Sets</h4>
+          {#if userLists.videoSets.length > 0}
+            <div class="space-y-4">
+              {#each userLists.videoSets as videoSet}
+                <div class="bg-gray-50 p-4 rounded-lg text-left">
+                  <div class="mb-4">
+                    <h5 class="font-semibold text-blue-800">
+                      {videoSet.content || 'Unnamed Video Set'}
+                    </h5>
+                    {#if videoSet.tags.find(t => t[0] === 'description')}
+                      <p class="mt-2 text-sm text-gray-600">
+                        {videoSet.tags.find(t => t[0] === 'description')?.[1]}
+                      </p>
+                    {/if}
+                  </div>
+                  
+                  <!-- Display curated videos -->
+                  {#if videoSet.tags.filter(t => t[0] === 'a').length > 0}
+                    <div class="mt-3">
+                      <span class="text-sm font-medium">Curated Videos ({videoSet.tags.filter(t => t[0] === 'a').length}):</span>
+                      <div class="mt-2 space-y-2">
+                        {#each videoSet.tags.filter(t => t[0] === 'a') as [_, videoId]}
+                          <div class="bg-white p-2 rounded border border-red-200">
+                            <span class="font-mono text-sm text-red-600">{videoId}</span>
+                          </div>
+                        {/each}
+                      </div>
+                    </div>
+                  {:else}
+                    <p class="text-gray-500">No videos in this set</p>
+                  {/if}
+                </div>
+              {/each}
+            </div>
+          {:else}
+            <p class="text-gray-500">No video sets found</p>
           {/if}
         </div>
 
