@@ -79,13 +79,13 @@
     <section class="bg-white rounded-lg shadow-lg p-8">
       <div class="flex items-start gap-6">
         <img 
-          src="https://participatoryeconomy.org/wp-content/uploads/2023/04/arash-kolahi.jpg" 
+          src="https://znetwork.org/wp-content/uploads/avatars/1005031_10152050272169637_1682340644_n-cropped.jpg" 
           alt="Arash Kolahi"
           class="w-32 h-32 object-cover rounded-lg"
         />
         <div>
           <h2 class="text-2xl font-bold mb-4">
-            <a href="https://participatoryeconomy.org/authors/arash-kolahi/" class="hover:text-purple-600 transition-colors">
+            <a href="https://znetwork.org/author/arashkolahi/" class="hover:text-purple-600 transition-colors">
               Arash Kolahi
             </a>
           </h2>
