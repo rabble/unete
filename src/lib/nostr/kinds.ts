@@ -1,5 +1,20 @@
 // Organization event kind (30000-40000 range for addressable events)
 export const ORGANIZATION = 30078;
+export const TOPICS = 30079;
+
+// Topics event content schema
+export interface TopicsContent {
+  topics: string[];
+  description?: string;
+  lastUpdated: number;
+}
+
+// Topics event tags
+export const TOPICS_TAGS = {
+  IDENTIFIER: 'd',           // Required for addressable events
+  TOPIC: 't',               // Topic identifier
+  DESCRIPTION: 'description' // Topic description
+};
 
 // Organization event content schema
 export interface OrganizationContent {

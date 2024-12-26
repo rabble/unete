@@ -6,7 +6,17 @@
   let selectedFocusAreas: string[] = [];
   let selectedEngagementTypes: string[] = [];
 
-  // Filter options
+  import { getTopics } from '$lib/topics';
+  
+  let focusAreas: string[] = [];
+  
+  onMount(async () => {
+    if (ndk) {
+      focusAreas = await getTopics(ndk);
+    }
+  });
+
+  // Filter options  
   const locations = [
     'National',
     'International',
@@ -23,26 +33,6 @@
     'Border regions'
   ];
 
-  const focusAreas = [
-    'Housing',
-    'Racial Justice',
-    'Economic Democracy',
-    'Community',
-    'Immigration',
-    'Youth',
-    'Climate Justice',
-    'Workplace Justice',
-    'Feminism',
-    'LGBTQIA+',
-    'Indigenous',
-    'Food',
-    'Healthcare',
-    'Education',
-    'Democracy',
-    'Palestine Solidarity',
-    'Legal',
-    'International'
-  ];
 
   const engagementTypes = [
     'Direct Action',
