@@ -37,16 +37,19 @@
   let isLoggedIn = false;
   let profile: { name?: string; about?: string; picture?: string; } | undefined;
   let userPosts: NDKEvent[] = [];
-  let userLists: { [key: string]: NDKEvent[] } = {
-    followSets: [],
-    relaySets: [],
-    bookmarkSets: [],
-    curationSets: [],
-    videoSets: [],
-    muteSets: [],
-    interestSets: [],
-    emojiSets: [],
-    releaseSets: []
+  let userLists: { [key: string]: NDKEvent[] } = {};
+  let revealedSections: Set<string> = new Set();
+
+  const LIST_TYPES = {
+    followSets: 'Follow Sets',
+    relaySets: 'Relay Sets', 
+    bookmarkSets: 'Bookmark Sets',
+    curationSets: 'Curation Sets',
+    videoSets: 'Video Sets',
+    muteSets: 'Mute Sets',
+    interestSets: 'Interest Sets',
+    emojiSets: 'Emoji Sets',
+    releaseSets: 'Release Sets'
   };
 
   function extractRelaySets(events: NDKEvent[]): RelaySet[] {
@@ -78,9 +81,20 @@
       limit: 10
     });
     userPosts = Array.from(postsEvents);
+  }
 
-    // Fetch all types of lists
-    const listKinds = [
+  async function fetchListContent(listType: string) {
+    if (!user || !revealedSections.has(listType)) return;
+
+    // Initialize the list array if it doesn't exist
+    if (!userLists[listType]) {
+      userLists[listType] = [];
+    }
+
+    // Skip if already loaded
+    if (userLists[listType].length > 0) return;
+
+    const listKindMap = {
       { kind: 30000, name: 'followSets' },    // Follow Sets
       { kind: 30001, name: 'pinSets' },       // Pin Sets
       { kind: 30002, name: 'relaySets' },     // Relay Sets
@@ -102,23 +116,32 @@
       { kind: 10006, name: 'blockedRelayList' },     // Blocked Relays (never connect to these)
       { kind: 10007, name: 'searchRelayList' },     // Search Relays (for search queries)
       { kind: 10009, name: 'groupList' }     // NIP-29 Groups (group id + relay URL + name)
-    ];
+    };
 
-    for (const { kind, name } of listKinds) {
-      const events = await ndk.fetchEvents({
-        kinds: [kind],
-        authors: [user.pubkey]
-      });
-      userLists[name] = Array.from(events);
-      
-      // Process relay sets after fetching events
-      if (name === 'searchRelays') {
-        relaySets = extractRelaySets(Array.from(events));
-        if (relaySets.length > 0) {
-          selectedRelaySet = relaySets[0];
-        }
+    const kind = listKindMap[listType]?.kind;
+    const events = await ndk.fetchEvents({
+      kinds: [kind],
+      authors: [user.pubkey]
+    });
+    userLists[listType] = Array.from(events);
+    
+    // Process relay sets after fetching events
+    if (listType === 'searchRelays') {
+      relaySets = extractRelaySets(Array.from(events));
+      if (relaySets.length > 0) {
+        selectedRelaySet = relaySets[0];
       }
     }
+  }
+
+  function toggleSection(section: string) {
+    if (revealedSections.has(section)) {
+      revealedSections.delete(section);
+    } else {
+      revealedSections.add(section);
+      fetchListContent(section);
+    }
+    revealedSections = revealedSections; // Trigger reactivity
   }
 
   onMount(() => {
@@ -833,8 +856,17 @@
 
         <!-- Follow Sets -->
         <div>
-          <h4 class="text-xl font-semibold mb-4">Follow Sets</h4>
-          {#if userLists.followSets.length > 0}
+          <div class="flex justify-between items-center mb-4">
+            <h4 class="text-xl font-semibold">Follow Sets</h4>
+            <button
+              on:click={() => toggleSection('followSets')}
+              class="bg-blue-100 hover:bg-blue-200 text-blue-800 px-4 py-2 rounded-lg transition-colors"
+            >
+              {revealedSections.has('followSets') ? 'Hide' : 'Reveal'}
+            </button>
+          </div>
+          {#if revealedSections.has('followSets')}
+            {#if userLists.followSets?.length > 0}
             <div class="space-y-4">
               {#each userLists.followSets as followSet}
                 <div class="bg-gray-50 p-4 rounded-lg text-left">
