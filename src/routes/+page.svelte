@@ -212,7 +212,14 @@
 
       <!-- Lists -->
       <div class="space-y-8">
-        <h3 class="text-2xl font-semibold mb-6">Lists</h3>
+        <h3 class="text-2xl font-semibold mb-2">Lists</h3>
+        <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-6">
+          <p class="text-yellow-700">
+            <strong>Note:</strong> Some clients may still use legacy list formats. 
+            We recommend transitioning to the standardized NIP-51 list formats shown below 
+            for better interoperability and feature support.
+          </p>
+        </div>
         
         <!-- People Lists/Sets -->
         <div>
