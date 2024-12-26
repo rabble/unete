@@ -349,14 +349,6 @@
     </div>
   </div>
 
-  <div class="mt-8 text-center">
-    <a 
-      href="/profile" 
-      class="inline-block bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-8 rounded-lg transition-colors"
-    >
-      View Profile
-    </a>
-  </div>
   
   {#if isLoggedIn && user}
     <div class="bg-white shadow-lg rounded-lg p-6 mt-8">
