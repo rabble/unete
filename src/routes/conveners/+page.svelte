@@ -4,19 +4,19 @@
   <div class="space-y-12">
     <!-- Alexandria Shaner -->
     <section class="bg-white rounded-lg shadow-lg p-8">
-      <div class="flex items-start gap-6">
+      <h2 class="text-2xl font-bold mb-4">
+        <a href="https://znetwork.org/author/alexandria/" class="hover:text-purple-600 transition-colors">
+          Alexandria Shaner
+        </a>
+      </h2>
+      <div class="relative">
         <img 
+          class="float-left w-32 h-32 object-cover rounded-lg mr-6 mb-4"
           src="https://znetwork.org/wp-content/uploads/avatars/5c486759-6221-410b-b54f-569ac0e77f48.jpeg" 
           alt="Alexandria Shaner"
-          class="w-32 h-32 object-cover rounded-lg"
+          class="float-left w-32 h-32 object-cover rounded-lg mr-6 mb-4"
         />
-        <div>
-          <h2 class="text-2xl font-bold mb-4">
-            <a href="https://znetwork.org/author/alexandria/" class="hover:text-purple-600 transition-colors">
-              Alexandria Shaner
-            </a>
-          </h2>
-          <p class="text-gray-700">
+        <p class="text-gray-700">
         Originally from the US, Alexandria has lived most of her life in the
         Caribbean, as well as in Egypt and Central America. A sailor, writer,
         organizer, and street medic, she has been involved in community
