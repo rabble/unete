@@ -56,13 +56,13 @@
     <section class="bg-white rounded-lg shadow-lg p-8">
       <div class="flex items-start gap-6">
         <img 
-          src="https://changeagent.nelrc.org/wp-content/uploads/2019/03/Cynthia-Peters-300x300.jpg" 
+          src="https://znetwork.org/wp-content/uploads/avatars/peters.jpeg" 
           alt="Cynthia Peters"
           class="w-32 h-32 object-cover rounded-lg"
         />
         <div>
           <h2 class="text-2xl font-bold mb-4">
-            <a href="https://changeagent.nelrc.org/about-us/" class="hover:text-purple-600 transition-colors">
+            <a href="https://znetwork.org/author/cynthiapeters/" class="hover:text-purple-600 transition-colors">
               Cynthia Peters
             </a>
           </h2>
