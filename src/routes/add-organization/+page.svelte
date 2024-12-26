@@ -12,9 +12,31 @@
   let success: boolean = false;
   let loading: boolean = false;
 
-  // Form fields
-  let name = '';
-  let category: OrganizationCategory = 'Nonprofit';
+  // Form data object to store all form fields
+  let formData = {
+    name: '',
+    category: 'Nonprofit' as OrganizationCategory,
+    description: '',
+    focusAreas: [] as string[],
+    locations: [] as string[],
+    engagementTypes: [] as string[],
+    website: '',
+    picture: '',
+    email: '',
+    about: '',
+    mission: '',
+    vision: '',
+    founded: '',
+    size: '',
+    languages: [] as string[],
+    socialLinks: {
+      twitter: '',
+      github: '',
+      linkedin: '',
+      facebook: '',
+      instagram: ''
+    }
+  };
   
   const categoryOptions: OrganizationCategory[] = [
     'Nonprofit',
