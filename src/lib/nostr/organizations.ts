@@ -1,18 +1,49 @@
 import NDK, { NDKEvent } from '@nostr-dev-kit/ndk';
 import { ORGANIZATION, type OrganizationContent, ORGANIZATION_TAGS } from './kinds';
+import { SignerRequiredError, ValidationError, PublishError } from './errors';
+
+function validateOrganizationContent(content: OrganizationContent): void {
+  if (!content.name?.trim()) {
+    throw new ValidationError('Organization name is required');
+  }
+  if (!content.category?.trim()) {
+    throw new ValidationError('Organization category is required');
+  }
+  if (!content.description?.trim()) {
+    throw new ValidationError('Organization description is required');
+  }
+  if (!Array.isArray(content.focusAreas) || content.focusAreas.length === 0) {
+    throw new ValidationError('At least one focus area is required');
+  }
+  if (!Array.isArray(content.locations) || content.locations.length === 0) {
+    throw new ValidationError('At least one location is required');
+  }
+  if (!Array.isArray(content.engagementTypes) || content.engagementTypes.length === 0) {
+    throw new ValidationError('At least one engagement type is required');
+  }
+}
 
 export async function createOrganization(
   ndk: NDK,
   content: OrganizationContent,
   identifier: string
 ): Promise<NDKEvent> {
-  if (!ndk.signer) {
-    throw new Error('NDK signer required to create organization');
-  }
+  try {
+    if (!ndk.signer) {
+      throw new SignerRequiredError();
+    }
 
-  const event = new NDKEvent(ndk);
-  event.kind = ORGANIZATION;
-  event.content = JSON.stringify(content);
+    // Validate content
+    validateOrganizationContent(content);
+
+    // Validate identifier
+    if (!identifier?.trim()) {
+      throw new ValidationError('Organization identifier is required');
+    }
+
+    const event = new NDKEvent(ndk);
+    event.kind = ORGANIZATION;
+    event.content = JSON.stringify(content);
   
   // Add required tags
   event.tags = [
@@ -60,9 +91,21 @@ export async function createOrganization(
     });
   }
 
-  // Publish the event
-  await event.publish();
-  return event;
+    try {
+      // Publish the event
+      await event.publish();
+      return event;
+    } catch (error) {
+      throw new PublishError(
+        `Failed to publish organization event: ${error instanceof Error ? error.message : 'Unknown error'}`
+      );
+    }
+  } catch (error) {
+    if (error instanceof NostrError) {
+      throw error;
+    }
+    throw new NostrError(`Unexpected error creating organization: ${error instanceof Error ? error.message : 'Unknown error'}`);
+  }
 }
 
 // Helper function to test organization creation
