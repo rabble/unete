@@ -44,7 +44,17 @@
   };
 
   // Category, location, etc. options
-  const categoryOptions: OrganizationCategory[] = [ /* ... */ ];
+  const categoryOptions: OrganizationCategory[] = [
+    'Nonprofit',
+    'Mutual Aid',
+    'Coalition',
+    'Community Organization', 
+    'Advocacy Group',
+    'Labor Union',
+    'Worker Cooperative',
+    'Social Movement',
+    'Other'
+  ];
   const locationOptions = [ /* ... */ ];
   const engagementTypeOptions = [ /* ... */ ];
   const languageOptions = [ /* ... */ ];
