@@ -91,7 +91,8 @@
       { kind: 30015, name: 'interestSets' },    // Interest Sets
       { kind: 30030, name: 'emojiSets' },       // Emoji Sets
       { kind: 30063, name: 'releaseSets' },      // Release Artifact Sets
-      { kind: 30000, name: 'mutes', d: 'mute' }     // Mute Lists
+      { kind: 30000, name: 'mutes', d: 'mute' },     // Mute Lists
+      { kind: 30001, name: 'bookmarks', d: 'bookmark' }     // Bookmark Lists
     ];
 
     for (const { kind, name } of listKinds) {
