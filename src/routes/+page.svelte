@@ -36,7 +36,8 @@
     searchRelays: [],
     groups: [],
     interests: [],
-    emojis: []
+    emojis: [],
+    dmRelays: []
   };
 
   async function fetchUserContent() {
@@ -63,7 +64,8 @@
       { kind: 10007, name: 'searchRelays' },  // Search Relays
       { kind: 10009, name: 'groups' },        // Simple Groups
       { kind: 10015, name: 'interests' },     // Interests
-      { kind: 10030, name: 'emojis' }         // Emoji Preferences
+      { kind: 10030, name: 'emojis' },        // Emoji Preferences
+      { kind: 10050, name: 'dmRelays' }       // DM Relay Preferences
     ];
 
     for (const { kind, name } of listKinds) {
@@ -621,6 +623,32 @@
             </div>
           {:else}
             <p class="text-gray-500">No emoji preferences found</p>
+          {/if}
+        </div>
+
+        <!-- DM Relay Preferences -->
+        <div>
+          <h4 class="text-xl font-semibold mb-4">DM Relay Preferences</h4>
+          {#if userLists.dmRelays.length > 0}
+            <div class="space-y-4">
+              {#each userLists.dmRelays as dmRelay}
+                <div class="bg-gray-50 p-4 rounded-lg text-left">
+                  <div class="space-y-2">
+                    {#each dmRelay.tags.filter(t => t[0] === 'relay') as [_, relay]}
+                      <div class="flex items-center justify-between bg-white p-3 rounded border border-indigo-200">
+                        <span class="font-mono text-sm text-indigo-600">{relay}</span>
+                        <span class="bg-indigo-100 text-indigo-800 text-xs px-2 py-1 rounded">DM Relay</span>
+                      </div>
+                    {/each}
+                  </div>
+                  {#if dmRelay.content}
+                    <p class="text-sm text-gray-600 mt-2">Note: {dmRelay.content}</p>
+                  {/if}
+                </div>
+              {/each}
+            </div>
+          {:else}
+            <p class="text-gray-500">No DM relay preferences found</p>
           {/if}
         </div>
 
