@@ -266,8 +266,27 @@
             <div class="space-y-4">
               {#each userLists.pins as list}
                 <div class="bg-gray-50 p-4 rounded-lg text-left">
-                  <h5 class="font-semibold">{list.tags.find(t => t[0] === 'd')?.[1] || 'Unnamed List'}</h5>
+                  <h5 class="font-semibold">{list.tags.find(t => t[0] === 'd')?.[1] || 'Pinned Notes'}</h5>
                   <p class="text-gray-800">{list.content}</p>
+                  
+                  <!-- Pinned Notes -->
+                  {#if list.tags.filter(t => t[0] === 'e').length > 0}
+                    <div class="mt-4">
+                      <span class="font-medium">Pinned Notes ({list.tags.filter(t => t[0] === 'e').length}):</span>
+                      <div class="mt-2 space-y-3">
+                        {#each list.tags.filter(t => t[0] === 'e') as tag}
+                          <div class="bg-white p-3 rounded border border-gray-200">
+                            <div class="flex justify-between items-center">
+                              <span class="text-sm text-gray-500">Note ID:</span>
+                              <span class="text-sm font-mono">{tag[1].slice(0, 8)}...</span>
+                            </div>
+                          </div>
+                        {/each}
+                      </div>
+                    </div>
+                  {:else}
+                    <p class="text-gray-500 mt-2">No notes pinned in this list</p>
+                  {/if}
                 </div>
               {/each}
             </div>
