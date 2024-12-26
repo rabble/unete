@@ -54,7 +54,8 @@
     wikiAuthors: [],
     wikiRelays: [],
     followSets: [],
-    relaySets: []
+    relaySets: [],
+    bookmarkSets: []
   };
 
   function extractRelaySets(events: NDKEvent[]): RelaySet[] {
@@ -105,7 +106,8 @@
       { kind: 10101, name: 'wikiAuthors' },   // Wiki Author Preferences
       { kind: 10102, name: 'wikiRelays' },    // Wiki Relay Preferences
       { kind: 30000, name: 'followSets' },    // Follow Sets
-      { kind: 30002, name: 'relaySets' }      // Relay Sets
+      { kind: 30002, name: 'relaySets' },     // Relay Sets
+      { kind: 30003, name: 'bookmarkSets' }   // Bookmark Sets
     ];
 
     for (const { kind, name } of listKinds) {
@@ -907,6 +909,94 @@
             </div>
           {:else}
             <p class="text-gray-500">No relay sets found</p>
+          {/if}
+        </div>
+
+        <!-- Bookmark Sets -->
+        <div>
+          <h4 class="text-xl font-semibold mb-4">Bookmark Sets</h4>
+          {#if userLists.bookmarkSets.length > 0}
+            <div class="space-y-4">
+              {#each userLists.bookmarkSets as bookmarkSet}
+                <div class="bg-gray-50 p-4 rounded-lg text-left">
+                  <div class="mb-4">
+                    <h5 class="font-semibold text-blue-800">
+                      {bookmarkSet.content || 'Unnamed Set'}
+                    </h5>
+                    {#if bookmarkSet.tags.find(t => t[0] === 'description')}
+                      <p class="mt-2 text-sm text-gray-600">
+                        {bookmarkSet.tags.find(t => t[0] === 'description')?.[1]}
+                      </p>
+                    {/if}
+                  </div>
+                  
+                  <!-- Display notes -->
+                  {#if bookmarkSet.tags.filter(t => t[0] === 'e').length > 0}
+                    <div class="mt-3">
+                      <span class="text-sm font-medium">Bookmarked Notes ({bookmarkSet.tags.filter(t => t[0] === 'e').length}):</span>
+                      <div class="mt-2 space-y-2">
+                        {#each bookmarkSet.tags.filter(t => t[0] === 'e') as [_, noteId]}
+                          <div class="bg-white p-2 rounded border border-blue-200">
+                            <span class="font-mono text-sm text-blue-600">{noteId}</span>
+                          </div>
+                        {/each}
+                      </div>
+                    </div>
+                  {/if}
+
+                  <!-- Display articles -->
+                  {#if bookmarkSet.tags.filter(t => t[0] === 'a').length > 0}
+                    <div class="mt-3">
+                      <span class="text-sm font-medium">Bookmarked Articles ({bookmarkSet.tags.filter(t => t[0] === 'a').length}):</span>
+                      <div class="mt-2 space-y-2">
+                        {#each bookmarkSet.tags.filter(t => t[0] === 'a') as [_, articleId]}
+                          <div class="bg-white p-2 rounded border border-amber-200">
+                            <span class="font-mono text-sm text-amber-600">{articleId}</span>
+                          </div>
+                        {/each}
+                      </div>
+                    </div>
+                  {/if}
+
+                  <!-- Display hashtags -->
+                  {#if bookmarkSet.tags.filter(t => t[0] === 't').length > 0}
+                    <div class="mt-3">
+                      <span class="text-sm font-medium">Tagged Topics:</span>
+                      <div class="flex flex-wrap gap-2 mt-2">
+                        {#each bookmarkSet.tags.filter(t => t[0] === 't') as [_, tag]}
+                          <span class="bg-green-100 text-green-800 px-2 py-1 rounded-md text-sm">#{tag}</span>
+                        {/each}
+                      </div>
+                    </div>
+                  {/if}
+
+                  <!-- Display URLs -->
+                  {#if bookmarkSet.tags.filter(t => t[0] === 'r').length > 0}
+                    <div class="mt-3">
+                      <span class="text-sm font-medium">Bookmarked URLs:</span>
+                      <div class="mt-2 space-y-2">
+                        {#each bookmarkSet.tags.filter(t => t[0] === 'r') as [_, url]}
+                          <a 
+                            href={url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            class="block bg-white p-2 rounded border border-purple-200 text-purple-600 hover:text-purple-800 text-sm truncate"
+                          >
+                            {url}
+                          </a>
+                        {/each}
+                      </div>
+                    </div>
+                  {/if}
+
+                  {#if !bookmarkSet.tags.some(t => ['e', 'a', 't', 'r'].includes(t[0]))}
+                    <p class="text-gray-500">No bookmarks in this set</p>
+                  {/if}
+                </div>
+              {/each}
+            </div>
+          {:else}
+            <p class="text-gray-500">No bookmark sets found</p>
           {/if}
         </div>
 
