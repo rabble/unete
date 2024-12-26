@@ -3,6 +3,8 @@
   import { ParaglideJS } from "@inlang/paraglide-sveltekit";
   import { page } from '$app/stores';
   import '../app.css';
+  
+  let isLoggedIn = false; // This should be connected to your auth state management
 </script>
 
 <div>
@@ -24,7 +26,11 @@
                 </svg>
               </button>
               <div class="absolute hidden group-hover:block w-48 bg-white shadow-lg py-2 mt-1 rounded-md">
-                <!-- Dropdown items will go here -->
+                <a href="/organizations" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Search</a>
+                <a href="/join-directory" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Add Your Organization</a>
+                {#if isLoggedIn}
+                  <a href="/organizations/manage" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Manage Your Organizations</a>
+                {/if}
               </div>
             </div>
 
