@@ -1154,7 +1154,7 @@
             <div class="space-y-4">
               {#each userLists.muteSets as muteSet}
                 <div class="bg-gray-50 p-4 rounded-lg text-left">
-                  {#if muteSet.tags.find(t => t[0] === 'd')?.[1] === 'p'}
+                  {#if muteSet.tags.find(t => t[0] === 'd')}
                     <div class="mb-4">
                       <h5 class="font-semibold text-red-800">
                         {muteSet.content || 'Unnamed Mute Set'}
@@ -1171,13 +1171,13 @@
                     <div class="mt-3">
                       <span class="text-sm font-medium">Muted Users by Kind:</span>
                       <div class="mt-2 space-y-2">
-                        {#each muteSet.tags.filter(t => t[0] === 'p') as [_, pubkey, kind]}
+                        {#each muteSet.tags.filter(t => t[0] === 'p') as [_, pubkey]}
                           <div class="bg-white p-2 rounded border border-red-200">
                             <div class="flex justify-between items-center">
                               <span class="font-mono text-sm text-red-600">{pubkey}</span>
-                              {#if kind}
+                              {#if muteSet.tags.find(t => t[0] === 'kind')}
                                 <span class="bg-red-100 text-red-800 text-xs px-2 py-1 rounded">
-                                  Kind: {kind}
+                                  Kind: {muteSet.tags.find(t => t[0] === 'kind')?.[1]}
                                 </span>
                               {/if}
                             </div>
