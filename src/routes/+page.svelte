@@ -1,5 +1,6 @@
 <script lang="ts">
-  import { NDKUser, NDK } from '@nostr-dev-kit/ndk';
+  import NDK from '@nostr-dev-kit/ndk';
+  import type { NDKUser } from '@nostr-dev-kit/ndk';
   import { onMount } from 'svelte';
 
   let ndk: NDK;
