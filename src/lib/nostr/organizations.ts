@@ -175,9 +175,11 @@ export async function createOrganization(
       );
     }
   } catch (error) {
+    console.error('Organization creation error:', error);
     if (error instanceof NostrError) {
       throw error;
     }
+    // Wrap unknown errors in NostrError
     throw new NostrError(`Unexpected error creating organization: ${error instanceof Error ? error.message : 'Unknown error'}`);
   }
 }

@@ -99,16 +99,27 @@
 
   // --- onMount: Initialize NDK and load data
   onMount(async () => {
-    ndk = new NDK({
-      explicitRelayUrls: [
-        'wss://relay.nos.social',
-        'wss://relay.damus.io',
-        'wss://relay.nostr.band',
-      ],
-      signer: new NDKNip07Signer(),
-    });
+    try {
+      ndk = new NDK({
+        explicitRelayUrls: [
+          'wss://relay.nos.social',
+          'wss://relay.damus.io',
+          'wss://relay.nostr.band',
+        ],
+        signer: new NDKNip07Signer(),
+      });
 
-    await ndk.connect();
+      // Add debug logging for relay connections
+      ndk.pool.on('relay:connect', (relay) => {
+        console.log('Connected to relay:', relay.url);
+      });
+      
+      ndk.pool.on('relay:error', (relay, error) => {
+        console.error('Relay error:', relay.url, error);
+      });
+
+      await ndk.connect();
+      console.log('NDK connected successfully');
     focusAreas = await getTopics(ndk); // e.g. load dynamic "Focus Areas"
   });
 
@@ -135,9 +146,19 @@
     // 3) Catch errors
 
     try {
-      // Example:
+      if (!ndk?.signer) {
+        throw new SignerRequiredError();
+      }
+
+      // Log form data for debugging
+      console.log('Submitting organization:', formData);
+
       const identifier = `org-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+      console.log('Using identifier:', identifier);
+
       const event = await createOrganization(ndk, formData, identifier);
+      console.log('Organization created successfully:', event);
+
       success = true;
       window.location.href = `/organizations/${event.id}`;
     } catch (e) {
