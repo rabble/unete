@@ -95,27 +95,27 @@
     if (userLists[listType].length > 0) return;
 
     const listKindMap = {
-      { kind: 30000, name: 'followSets' },    // Follow Sets
-      { kind: 30001, name: 'pinSets' },       // Pin Sets
-      { kind: 30002, name: 'relaySets' },     // Relay Sets
-      { kind: 30003, name: 'bookmarkSets' },   // Bookmark Sets
-      { kind: 30004, name: 'curationSets' },    // Curation Sets
-      { kind: 30005, name: 'videoSets' },       // Video Sets
-      { kind: 30007, name: 'muteSets' },        // Kind-specific Mute Sets
-      { kind: 30015, name: 'interestSets' },    // Interest Sets
-      { kind: 30030, name: 'emojiSets' },       // Emoji Sets
-      { kind: 30063, name: 'releaseSets' },      // Release Artifact Sets
-      { kind: 30000, name: 'mutes', d: 'mute' },     // Mute Lists
-      { kind: 30001, name: 'bookmarks', d: 'bookmark' },     // Bookmark Lists
-      { kind: 30001, name: 'communities', d: 'community' },     // Communities Lists
-      { kind: 10000, name: 'muteList' },     // Mute List (pubkeys, hashtags, words, threads)
-      { kind: 10001, name: 'pinnedNotes' },     // Pinned Notes (kind:1 notes for profile)
-      { kind: 10003, name: 'bookmarkList' },     // Bookmarks (notes, articles, hashtags, URLs)
-      { kind: 10004, name: 'communityList' },     // NIP-72 Communities (kind:34550 definitions)
-      { kind: 10005, name: 'chatList' },     // NIP-28 Chat Channels (kind:40 definitions)
-      { kind: 10006, name: 'blockedRelayList' },     // Blocked Relays (never connect to these)
-      { kind: 10007, name: 'searchRelayList' },     // Search Relays (for search queries)
-      { kind: 10009, name: 'groupList' }     // NIP-29 Groups (group id + relay URL + name)
+      followSets: { kind: 30000 },    // Follow Sets
+      pinSets: { kind: 30001 },       // Pin Sets
+      relaySets: { kind: 30002 },     // Relay Sets
+      bookmarkSets: { kind: 30003 },   // Bookmark Sets
+      curationSets: { kind: 30004 },    // Curation Sets
+      videoSets: { kind: 30005 },       // Video Sets
+      muteSets: { kind: 30007 },        // Kind-specific Mute Sets
+      interestSets: { kind: 30015 },    // Interest Sets
+      emojiSets: { kind: 30030 },       // Emoji Sets
+      releaseSets: { kind: 30063 },      // Release Artifact Sets
+      mutes: { kind: 30000, d: 'mute' },     // Mute Lists
+      bookmarks: { kind: 30001, d: 'bookmark' },     // Bookmark Lists
+      communities: { kind: 30001, d: 'community' },     // Communities Lists
+      muteList: { kind: 10000 },     // Mute List (pubkeys, hashtags, words, threads)
+      pinnedNotes: { kind: 10001 },     // Pinned Notes (kind:1 notes for profile)
+      bookmarkList: { kind: 10003 },     // Bookmarks (notes, articles, hashtags, URLs)
+      communityList: { kind: 10004 },     // NIP-72 Communities (kind:34550 definitions)
+      chatList: { kind: 10005 },     // NIP-28 Chat Channels (kind:40 definitions)
+      blockedRelayList: { kind: 10006 },     // Blocked Relays (never connect to these)
+      searchRelayList: { kind: 10007 },     // Search Relays (for search queries)
+      groupList: { kind: 10009 }     // NIP-29 Groups (group id + relay URL + name)
     };
 
     const kind = listKindMap[listType]?.kind;
