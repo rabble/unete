@@ -12,14 +12,14 @@
   let success: boolean = false;
   let loading: boolean = false;
 
-  // Form data object to store all form fields
-  let formData = {
+  // Form data object with proper TypeScript interface
+  let formData: OrganizationContent = {
     name: '',
-    category: 'Nonprofit' as OrganizationCategory,
+    category: 'Nonprofit',
     description: '',
-    focusAreas: [] as string[],
-    locations: [] as string[],
-    engagementTypes: [] as string[],
+    focusAreas: [],
+    locations: [],
+    engagementTypes: [],
     website: '',
     picture: '',
     email: '',
@@ -28,7 +28,7 @@
     vision: '',
     founded: '',
     size: '',
-    languages: [] as string[],
+    languages: [],
     socialLinks: {
       twitter: '',
       github: '',
