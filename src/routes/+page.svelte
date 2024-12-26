@@ -82,6 +82,7 @@
     // Fetch all types of lists
     const listKinds = [
       { kind: 30000, name: 'followSets' },    // Follow Sets
+      { kind: 30001, name: 'pinSets' },       // Pin Sets
       { kind: 30002, name: 'relaySets' },     // Relay Sets
       { kind: 30003, name: 'bookmarkSets' },   // Bookmark Sets
       { kind: 30004, name: 'curationSets' },    // Curation Sets
