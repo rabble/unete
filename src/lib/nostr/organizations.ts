@@ -151,36 +151,40 @@ export async function createOrganization(
   }
 
     try {
-      // Publish the event and wait for verification
+      // Publish the event
       await event.publish();
       
-      // Wait for relay confirmation
+      // Wait for relay confirmation with longer timeout
       const verified = await new Promise((resolve, reject) => {
         const timeout = setTimeout(() => {
           reject(new Error('Event verification timeout'));
-        }, 5000);
+        }, 15000); // Increased timeout to 15 seconds
 
-        ndk.pool.on('event:verified', (e: NDKEvent) => {
+        const handleVerification = (e: NDKEvent) => {
           if (e.id === event.id) {
             clearTimeout(timeout);
+            ndk.pool.removeListener('event:verified', handleVerification);
             resolve(e);
           }
-        });
+        };
+
+        ndk.pool.on('event:verified', handleVerification);
       });
 
       return event;
     } catch (error) {
+      console.error('Publish error:', error);
       throw new PublishError(
         `Failed to publish organization event: ${error instanceof Error ? error.message : 'Unknown error'}`
       );
     }
   } catch (error) {
     console.error('Organization creation error:', error);
-    if (error instanceof NostrError) {
+    if (error instanceof ValidationError || error instanceof SignerRequiredError || error instanceof PublishError) {
       throw error;
     }
-    // Wrap unknown errors in NostrError
-    throw new NostrError(`Unexpected error creating organization: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    // Wrap unknown errors in PublishError instead of NostrError
+    throw new PublishError(`Unexpected error creating organization: ${error instanceof Error ? error.message : 'Unknown error'}`);
   }
 }
 
