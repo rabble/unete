@@ -209,6 +209,48 @@
                 <div class="bg-gray-50 p-4 rounded-lg text-left">
                   <h5 class="font-semibold">{list.tags.find(t => t[0] === 'd')?.[1] || 'Unnamed List'}</h5>
                   <p class="text-gray-800">{list.content}</p>
+                  
+                  <div class="mt-4 space-y-2">
+                    <!-- Muted Users -->
+                    {#if list.tags.filter(t => t[0] === 'p').length > 0}
+                      <div>
+                        <span class="font-medium">Muted Users:</span>
+                        <span class="text-gray-600">{list.tags.filter(t => t[0] === 'p').length} users</span>
+                      </div>
+                    {/if}
+                    
+                    <!-- Muted Hashtags -->
+                    {#if list.tags.filter(t => t[0] === 't').length > 0}
+                      <div>
+                        <span class="font-medium">Muted Hashtags:</span>
+                        <div class="flex flex-wrap gap-2 mt-1">
+                          {#each list.tags.filter(t => t[0] === 't') as tag}
+                            <span class="bg-gray-200 px-2 py-1 rounded-md text-sm">#{tag[1]}</span>
+                          {/each}
+                        </div>
+                      </div>
+                    {/if}
+                    
+                    <!-- Muted Words -->
+                    {#if list.tags.filter(t => t[0] === 'word').length > 0}
+                      <div>
+                        <span class="font-medium">Muted Words:</span>
+                        <div class="flex flex-wrap gap-2 mt-1">
+                          {#each list.tags.filter(t => t[0] === 'word') as tag}
+                            <span class="bg-gray-200 px-2 py-1 rounded-md text-sm">{tag[1]}</span>
+                          {/each}
+                        </div>
+                      </div>
+                    {/if}
+                    
+                    <!-- Muted Threads -->
+                    {#if list.tags.filter(t => t[0] === 'e').length > 0}
+                      <div>
+                        <span class="font-medium">Muted Threads:</span>
+                        <span class="text-gray-600">{list.tags.filter(t => t[0] === 'e').length} threads</span>
+                      </div>
+                    {/if}
+                  </div>
                 </div>
               {/each}
             </div>
