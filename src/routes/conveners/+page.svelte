@@ -9,7 +9,7 @@
           Alexandria Shaner
         </a>
       </h2>
-      <div class="relative">
+      <div class="relative min-h-[160px]">
         <img 
           src="https://znetwork.org/wp-content/uploads/avatars/5c486759-6221-410b-b54f-569ac0e77f48.jpeg" 
           alt="Alexandria Shaner"
