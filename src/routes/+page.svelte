@@ -3,6 +3,22 @@
   import type { NDKUser, NDKEvent } from '@nostr-dev-kit/ndk';
   import { onMount } from 'svelte';
 
+  // Media detection helpers
+  function getMediaUrls(content: string): string[] {
+    const urlRegex = /(https?:\/\/[^\s<]+[^<.,:;"')\]\s])/g;
+    const urls = content.match(urlRegex) || [];
+    return urls.filter(url => {
+      return url.match(/\.(jpg|jpeg|png|gif|mp4|webm|mp3|wav)$/i);
+    });
+  }
+
+  function getMediaType(url: string): 'image' | 'video' | 'audio' | null {
+    if (url.match(/\.(jpg|jpeg|png|gif)$/i)) return 'image';
+    if (url.match(/\.(mp4|webm)$/i)) return 'video';
+    if (url.match(/\.(mp3|wav)$/i)) return 'audio';
+    return null;
+  }
+
   let ndk: NDK;
   let user: NDKUser | undefined;
   let isLoggedIn = false;
@@ -86,6 +102,39 @@
             {#each userPosts as post}
               <div class="bg-gray-50 p-4 rounded-lg text-left">
                 <p class="text-gray-800">{post.content}</p>
+                
+                <!-- Media Gallery -->
+                {#if getMediaUrls(post.content).length > 0}
+                  <div class="mt-4 grid grid-cols-2 gap-4">
+                    {#each getMediaUrls(post.content) as mediaUrl}
+                      {#if getMediaType(mediaUrl) === 'image'}
+                        <img 
+                          src={mediaUrl} 
+                          alt="Post media" 
+                          class="w-full h-48 object-cover rounded-lg cursor-pointer hover:opacity-90"
+                          loading="lazy"
+                        />
+                      {:else if getMediaType(mediaUrl) === 'video'}
+                        <video 
+                          src={mediaUrl} 
+                          controls 
+                          class="w-full h-48 object-cover rounded-lg"
+                        >
+                          <track kind="captions">
+                        </video>
+                      {:else if getMediaType(mediaUrl) === 'audio'}
+                        <audio 
+                          src={mediaUrl} 
+                          controls 
+                          class="w-full mt-2"
+                        >
+                          <track kind="captions">
+                        </audio>
+                      {/if}
+                    {/each}
+                  </div>
+                {/if}
+
                 <p class="text-sm text-gray-500 mt-2">
                   {new Date(post.created_at * 1000).toLocaleString()}
                 </p>
