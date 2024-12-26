@@ -74,7 +74,9 @@
                 </svg>
               </button>
               <div class="absolute hidden group-hover:block w-48 bg-white shadow-lg py-2 rounded-md" style="top: 100%; margin-top: -2px;">
-                <!-- Dropdown items will go here -->
+                <a href="/about" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">About</a>
+                <a href="/contact" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Contact</a>
+                <a href="/join-directory" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Join Directory</a>
               </div>
             </div>
 
