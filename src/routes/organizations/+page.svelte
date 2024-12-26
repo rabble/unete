@@ -10,16 +10,7 @@
 
   import { getTopics } from '$lib/topics';
   
-  let focusAreas: string[] = [];
-  
-  onMount(async () => {
-    if (ndk) {
-      focusAreas = await getTopics(ndk);
-    }
-  });
-
-  // Import default topics as initial focus areas
-  const focusAreas = [
+  let focusAreas: string[] = [
     'Housing',
     'Racial Justice', 
     'Economic Democracy',
@@ -75,22 +66,29 @@
   let ndk: NDK;
 
   onMount(async () => {
-    // Initialize NDK
-    ndk = new NDK({
-      explicitRelayUrls: [
-        'wss://relay.nos.social',
-        'wss://relay.damus.io',
-        'wss://relay.nostr.band'
-      ]
-    });
-    await ndk.connect();
+    try {
+      // Initialize NDK
+      ndk = new NDK({
+        explicitRelayUrls: [
+          'wss://relay.nos.social',
+          'wss://relay.damus.io',
+          'wss://relay.nostr.band'
+        ]
+      });
+      await ndk.connect();
 
-    // Fetch organizations
-    const events = await ndk.fetchEvents({
-      kinds: [ORGANIZATION],
-      limit: 100 // Adjust as needed
-    });
-    organizations = Array.from(events);
+      // Load focus areas
+      focusAreas = await getTopics(ndk);
+
+      // Fetch organizations
+      const events = await ndk.fetchEvents({
+        kinds: [ORGANIZATION],
+        limit: 100 // Adjust as needed
+      });
+      organizations = Array.from(events);
+    } catch (error) {
+      console.error('Failed to initialize:', error);
+    }
   });
 
   function getOrgContent(event: NDKEvent): OrganizationContent {
