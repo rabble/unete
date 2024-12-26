@@ -1023,19 +1023,20 @@
             <div class="space-y-4">
               {#each userLists.muteSets as muteSet}
                 <div class="bg-gray-50 p-4 rounded-lg text-left">
-                  <div class="mb-4">
-                    <h5 class="font-semibold text-red-800">
-                      {muteSet.content || 'Unnamed Mute Set'}
-                    </h5>
-                    {#if muteSet.tags.find(t => t[0] === 'description')}
-                      <p class="mt-2 text-sm text-gray-600">
-                        {muteSet.tags.find(t => t[0] === 'description')?.[1]}
-                      </p>
-                    {/if}
-                  </div>
+                  {#if muteSet.tags.find(t => t[0] === 'd')?.[1] === 'p'}
+                    <div class="mb-4">
+                      <h5 class="font-semibold text-red-800">
+                        {muteSet.content || 'Unnamed Mute Set'}
+                      </h5>
+                      {#if muteSet.tags.find(t => t[0] === 'description')}
+                        <p class="mt-2 text-sm text-gray-600">
+                          {muteSet.tags.find(t => t[0] === 'description')?.[1]}
+                        </p>
+                      {/if}
+                    </div>
                   
-                  <!-- Display muted pubkeys by kind -->
-                  {#if muteSet.tags.filter(t => t[0] === 'p').length > 0}
+                    <!-- Display muted pubkeys by kind -->
+                    {#if muteSet.tags.filter(t => t[0] === 'p').length > 0}
                     <div class="mt-3">
                       <span class="text-sm font-medium">Muted Users by Kind:</span>
                       <div class="mt-2 space-y-2">
@@ -1053,8 +1054,11 @@
                         {/each}
                       </div>
                     </div>
+                    {:else}
+                      <p class="text-gray-500">No muted users in this set</p>
+                    {/if}
                   {:else}
-                    <p class="text-gray-500">No muted users in this set</p>
+                    <p class="text-red-500">Invalid mute set: missing or incorrect 'd' tag</p>
                   {/if}
                 </div>
               {/each}
