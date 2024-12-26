@@ -147,6 +147,7 @@
   onMount(() => {
     ndk = new NDK({
       explicitRelayUrls: [
+        'wss://relay.nos.social',
         'wss://relay.damus.io',
         'wss://relay.nostr.band'
       ],
