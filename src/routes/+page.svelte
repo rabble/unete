@@ -213,24 +213,105 @@
 
 <main class="container mx-auto max-w-4xl p-8">
   <div class="text-center mb-12">
-    <h1 class="text-4xl font-bold mb-4">Nostr Organization Directory</h1>
-    <p class="text-xl text-gray-600">Discover and connect with organizations on Nostr</p>
+    <h1 class="text-4xl font-bold mb-4">All of Us: A Directory To Connect, Care, and Build</h1>
+    <h3 class="text-xl text-gray-700 mb-8">Contact campaigns and organizations that need your help to help everyone.</h3>
+    
+    <div class="bg-white rounded-lg shadow-lg p-8 mb-12">
+      <p class="text-gray-700 mb-6">
+        <strong>All of Us</strong> wants to help you find and join efforts to make
+        neighborhoods, schools, jobs, and daily lives better. Use the search
+        below to find and work with organizations on a wide range of issues
+        throughout the country. Enter your information and find ways to help
+        people in need, stop evictions, stop deportations, win higher wages and
+        greater respect on the job, work for racial and gender justice, bring
+        healthcare and reproductive rights to all, protect our environment,
+        achieve climate justice, win electoral reforms, and more opportunities for organizing together.
+      </p>
+    </div>
+  </div>
+
+  <!-- Search Section -->
+  <div class="bg-white rounded-lg shadow-lg p-8 mb-12">
+    <h2 class="text-2xl font-bold mb-4">Search Our Directory of Organizations</h2>
+    <p class="text-gray-700 mb-6">
+      Choose your location, your focus area, and the way you want to engage,
+      and then click Search to see a list of organizations that fit your
+      criteria. Each entry you see links to an organization page where you
+      will learn more about the organization and projects they have and the
+      help they need.
+    </p>
+    
+    <div class="flex justify-center">
+      <a 
+        href="/organizations" 
+        class="inline-block bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-8 rounded-lg transition-colors"
+      >
+        Search Organizations
+      </a>
+    </div>
+  </div>
+
+  <!-- Get Involved Section -->
+  <div class="bg-white rounded-lg shadow-lg p-8 mb-12">
+    <h2 class="text-2xl font-bold mb-4">Search Now: Get Involved</h2>
+    <p class="text-gray-700 mb-6">
+      Use your skills for positive change, learn new ones, and connect with
+      campaigns and organizations that need your help to help your community.
+    </p>
   </div>
 
   <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-    <!-- Featured Organizations -->
+    <!-- Latest Updates -->
     <div class="bg-white rounded-lg shadow-lg p-6">
-      <h2 class="text-2xl font-semibold mb-4">Featured Organizations</h2>
-      <div class="space-y-4">
-        <p class="text-gray-600">Coming soon...</p>
+      <h2 class="text-2xl font-bold mb-6">Latest Updates</h2>
+      <div class="space-y-6">
+        {#if userLists.communities?.length > 0}
+          {#each userLists.communities.slice(0, 5) as org}
+            <div class="border-b pb-4">
+              <h3 class="font-semibold text-lg mb-2">
+                {org.tags.find(t => t[0] === 'name')?.[1] || 'Organization'}
+              </h3>
+              <p class="text-gray-600 mb-2">{org.content}</p>
+              <p class="text-sm text-gray-500">
+                {new Date(org.created_at * 1000).toLocaleDateString()}
+              </p>
+            </div>
+          {/each}
+        {:else}
+          <p class="text-gray-600">No updates available</p>
+        {/if}
+        <a href="/announcements" class="text-purple-600 hover:text-purple-800 font-medium">
+          View all updates →
+        </a>
       </div>
     </div>
 
-    <!-- Recent Updates -->
+    <!-- Recent Reports -->
     <div class="bg-white rounded-lg shadow-lg p-6">
-      <h2 class="text-2xl font-semibold mb-4">Recent Updates</h2>
-      <div class="space-y-4">
-        <p class="text-gray-600">Coming soon...</p>
+      <h2 class="text-2xl font-bold mb-6">Recent Reports</h2>
+      <div class="space-y-6">
+        {#if userLists.communities?.length > 0}
+          {#each userLists.communities.slice(0, 5) as org}
+            <div class="border-b pb-4">
+              <p class="text-sm text-gray-500 mb-1">
+                {org.tags.find(t => t[0] === 'name')?.[1] || 'Organization'} 
+                {new Date(org.created_at * 1000).toLocaleDateString()}
+              </p>
+              <h3 class="font-semibold text-lg mb-2">
+                {org.tags.find(t => t[0] === 'description')?.[1] || 'Report Title'}
+              </h3>
+              <p class="text-gray-600 mb-2">{org.content}</p>
+              <a href={`/reports/${org.id}`} class="text-purple-600 hover:text-purple-800">
+                Read full report →
+              </a>
+            </div>
+          {/each}
+        {:else}
+          <p class="text-gray-600">No reports available</p>
+        {/if}
+        <a href="/reports" class="text-purple-600 hover:text-purple-800 font-medium">
+          View all reports →
+        </a>
       </div>
     </div>
   </div>
