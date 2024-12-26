@@ -110,11 +110,6 @@
         <a href="/contact" class="text-gray-400 hover:text-gray-500">Contact</a>
         <a href="/add-organization" class="text-gray-400 hover:text-gray-500">Add Organization</a>
       </div>
-      <div class="mt-8 md:mt-0 md:order-1">
-        <p class="text-center text-base text-gray-400">
-          &copy; 2024 All of Us. All rights reserved.
-        </p>
-      </div>
     </div>
   </footer>
 </div>
