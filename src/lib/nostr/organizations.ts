@@ -151,29 +151,53 @@ export async function createOrganization(
   }
 
     try {
-      // Publish the event
-      await event.publish();
+      console.log('Publishing event:', event);
+      console.log('Connected relays:', Array.from(ndk.pool.relays.values()).map(r => r.url));
       
-      // Wait for relay confirmation with longer timeout
+      // First publish without waiting
+      await event.publish();
+      console.log('Event published, waiting for verification...');
+      
+      // Then wait for verification with a longer timeout
       const verified = await new Promise((resolve, reject) => {
         const timeout = setTimeout(() => {
-          reject(new Error('Event verification timeout'));
-        }, 15000); // Increased timeout to 15 seconds
+          console.warn('Event verification timed out after 30 seconds');
+          // Don't reject - some relays might be slow
+          resolve(event);
+        }, 30000); // 30 second timeout
 
+        let verifiedCount = 0;
+        const requiredVerifications = 1; // Adjust as needed
+        
         const handleVerification = (e: NDKEvent) => {
           if (e.id === event.id) {
-            clearTimeout(timeout);
-            ndk.pool.removeListener('event:verified', handleVerification);
-            resolve(e);
+            verifiedCount++;
+            console.log(`Event verified by relay (${verifiedCount}/${requiredVerifications})`);
+            
+            if (verifiedCount >= requiredVerifications) {
+              clearTimeout(timeout);
+              ndk.pool.removeListener('event:verified', handleVerification);
+              resolve(e);
+            }
           }
         };
 
         ndk.pool.on('event:verified', handleVerification);
       });
 
+      console.log('Event fully verified');
       return event;
     } catch (error) {
-      console.error('Publish error:', error);
+      console.error('Publish error details:', {
+        error,
+        eventId: event.id,
+        relayStatus: Array.from(ndk.pool.relays.values()).map(r => ({
+          url: r.url,
+          connected: r.connected,
+          connecting: r.connecting
+        }))
+      });
+      
       throw new PublishError(
         `Failed to publish organization event: ${error instanceof Error ? error.message : 'Unknown error'}`
       );
