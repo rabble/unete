@@ -48,36 +48,58 @@
     'Technical Support'
   ];
 
-  // Sample organizations data
-  const organizations = [
-    {
-      id: 'right-to-city',
-      name: 'Right to the City',
-      category: 'Multi-Issue',
-      description: 'A national alliance advocating for housing rights and urban justice, focusing on combating gentrification and displacement.',
-      focusAreas: ['Housing', 'Racial Justice', 'Economic Democracy', 'Community'],
-      locations: ['National']
-    },
-    {
-      id: 'united-we-dream',
-      name: 'United We Dream',
-      category: 'Immigrant Rights',
-      description: 'The largest immigrant youth-led organization in the U.S., empowering young immigrants and advocating for immigration reforms.',
-      focusAreas: ['Immigration', 'Youth', 'Racial Justice'],
-      locations: ['National']
-    },
-    // Add more organizations as needed
-  ];
+  // Store for organizations
+  let organizations: NDKEvent[] = [];
+  let ndk: NDK;
+
+  onMount(async () => {
+    // Initialize NDK
+    ndk = new NDK({
+      explicitRelayUrls: [
+        'wss://relay.nos.social',
+        'wss://relay.damus.io',
+        'wss://relay.nostr.band'
+      ]
+    });
+    await ndk.connect();
+
+    // Fetch organizations
+    const events = await ndk.fetchEvents({
+      kinds: [ORGANIZATION],
+      limit: 100 // Adjust as needed
+    });
+    organizations = Array.from(events);
+  });
+
+  function getOrgContent(event: NDKEvent): OrganizationContent {
+    try {
+      return JSON.parse(event.content);
+    } catch (e) {
+      console.error('Failed to parse organization content:', e);
+      return {
+        name: 'Unknown Organization',
+        category: 'Unknown',
+        description: 'Invalid organization data',
+        focusAreas: [],
+        locations: [],
+        engagementTypes: []
+      };
+    }
+  }
 
   // Filter organizations based on selected criteria
-  $: filteredOrganizations = organizations.filter(org => {
+  $: filteredOrganizations = organizations.filter(event => {
+    const org = getOrgContent(event);
     const locationMatch = selectedLocations.length === 0 || 
       org.locations.some(loc => selectedLocations.includes(loc));
     
     const focusMatch = selectedFocusAreas.length === 0 ||
       org.focusAreas.some(focus => selectedFocusAreas.includes(focus));
     
-    return locationMatch && focusMatch;
+    const engagementMatch = selectedEngagementTypes.length === 0 ||
+      org.engagementTypes.some(type => selectedEngagementTypes.includes(type));
+    
+    return locationMatch && focusMatch && engagementMatch;
   });
 
   // Toggle selection in array
@@ -159,35 +181,58 @@
 
   <!-- Organizations List -->
   <div class="space-y-8">
-    {#each filteredOrganizations as org}
+    {#each filteredOrganizations as event}
+      {@const org = getOrgContent(event)}
       <a 
-        href="/organizations/{org.id}" 
+        href="/organizations/{event.id}" 
         class="block bg-white rounded-lg shadow-lg p-6 hover:shadow-xl transition-shadow"
       >
-        <h2 class="text-2xl font-bold mb-2">{org.name}</h2>
-        <p class="text-purple-600 font-medium mb-4">{org.category}</p>
-        <p class="text-gray-700 mb-6">{org.description}</p>
-        
-        <div class="space-y-4">
-          <div>
-            <h3 class="font-semibold mb-2">Focus Areas:</h3>
-            <div class="flex flex-wrap gap-2">
-              {#each org.focusAreas as area}
-                <span class="bg-purple-100 text-purple-800 px-3 py-1 rounded-full text-sm">
-                  {area}
-                </span>
-              {/each}
-            </div>
-          </div>
-          
-          <div>
-            <h3 class="font-semibold mb-2">Locations:</h3>
-            <div class="flex flex-wrap gap-2">
-              {#each org.locations as location}
-                <span class="bg-gray-100 text-gray-800 px-3 py-1 rounded-full text-sm">
-                  {location}
-                </span>
-              {/each}
+        <div class="flex items-start gap-4">
+          {#if org.picture}
+            <img 
+              src={org.picture} 
+              alt={org.name}
+              class="w-24 h-24 object-cover rounded-lg"
+            />
+          {/if}
+          <div class="flex-1">
+            <h2 class="text-2xl font-bold mb-2">{org.name}</h2>
+            <p class="text-purple-600 font-medium mb-4">{org.category}</p>
+            <p class="text-gray-700 mb-6">{org.description}</p>
+            
+            <div class="space-y-4">
+              <div>
+                <h3 class="font-semibold mb-2">Focus Areas:</h3>
+                <div class="flex flex-wrap gap-2">
+                  {#each org.focusAreas as area}
+                    <span class="bg-purple-100 text-purple-800 px-3 py-1 rounded-full text-sm">
+                      {area}
+                    </span>
+                  {/each}
+                </div>
+              </div>
+              
+              <div>
+                <h3 class="font-semibold mb-2">Locations:</h3>
+                <div class="flex flex-wrap gap-2">
+                  {#each org.locations as location}
+                    <span class="bg-gray-100 text-gray-800 px-3 py-1 rounded-full text-sm">
+                      {location}
+                    </span>
+                  {/each}
+                </div>
+              </div>
+
+              <div>
+                <h3 class="font-semibold mb-2">Engagement Types:</h3>
+                <div class="flex flex-wrap gap-2">
+                  {#each org.engagementTypes as type}
+                    <span class="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm">
+                      {type}
+                    </span>
+                  {/each}
+                </div>
+              </div>
             </div>
           </div>
         </div>
