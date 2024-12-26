@@ -98,7 +98,8 @@
       { kind: 10001, name: 'pinnedNotes' },     // Pinned Notes (kind:1 notes for profile)
       { kind: 10003, name: 'bookmarkList' },     // Bookmarks (notes, articles, hashtags, URLs)
       { kind: 10004, name: 'communityList' },     // NIP-72 Communities (kind:34550 definitions)
-      { kind: 10005, name: 'chatList' }     // NIP-28 Chat Channels (kind:40 definitions)
+      { kind: 10005, name: 'chatList' },     // NIP-28 Chat Channels (kind:40 definitions)
+      { kind: 10006, name: 'blockedRelayList' }     // Blocked Relays (never connect to these)
     ];
 
     for (const { kind, name } of listKinds) {
