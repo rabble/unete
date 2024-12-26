@@ -24,7 +24,6 @@
         Rebellion. She is active with Caracol DSA: the Degrowth Ecosocialist
         Caucus and the Women's Rights and Empowerment Network.
       </p>
-        </div>
       </div>
     </section>
 
