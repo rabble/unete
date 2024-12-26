@@ -38,21 +38,6 @@
   let profile: { name?: string; about?: string; picture?: string; } | undefined;
   let userPosts: NDKEvent[] = [];
   let userLists: { [key: string]: NDKEvent[] } = {
-    people: [],
-    bookmarks: [],
-    mutes: [],
-    pins: [],
-    contacts: [],
-    communities: [],
-    chats: [],
-    blockedRelays: [],
-    searchRelays: [],
-    groups: [],
-    interests: [],
-    emojis: [],
-    dmRelays: [],
-    wikiAuthors: [],
-    wikiRelays: [],
     followSets: [],
     relaySets: [],
     bookmarkSets: [],
@@ -96,21 +81,6 @@
 
     // Fetch all types of lists
     const listKinds = [
-      { kind: 30000, name: 'people' },    // People Lists
-      { kind: 30001, name: 'bookmarks' }, // Bookmarks
-      { kind: 10000, name: 'mutes' },     // Mute Lists
-      { kind: 10001, name: 'pins' },      // Pin Lists
-      { kind: 3, name: 'contacts' },      // Contacts/Following
-      { kind: 34550, name: 'communities'}, // Communities
-      { kind: 40, name: 'chats' },        // Public Chat Channels
-      { kind: 10006, name: 'blockedRelays' }, // Blocked Relays
-      { kind: 10007, name: 'searchRelays' },  // Search Relays
-      { kind: 10009, name: 'groups' },        // Simple Groups
-      { kind: 10015, name: 'interests' },     // Interests
-      { kind: 10030, name: 'emojis' },        // Emoji Preferences
-      { kind: 10050, name: 'dmRelays' },      // DM Relay Preferences
-      { kind: 10101, name: 'wikiAuthors' },   // Wiki Author Preferences
-      { kind: 10102, name: 'wikiRelays' },    // Wiki Relay Preferences
       { kind: 30000, name: 'followSets' },    // Follow Sets
       { kind: 30002, name: 'relaySets' },     // Relay Sets
       { kind: 30003, name: 'bookmarkSets' },   // Bookmark Sets
