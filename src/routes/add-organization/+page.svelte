@@ -38,6 +38,7 @@
     }
   };
   
+  // Available options
   const categoryOptions: OrganizationCategory[] = [
     'Nonprofit',
     'Mutual Aid',
@@ -49,28 +50,7 @@
     'Social Movement',
     'Other'
   ];
-  let description = '';
-  let selectedFocusAreas: string[] = [];
-  let locations: string[] = [];
-  let engagementTypes: string[] = [];
-  let website = '';
-  let picture = '';
-  let email = '';
-  let about = '';
-  let mission = '';
-  let vision = '';
-  let founded = '';
-  let size = '';
-  let languages: string[] = [];
-  let socialLinks = {
-    twitter: '',
-    github: '',
-    linkedin: '',
-    facebook: '',
-    instagram: ''
-  };
 
-  // Available options
   const locationOptions = [
     'National',
     'International',
