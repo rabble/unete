@@ -186,20 +186,44 @@
       <div class="space-y-8">
         <h3 class="text-2xl font-semibold mb-6">Lists</h3>
         
-        <!-- People Lists -->
+        <!-- People Lists/Sets -->
         <div>
-          <h4 class="text-xl font-semibold mb-4">People Lists</h4>
+          <h4 class="text-xl font-semibold mb-4">People Lists & Sets</h4>
           {#if userLists.people.length > 0}
             <div class="space-y-4">
-              {#each userLists.people as list}
-                <div class="bg-gray-50 p-4 rounded-lg text-left">
-                  <h5 class="font-semibold">{list.tags.find(t => t[0] === 'd')?.[1] || 'Unnamed List'}</h5>
-                  <p class="text-gray-800">{list.content}</p>
+              <!-- Group lists by their 'd' identifier -->
+              {#each Array.from(new Set(userLists.people.map(list => list.tags.find(t => t[0] === 'd')?.[1] || 'default'))).sort() as setId}
+                <div class="border-l-4 border-blue-400 pl-4">
+                  <h5 class="font-semibold text-blue-800 mb-3">Set: {setId}</h5>
+                  <div class="space-y-3">
+                    {#each userLists.people.filter(list => (list.tags.find(t => t[0] === 'd')?.[1] || 'default') === setId) as list}
+                      <div class="bg-gray-50 p-4 rounded-lg text-left">
+                        <div class="flex items-center justify-between mb-2">
+                          <span class="text-sm text-gray-500">Set ID: {setId}</span>
+                          <span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded">Set</span>
+                        </div>
+                        <p class="text-gray-800">{list.content}</p>
+                        <!-- Display people in this set -->
+                        {#if list.tags.filter(t => t[0] === 'p').length > 0}
+                          <div class="mt-3">
+                            <span class="text-sm font-medium">People in set:</span>
+                            <div class="mt-2 space-y-2">
+                              {#each list.tags.filter(t => t[0] === 'p') as [_, pubkey]}
+                                <div class="bg-white p-2 rounded border border-blue-200">
+                                  <span class="font-mono text-sm text-blue-600">{pubkey}</span>
+                                </div>
+                              {/each}
+                            </div>
+                          </div>
+                        {/if}
+                      </div>
+                    {/each}
+                  </div>
                 </div>
               {/each}
             </div>
           {:else}
-            <p class="text-gray-500">No people lists found</p>
+            <p class="text-gray-500">No people lists or sets found</p>
           {/if}
         </div>
 
