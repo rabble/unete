@@ -3,6 +3,16 @@
   import type { NDKUser, NDKEvent } from '@nostr-dev-kit/ndk';
   import { onMount } from 'svelte';
 
+  // Interface for relay sets
+  interface RelaySet {
+    id: string;
+    name: string;
+    relays: string[];
+  }
+
+  let selectedRelaySet: RelaySet | null = null;
+  let relaySets: RelaySet[] = [];
+
   // Media detection helpers
   function getMediaUrls(content: string): string[] {
     const urlRegex = /(https?:\/\/[^\s<]+[^<.,:;"')\]\s])/g;
@@ -42,6 +52,22 @@
     wikiRelays: []
   };
 
+  function extractRelaySets(events: NDKEvent[]): RelaySet[] {
+    const sets: RelaySet[] = [];
+    events.forEach(event => {
+      const setId = event.tags.find(t => t[0] === 'd')?.[1] || 'default';
+      const relays = event.tags.filter(t => t[0] === 'relay').map(t => t[1]);
+      if (relays.length > 0) {
+        sets.push({
+          id: setId,
+          name: event.content || setId,
+          relays
+        });
+      }
+    });
+    return sets;
+  }
+
   async function fetchUserContent() {
     if (!user) return;
 
@@ -78,6 +104,14 @@
         authors: [user.pubkey]
       });
       userLists[name] = Array.from(events);
+      
+      // Process relay sets after fetching events
+      if (name === 'searchRelays') {
+        relaySets = extractRelaySets(Array.from(events));
+        if (relaySets.length > 0) {
+          selectedRelaySet = relaySets[0];
+        }
+      }
     }
   }
 
@@ -227,9 +261,9 @@
           {/if}
         </div>
 
-        <!-- Bookmarks -->
+        <!-- Bookmarks & Curations -->
         <div>
-          <h4 class="text-xl font-semibold mb-4">Bookmarks</h4>
+          <h4 class="text-xl font-semibold mb-4">Bookmarks & Curations</h4>
           {#if userLists.bookmarks.length > 0}
             <div class="space-y-4">
               {#each userLists.bookmarks as list}
@@ -266,15 +300,22 @@
                       </div>
                     {/if}
                     
-                    <!-- Saved Hashtags -->
+                    <!-- Topics & Curations -->
                     {#if list.tags.filter(t => t[0] === 't').length > 0}
                       <div>
-                        <span class="font-medium">Saved Hashtags:</span>
+                        <span class="font-medium">Topics & Curations:</span>
                         <div class="flex flex-wrap gap-2 mt-2">
                           {#each list.tags.filter(t => t[0] === 't') as tag}
-                            <span class="bg-gray-200 px-2 py-1 rounded-md text-sm">#{tag[1]}</span>
+                            <span class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium cursor-pointer hover:bg-blue-200 transition-colors">
+                              #{tag[1]}
+                            </span>
                           {/each}
                         </div>
+                        {#if list.tags.find(t => t[0] === 'd')}
+                          <div class="mt-2 text-sm text-gray-600">
+                            Curation Set: {list.tags.find(t => t[0] === 'd')?.[1]}
+                          </div>
+                        {/if}
                       </div>
                     {/if}
                     
@@ -496,7 +537,22 @@
 
         <!-- Search Relays -->
         <div>
-          <h4 class="text-xl font-semibold mb-4">Search Relays</h4>
+          <div class="flex justify-between items-center mb-4">
+            <h4 class="text-xl font-semibold">Search Relays</h4>
+            {#if relaySets.length > 0}
+              <div class="relative">
+                <select 
+                  bind:value={selectedRelaySet}
+                  class="bg-white border border-gray-300 rounded-md py-2 px-4 pr-8 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value={null}>Select Relay Set</option>
+                  {#each relaySets as set}
+                    <option value={set}>{set.name}</option>
+                  {/each}
+                </select>
+              </div>
+            {/if}
+          </div>
           {#if userLists.searchRelays.length > 0}
             <div class="space-y-4">
               {#each userLists.searchRelays as searchRelay}
