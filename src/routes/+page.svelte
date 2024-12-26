@@ -209,6 +209,37 @@
       console.error('Login failed:', error);
     }
   }
+
+  async function logout() {
+    try {
+      console.log('Logging out...');
+      // Clear NDK state
+      ndk.signer = undefined;
+      user = undefined;
+      profile = undefined;
+      userPosts = [];
+      userLists = {};
+      isLoggedIn = false;
+      revealedSections = new Set();
+      
+      // Disconnect NDK
+      await ndk.disconnect();
+      
+      // Create new NDK instance
+      ndk = new NDK({
+        explicitRelayUrls: [
+          'wss://relay.nos.social',
+          'wss://relay.damus.io',
+          'wss://relay.nostr.band'
+        ],
+        signer: new NDKNip07Signer()
+      });
+      
+      console.log('Logged out successfully');
+    } catch (error) {
+      console.error('Logout failed:', error);
+    }
+  }
 </script>
 
 <main class="container mx-auto max-w-4xl p-8">
@@ -1547,10 +1578,10 @@
     </div>
   {:else}
     <button
-      on:click={login}
+      on:click={isLoggedIn ? logout : login}
       class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-8 rounded-lg transition-colors"
     >
-      Login with Nostr
+      {isLoggedIn ? 'Logout' : 'Login with Nostr'}
     </button>
   {/if}
 </main>
