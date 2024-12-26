@@ -11,7 +11,6 @@
       </h2>
       <div class="relative">
         <img 
-          class="float-left w-32 h-32 object-cover rounded-lg mr-6 mb-4"
           src="https://znetwork.org/wp-content/uploads/avatars/5c486759-6221-410b-b54f-569ac0e77f48.jpeg" 
           alt="Alexandria Shaner"
           class="float-left w-32 h-32 object-cover rounded-lg mr-6 mb-4"
