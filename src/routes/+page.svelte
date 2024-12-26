@@ -55,7 +55,8 @@
     wikiRelays: [],
     followSets: [],
     relaySets: [],
-    bookmarkSets: []
+    bookmarkSets: [],
+    curationSets: []
   };
 
   function extractRelaySets(events: NDKEvent[]): RelaySet[] {
@@ -107,7 +108,8 @@
       { kind: 10102, name: 'wikiRelays' },    // Wiki Relay Preferences
       { kind: 30000, name: 'followSets' },    // Follow Sets
       { kind: 30002, name: 'relaySets' },     // Relay Sets
-      { kind: 30003, name: 'bookmarkSets' }   // Bookmark Sets
+      { kind: 30003, name: 'bookmarkSets' },   // Bookmark Sets
+      { kind: 30004, name: 'curationSets' }    // Curation Sets
     ];
 
     for (const { kind, name } of listKinds) {
@@ -909,6 +911,63 @@
             </div>
           {:else}
             <p class="text-gray-500">No relay sets found</p>
+          {/if}
+        </div>
+
+        <!-- Curation Sets -->
+        <div>
+          <h4 class="text-xl font-semibold mb-4">Curation Sets</h4>
+          {#if userLists.curationSets.length > 0}
+            <div class="space-y-4">
+              {#each userLists.curationSets as curationSet}
+                <div class="bg-gray-50 p-4 rounded-lg text-left">
+                  <div class="mb-4">
+                    <h5 class="font-semibold text-blue-800">
+                      {curationSet.content || 'Unnamed Curation'}
+                    </h5>
+                    {#if curationSet.tags.find(t => t[0] === 'description')}
+                      <p class="mt-2 text-sm text-gray-600">
+                        {curationSet.tags.find(t => t[0] === 'description')?.[1]}
+                      </p>
+                    {/if}
+                  </div>
+                  
+                  <!-- Display curated articles -->
+                  {#if curationSet.tags.filter(t => t[0] === 'a').length > 0}
+                    <div class="mt-3">
+                      <span class="text-sm font-medium">Curated Articles ({curationSet.tags.filter(t => t[0] === 'a').length}):</span>
+                      <div class="mt-2 space-y-2">
+                        {#each curationSet.tags.filter(t => t[0] === 'a') as [_, articleId]}
+                          <div class="bg-white p-2 rounded border border-amber-200">
+                            <span class="font-mono text-sm text-amber-600">{articleId}</span>
+                          </div>
+                        {/each}
+                      </div>
+                    </div>
+                  {/if}
+
+                  <!-- Display curated notes -->
+                  {#if curationSet.tags.filter(t => t[0] === 'e').length > 0}
+                    <div class="mt-3">
+                      <span class="text-sm font-medium">Curated Notes ({curationSet.tags.filter(t => t[0] === 'e').length}):</span>
+                      <div class="mt-2 space-y-2">
+                        {#each curationSet.tags.filter(t => t[0] === 'e') as [_, noteId]}
+                          <div class="bg-white p-2 rounded border border-blue-200">
+                            <span class="font-mono text-sm text-blue-600">{noteId}</span>
+                          </div>
+                        {/each}
+                      </div>
+                    </div>
+                  {/if}
+
+                  {#if !curationSet.tags.some(t => ['e', 'a'].includes(t[0]))}
+                    <p class="text-gray-500">No curated content in this set</p>
+                  {/if}
+                </div>
+              {/each}
+            </div>
+          {:else}
+            <p class="text-gray-500">No curation sets found</p>
           {/if}
         </div>
 
