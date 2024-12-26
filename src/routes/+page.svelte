@@ -31,7 +31,8 @@
     pins: [],
     contacts: [],
     communities: [],
-    chats: []
+    chats: [],
+    blockedRelays: []
   };
 
   async function fetchUserContent() {
