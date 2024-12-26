@@ -4,7 +4,6 @@
   import { getTopics } from '$lib/topics';
   import NDK, { NDKNip07Signer } from '@nostr-dev-kit/ndk';
   import { onMount } from 'svelte';
-  import type { OrganizationContent, OrganizationCategory } from '$lib/nostr/kinds';
   import { ValidationError, SignerRequiredError, PublishError } from '$lib/nostr/errors';
 
   let ndk: NDK;
