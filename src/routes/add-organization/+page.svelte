@@ -220,6 +220,9 @@
 </script>
 
 <style lang="postcss">
+  :global(html) {
+    background-color: theme(colors.gray.50);
+  }
 </style>
 
 <div class="max-w-4xl mx-auto px-4 py-12">
