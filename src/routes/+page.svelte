@@ -95,7 +95,8 @@
       { kind: 30001, name: 'bookmarks', d: 'bookmark' },     // Bookmark Lists
       { kind: 30001, name: 'communities', d: 'community' },     // Communities Lists
       { kind: 10000, name: 'muteList' },     // Mute List (pubkeys, hashtags, words, threads)
-      { kind: 10001, name: 'pinnedNotes' }     // Pinned Notes (kind:1 notes for profile)
+      { kind: 10001, name: 'pinnedNotes' },     // Pinned Notes (kind:1 notes for profile)
+      { kind: 10003, name: 'bookmarkList' }     // Bookmarks (notes, articles, hashtags, URLs)
     ];
 
     for (const { kind, name } of listKinds) {
