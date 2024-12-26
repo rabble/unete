@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { ORGANIZATION, type OrganizationContent, ORGANIZATION_TAGS } from '$lib/nostr/kinds';
+  import NDK, { NDKEvent } from '@nostr-dev-kit/ndk';
   // Filter state
   let selectedLocations: string[] = [];
   let selectedFocusAreas: string[] = [];
