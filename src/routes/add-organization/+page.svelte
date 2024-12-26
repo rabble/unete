@@ -1,61 +1,54 @@
 <script lang="ts">
-  import { ORGANIZATION, type OrganizationContent, ORGANIZATION_TAGS } from '$lib/nostr/kinds';
-  import NDK, { NDKEvent } from '@nostr-dev-kit/ndk';
+  import { createOrganization } from '$lib/nostr/organizations';
+  import { getTopics } from '$lib/topics';
+  import NDK, { NDKNip07Signer } from '@nostr-dev-kit/ndk';
   import { onMount } from 'svelte';
+  import type { OrganizationContent, OrganizationCategory } from '$lib/nostr/kinds';
+  import { ValidationError, SignerRequiredError, PublishError } from '$lib/nostr/errors';
 
   let ndk: NDK;
-  let formData: OrganizationContent = {
-    name: '',
-    category: '',
-    description: '',
-    focusAreas: [],
-    locations: [],
-    engagementTypes: [],
-    email: '',
-    website: '',
-    about: '',
-    mission: '',
-    vision: '',
-    founded: '',
-    size: '',
-    languages: [],
-    socialLinks: {}
+  let focusAreas: string[] = [];
+  let error: string | null = null;
+  let success: boolean = false;
+  let loading: boolean = false;
+
+  // Form fields
+  let name = '';
+  let category: OrganizationCategory = 'Nonprofit';
+  
+  const categoryOptions: OrganizationCategory[] = [
+    'Nonprofit',
+    'Mutual Aid',
+    'Coalition',
+    'Community Organization', 
+    'Advocacy Group',
+    'Labor Union',
+    'Worker Cooperative',
+    'Social Movement',
+    'Other'
+  ];
+  let description = '';
+  let selectedFocusAreas: string[] = [];
+  let locations: string[] = [];
+  let engagementTypes: string[] = [];
+  let website = '';
+  let picture = '';
+  let email = '';
+  let about = '';
+  let mission = '';
+  let vision = '';
+  let founded = '';
+  let size = '';
+  let languages: string[] = [];
+  let socialLinks = {
+    twitter: '',
+    github: '',
+    linkedin: '',
+    facebook: '',
+    instagram: ''
   };
 
-  // Available options for select fields
-  const focusAreaOptions = [
-    'Housing',
-    'Racial Justice',
-    'Economic Democracy',
-    'Community',
-    'Immigration',
-    'Youth',
-    'Climate Justice',
-    'Workplace Justice',
-    'Feminism',
-    'LGBTQIA+',
-    'Indigenous',
-    'Food',
-    'Healthcare',
-    'Education',
-    'Democracy',
-    'Palestine Solidarity',
-    'Legal',
-    'International'
-  ];
-
-  const engagementTypeOptions = [
-    'Direct Action',
-    'Community Organizing',
-    'Policy Advocacy',
-    'Education',
-    'Mutual Aid',
-    'Legal Support',
-    'Research',
-    'Media',
-    'Technical Support'
-  ];
-
+  // Available options
   const locationOptions = [
     'National',
     'International',
@@ -72,74 +65,156 @@
     'Border regions'
   ];
 
-  onMount(() => {
+  const engagementTypeOptions = [
+    'Direct Action',
+    'Community Organizing',
+    'Policy Advocacy',
+    'Education',
+    'Mutual Aid',
+    'Legal Support',
+    'Research',
+    'Media',
+    'Technical Support'
+  ];
+
+  const languageOptions = [
+    'English',
+    'Spanish',
+    'French',
+    'Portuguese',
+    'Arabic',
+    'Chinese',
+    'Hindi'
+  ];
+
+  const sizeOptions = [
+    '1-10',
+    '11-50',
+    '51-200',
+    '201-500',
+    '501+'
+  ];
+
+  onMount(async () => {
     ndk = new NDK({
       explicitRelayUrls: [
         'wss://relay.nos.social',
         'wss://relay.damus.io',
         'wss://relay.nostr.band'
-      ]
+      ],
+      signer: new NDKNip07Signer()
     });
-    ndk.connect();
+    await ndk.connect();
+    
+    // Load focus areas
+    focusAreas = await getTopics(ndk);
   });
 
+  function toggleSelection(array: string[], item: string) {
+    const index = array.indexOf(item);
+    if (index === -1) {
+      array.push(item);
+    } else {
+      array.splice(index, 1);
+    }
+    array = [...array]; // Trigger reactivity
+  }
+
   async function handleSubmit() {
+    error = null;
+    success = false;
+    loading = true;
+    
+    // Validate URLs
+    const urlFields = {
+      website,
+      picture,
+      'Twitter URL': socialLinks.twitter,
+      'GitHub URL': socialLinks.github,
+      'LinkedIn URL': socialLinks.linkedin,
+      'Facebook URL': socialLinks.facebook,
+      'Instagram URL': socialLinks.instagram
+    };
+
+    const urlPattern = /^https?:\/\/.+/i;
+    for (const [field, url] of Object.entries(urlFields)) {
+      if (url && !urlPattern.test(url)) {
+        error = `${field} must be a valid URL starting with http:// or https://`;
+        loading = false;
+        return;
+      }
+    }
+
+    // Validate email
+    if (email) {
+      const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailPattern.test(email)) {
+        error = 'Please enter a valid email address';
+        loading = false;
+        return;
+      }
+    }
+
+    // Validate required arrays
+    if (!selectedFocusAreas.length) {
+      error = 'Please select at least one focus area';
+      loading = false;
+      return;
+    }
+
+    if (!locations.length) {
+      error = 'Please select at least one location';
+      loading = false;
+      return;
+    }
+
+    if (!engagementTypes.length) {
+      error = 'Please select at least one engagement type';
+      loading = false;
+      return;
+    }
+
     try {
-      if (!ndk) {
-        throw new Error('NDK not initialized');
-      }
-
-      // Create new NDKEvent
-      const event = new NDKEvent(ndk);
-      event.kind = ORGANIZATION;
-      event.content = JSON.stringify(formData);
-      
-      // Add required tags
-      event.tags = [
-        [ORGANIZATION_TAGS.IDENTIFIER, formData.name.toLowerCase().replace(/\s+/g, '-')],
-        ...formData.focusAreas.map(area => [ORGANIZATION_TAGS.FOCUS_AREA, area]),
-        ...formData.locations.map(location => [ORGANIZATION_TAGS.LOCATION, location]),
-        ...formData.engagementTypes.map(type => [ORGANIZATION_TAGS.ENGAGEMENT, type])
-      ];
-
-      // Add optional tags if they exist
-      if (formData.website) {
-        event.tags.push([ORGANIZATION_TAGS.WEBSITE, formData.website]);
-      }
-      if (formData.email) {
-        event.tags.push([ORGANIZATION_TAGS.CONTACT, formData.email]);
-      }
-      if (formData.languages?.length) {
-        formData.languages.forEach(lang => 
-          event.tags.push([ORGANIZATION_TAGS.LANGUAGE, lang])
-        );
-      }
-
-      // Sign and publish event
-      await event.publish();
-      
-      alert('Organization submitted successfully!');
-      // Reset form
-      formData = {
-        name: '',
-        category: '',
-        description: '',
-        focusAreas: [],
-        locations: [],
-        engagementTypes: [],
-        email: '',
-        website: '',
-        about: '',
-        mission: '',
-        vision: '',
-        founded: '',
-        size: '',
-        languages: [],
-        socialLinks: {}
+      const content: OrganizationContent = {
+        name,
+        category,
+        description,
+        focusAreas: selectedFocusAreas,
+        locations,
+        engagementTypes,
+        website,
+        picture,
+        email,
+        about,
+        mission,
+        vision,
+        founded,
+        size,
+        languages,
+        socialLinks
       };
-    } catch (error) {
-      console.error('Error submitting organization:', error);
-      alert('Error submitting organization. Please try again.');
+
+      // Generate a unique identifier for the organization
+      const identifier = `org-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+      
+      const event = await createOrganization(ndk, content, identifier);
+      success = true;
+      
+      // Redirect to the organization view page
+      window.location.href = `/organizations/${event.id}`;
+    } catch (e) {
+      if (e instanceof ValidationError) {
+        error = e.message;
+      } else if (e instanceof SignerRequiredError) {
+        error = 'Please login with a Nostr extension first';
+      } else if (e instanceof PublishError) {
+        error = 'Failed to publish organization. Please try again.';
+      } else {
+        error = 'An unexpected error occurred';
+        console.error(e);
+      }
+    } finally {
+      loading = false;
     }
   }
 </script>
@@ -348,23 +423,6 @@
     </form>
   </div>
 </div>
-<script lang="ts">
-  import { createOrganization } from '$lib/nostr/organizations';
-  import { getTopics } from '$lib/topics';
-  import NDK, { NDKNip07Signer } from '@nostr-dev-kit/ndk';
-  import { onMount } from 'svelte';
-  import type { OrganizationContent } from '$lib/nostr/kinds';
-  import { ValidationError, SignerRequiredError, PublishError } from '$lib/nostr/errors';
-
-  let ndk: NDK;
-  let focusAreas: string[] = [];
-  let error: string | null = null;
-  let success: boolean = false;
-  let loading: boolean = false;
-
-  // Form fields
-  let name = '';
-  let category: OrganizationCategory = 'Nonprofit';
   
   const categoryOptions: OrganizationCategory[] = [
     'Nonprofit',
