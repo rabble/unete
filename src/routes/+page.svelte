@@ -93,7 +93,8 @@
       { kind: 30063, name: 'releaseSets' },      // Release Artifact Sets
       { kind: 30000, name: 'mutes', d: 'mute' },     // Mute Lists
       { kind: 30001, name: 'bookmarks', d: 'bookmark' },     // Bookmark Lists
-      { kind: 30001, name: 'communities', d: 'community' }     // Communities Lists
+      { kind: 30001, name: 'communities', d: 'community' },     // Communities Lists
+      { kind: 10000, name: 'muteList' }     // Mute List (pubkeys, hashtags, words, threads)
     ];
 
     for (const { kind, name } of listKinds) {
