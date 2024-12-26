@@ -151,8 +151,23 @@ export async function createOrganization(
   }
 
     try {
-      // Publish the event
+      // Publish the event and wait for verification
       await event.publish();
+      
+      // Wait for relay confirmation
+      const verified = await new Promise((resolve, reject) => {
+        const timeout = setTimeout(() => {
+          reject(new Error('Event verification timeout'));
+        }, 5000);
+
+        ndk.pool.on('event:verified', (e: NDKEvent) => {
+          if (e.id === event.id) {
+            clearTimeout(timeout);
+            resolve(e);
+          }
+        });
+      });
+
       return event;
     } catch (error) {
       throw new PublishError(

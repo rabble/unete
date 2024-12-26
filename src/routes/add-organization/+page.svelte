@@ -486,10 +486,11 @@
       // Generate a unique identifier for the organization
       const identifier = `org-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
       
-      await createOrganization(ndk, content, identifier);
+      const event = await createOrganization(ndk, content, identifier);
       success = true;
       
-      // Reset form
+      // Redirect to the organization view page
+      window.location.href = `/organizations/${event.id}`;
       name = '';
       category = '';
       description = '';
