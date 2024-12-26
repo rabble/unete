@@ -42,8 +42,26 @@
                   <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
                 </svg>
               </button>
-              <div class="absolute hidden group-hover:block w-48 bg-white shadow-lg py-2 mt-1 rounded-md">
-                <!-- Dropdown items will go here -->
+              <div class="absolute hidden group-hover:block w-64 bg-white shadow-lg py-2 mt-1 rounded-md">
+                <a href="/topics" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">All Topics</a>
+                <div class="border-t border-gray-100 my-1"></div>
+                <a href="/focus-areas/climate" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Climate Justice</a>
+                <a href="/focus-areas/community" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Community</a>
+                <a href="/focus-areas/democracy" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Democracy</a>
+                <a href="/focus-areas/economic" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Economic Democracy</a>
+                <a href="/focus-areas/electoral" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Electoral Organizing</a>
+                <a href="/focus-areas/feminism" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Feminism</a>
+                <a href="/focus-areas/food" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Food</a>
+                <a href="/focus-areas/healthcare" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Healthcare</a>
+                <a href="/focus-areas/housing" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Housing</a>
+                <a href="/focus-areas/immigration" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Immigration</a>
+                <a href="/focus-areas/indigenous" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Indigenous</a>
+                <a href="/focus-areas/lgbtqia" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">LGBTQIA+</a>
+                <a href="/focus-areas/palestine" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Palestine Solidarity</a>
+                <a href="/focus-areas/racial" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Racial Justice</a>
+                <a href="/focus-areas/reproductive" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Reproductive Justice</a>
+                <a href="/focus-areas/workplace" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Workplace Justice</a>
+                <a href="/focus-areas/youth" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Youth</a>
               </div>
             </div>
 
