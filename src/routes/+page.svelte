@@ -1,7 +1,6 @@
 <script lang="ts">
-  import NDK, { NDKNip07Signer, NDKKind } from '@nostr-dev-kit/ndk';
-  import type { NDKUser, NDKEvent } from '@nostr-dev-kit/ndk';
   import { onMount } from 'svelte';
+  import { goto } from '$app/navigation';
 
   // Interface for relay sets
   interface RelaySet {
@@ -212,8 +211,38 @@
   }
 </script>
 
-<main class="container mx-auto max-w-2xl p-8 text-center">
-  <h1 class="text-4xl font-bold mb-8">Nostr Login Demo</h1>
+<main class="container mx-auto max-w-4xl p-8">
+  <div class="text-center mb-12">
+    <h1 class="text-4xl font-bold mb-4">Nostr Organization Directory</h1>
+    <p class="text-xl text-gray-600">Discover and connect with organizations on Nostr</p>
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+    <!-- Featured Organizations -->
+    <div class="bg-white rounded-lg shadow-lg p-6">
+      <h2 class="text-2xl font-semibold mb-4">Featured Organizations</h2>
+      <div class="space-y-4">
+        <p class="text-gray-600">Coming soon...</p>
+      </div>
+    </div>
+
+    <!-- Recent Updates -->
+    <div class="bg-white rounded-lg shadow-lg p-6">
+      <h2 class="text-2xl font-semibold mb-4">Recent Updates</h2>
+      <div class="space-y-4">
+        <p class="text-gray-600">Coming soon...</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="mt-8 text-center">
+    <a 
+      href="/profile" 
+      class="inline-block bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-8 rounded-lg transition-colors"
+    >
+      View Profile
+    </a>
+  </div>
   
   {#if isLoggedIn && user}
     <div class="bg-white shadow-lg rounded-lg p-6 mt-8">
