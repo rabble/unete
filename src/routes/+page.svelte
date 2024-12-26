@@ -6,6 +6,7 @@
   let ndk: NDK;
   let user: NDKUser | undefined;
   let isLoggedIn = false;
+  let profile: { name?: string; about?: string; picture?: string; } | undefined;
 
   onMount(() => {
     ndk = new NDK({
@@ -24,6 +25,9 @@
       user = await ndk.signer?.user();
       if (user) {
         isLoggedIn = true;
+        // Fetch profile data
+        const profileData = await user.fetchProfile();
+        profile = profileData;
       }
     } catch (error) {
       console.error('Login failed:', error);
@@ -36,7 +40,19 @@
   
   {#if isLoggedIn && user}
     <div class="bg-white shadow-lg rounded-lg p-6 mt-8">
-      <h2 class="text-2xl font-semibold mb-4">Welcome!</h2>
+      <h2 class="text-2xl font-semibold mb-4">
+        Welcome, {profile?.name || 'Nostr User'}!
+      </h2>
+      {#if profile?.picture}
+        <img 
+          src={profile.picture} 
+          alt="Profile" 
+          class="w-24 h-24 rounded-full mx-auto mb-4"
+        />
+      {/if}
+      {#if profile?.about}
+        <p class="text-gray-600 mb-4">{profile.about}</p>
+      {/if}
       <p class="text-gray-600">You are logged in with public key:</p>
       <p class="font-mono bg-gray-100 p-2 rounded mt-2 break-all">{user.npub}</p>
     </div>
