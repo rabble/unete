@@ -154,28 +154,7 @@
           
           <!-- Right side navigation items -->
           <div class="flex items-center">
-            {#if isLoggedIn}
-              <a 
-                href="/profile" 
-                class="flex items-center text-gray-700 hover:text-purple-600 transition-colors"
-              >
-                {#if profile?.picture}
-                  <img 
-                    src={profile.picture} 
-                    alt="Profile" 
-                    class="w-8 h-8 rounded-full mr-2"
-                  />
-                {/if}
-                <span class="text-sm font-medium">{profile?.name || 'Profile'}</span>
-              </a>
-            {:else}
-              <button
-                on:click={login}
-                class="text-gray-700 hover:text-purple-600 transition-colors text-sm font-medium"
-              >
-                Login with Nostr
-              </button>
-            {/if}
+            <!-- Login functionality moved to profile page -->
           </div>
         </div>
       </div>
