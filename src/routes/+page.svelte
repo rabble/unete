@@ -1,6 +1,17 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import { goto } from '$app/navigation';
+  import NDK, { NDKNip07Signer, type NDKUser, type NDKEvent } from '@nostr-dev-kit/ndk';
+
+  // Initialize NDK
+  let ndk = new NDK({
+    explicitRelayUrls: [
+      'wss://relay.nos.social',
+      'wss://relay.damus.io',
+      'wss://relay.nostr.band'
+    ],
+    signer: new NDKNip07Signer()
+  });
 
   // Interface for relay sets
   interface RelaySet {
@@ -169,14 +180,6 @@
   }
 
   onMount(() => {
-    ndk = new NDK({
-      explicitRelayUrls: [
-        'wss://relay.nos.social',
-        'wss://relay.damus.io',
-        'wss://relay.nostr.band'
-      ],
-      signer: new NDKNip07Signer()
-    });
     ndk.connect();
   });
 
