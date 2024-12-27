@@ -32,13 +32,15 @@ export const load: PageLoad = async ({ params }) => {
   // Update topic counts
   const topicsWithCounts = topics.map(topic => ({
     ...topic,
-    count: events.filter(event => 
+    count: Array.from(events).filter(event => 
       event.tags.some(t => t[0] === 't' && t[1] === topic.slug)
     ).length
   }));
 
   // Get organizations for the current topic
-  const topicOrganizations = Array.from(events)
+  const topicOrganizations = Array.from(events).filter(event => 
+    event.tags.some(t => t[0] === 't' && t[1] === slug)
+  )
     .filter(event => event.tags.some(t => t[0] === 't' && t[1] === slug))
     .map(event => {
       const name = event.tags.find(t => t[0] === 'name')?.[1] || 'Unnamed Organization';
