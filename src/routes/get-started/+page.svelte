@@ -6,11 +6,27 @@
   <h1 class="text-3xl font-bold mb-6">Join All Of Us</h1>
   
   <div class="prose max-w-none">
-    <h2 class="text-2xl font-semibold mb-4">Why We Use Nostr</h2>
+    <h2 class="text-2xl font-semibold mb-4">A Different Kind of Directory</h2>
     <p class="mb-4">
-      Instead of maintaining a traditional centralized database of user accounts, All of Us Directory uses Nostr - 
-      a decentralized protocol that gives you complete control over your identity. Your account credentials are never 
-      stored on our servers, making the system more secure and resistant to censorship.
+      All of Us Directory is built differently from traditional websites. Instead of storing everything on our own servers,
+      we use Nostr - an open protocol that makes our directory accessible to everyone in a way that can't be shut down
+      or censored.
+    </p>
+
+    <h2 class="text-2xl font-semibold mb-4">Why This Matters</h2>
+    <p class="mb-4">
+      With Nostr:
+    </p>
+    <ul class="list-disc ml-6 mb-6">
+      <li class="mb-2">Your identity and data belong to you, not us - you control them with your own encryption keys</li>
+      <li class="mb-2">The directory's content is stored across many servers (called relays) instead of just one place</li>
+      <li class="mb-2">No single organization can control or shut down access to the directory</li>
+      <li class="mb-2">Your information remains accessible even if our website goes offline</li>
+    </ul>
+
+    <p class="mb-6">
+      This makes All of Us Directory more resilient and ensures that social movements and organizations can maintain their 
+      connections regardless of what happens to any single website or server.
     </p>
 
     <h2 class="text-2xl font-semibold mb-4">Ways to Get Started</h2>
