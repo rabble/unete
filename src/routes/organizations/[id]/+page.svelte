@@ -2,7 +2,7 @@
   import { onMount } from 'svelte';
   import { page } from '$app/stores';
   import TagLink from '$lib/components/TagLink.svelte';
-  import { ndk, ensureConnection } from '$lib/stores/ndk';
+  import { ndk, ensureConnection, getCachedEvents } from '$lib/stores/ndk';
   import type { OrganizationContent } from '$lib/nostr/kinds';
   import { ORGANIZATION } from '$lib/nostr/kinds';
   import { isAdmin } from '$lib/nostr/admin';
@@ -16,7 +16,7 @@
     try {
       await ensureConnection();
 
-      const events = await ndk.fetchEvents({
+      const events = await getCachedEvents({
         kinds: [ORGANIZATION],
         ids: [$page.params.id]
       });
