@@ -1573,33 +1573,5 @@
         </div>
       </div>
     </div>
-  {:else}
-    {#if isLoggedIn && profile}
-      <div class="flex items-center gap-4">
-        <a href="/profile" class="flex items-center gap-2 hover:opacity-80 transition-opacity">
-          {#if profile.picture}
-            <img 
-              src={profile.picture} 
-              alt="Profile" 
-              class="w-12 h-12 rounded-full"
-            />
-          {/if}
-          <span class="text-gray-700">{profile.name || 'Profile'}</span>
-        </a>
-        <button
-          on:click={logout}
-          class="text-gray-600 hover:text-gray-800"
-        >
-          Logout
-        </button>
-      </div>
-    {:else}
-      <button
-        on:click={login}
-        class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-8 rounded-lg transition-colors"
-      >
-        Login with Nostr
-      </button>
-    {/if}
   {/if}
 </main>
