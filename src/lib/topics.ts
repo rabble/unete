@@ -1,6 +1,6 @@
-import type NDK from '@nostr-dev-kit/ndk';
-import { NDKEvent } from '@nostr-dev-kit/ndk';
-import { TOPICS, type TopicsContent, TOPICS_TAGS } from './nostr/kinds';
+import type NDK from '@nostr-dev-kit/ndk'
+import { NDKEvent } from '@nostr-dev-kit/ndk'
+import { TOPICS, type TopicsContent, TOPICS_TAGS } from './nostr/kinds'
 
 // Topics array for UI
 export const topics = [
@@ -156,10 +156,10 @@ export async function getTopics(ndk: NDK): Promise<string[]> {
     await createDefaultTopics(ndk);
   }
 
-  return DEFAULT_TOPICS;
+  return DEFAULT_TOPICS
 }
 
-export async function createDefaultTopics(ndk: NDK) {
+export async function createDefaultTopics(ndk: NDK): Promise<NDKEvent> {
   const event = new NDKEvent(ndk);
   event.kind = TOPICS;
   
@@ -175,6 +175,6 @@ export async function createDefaultTopics(ndk: NDK) {
     ...DEFAULT_TOPICS.map(topic => [TOPICS_TAGS.TOPIC, topic])
   ];
 
-  await event.publish();
-  return event;
+  await event.publish()
+  return event
 }
