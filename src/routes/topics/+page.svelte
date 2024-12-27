@@ -1,27 +1,5 @@
 <script lang="ts">
-  interface Topic {
-    slug: string;
-    title: string;
-    count: number;
-    description: string;
-    icon: string;
-  }
-
-  const topics: Topic[] = [
-    {
-      slug: 'climate',
-      title: 'Climate Justice',
-      count: 29,
-      description: 'The climate justice movement addresses the disproportionate impact of climate change on marginalized communities, emphasizing equitable solutions.',
-      icon: '/assets/icons/climate.png'
-    },
-    {
-      slug: 'community',
-      title: 'Community',
-      count: 74,
-      description: 'Community organizing focuses on building power through collective action at the local level, emphasizing mutual aid and community self-defense.',
-      icon: '/assets/icons/community.png'
-    },
+  import { topics } from '$lib/topics';
     {
       slug: 'democracy',
       title: 'Democracy',

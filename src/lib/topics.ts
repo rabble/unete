@@ -2,8 +2,16 @@ import type NDK from '@nostr-dev-kit/ndk'
 import { NDKEvent } from '@nostr-dev-kit/ndk'
 import { TOPICS, type TopicsContent, TOPICS_TAGS } from './nostr/kinds'
 
+export interface Topic {
+  slug: string;
+  title: string;
+  count?: number;
+  description: string;
+  icon: string;
+}
+
 // Topics array for UI
-export const topics = [
+export const topics: Topic[] = [
   {
     slug: 'housing',
     title: 'Housing',
