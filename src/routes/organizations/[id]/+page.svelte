@@ -1,17 +1,20 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import { page } from '$app/stores';
-  import NDK from '@nostr-dev-kit/ndk';
+  import NDK, { NDKNip07Signer } from '@nostr-dev-kit/ndk';
   import type { OrganizationContent } from '$lib/nostr/kinds';
   import { ORGANIZATION } from '$lib/nostr/kinds';
+  import { isAdmin } from '$lib/nostr/admin';
 
   let organization: OrganizationContent | null = null;
   let loading = true;
   let error: string | null = null;
+  let isAdminUser = false;
+  let ndk: NDK;
 
   onMount(async () => {
     try {
-      const ndk = new NDK({
+      ndk = new NDK({
         explicitRelayUrls: [
           'wss://relay.nos.social',
           'wss://relay.damus.io',
@@ -31,6 +34,12 @@
       }
 
       organization = JSON.parse(event.content);
+      
+      // Check if current user is admin
+      if (ndk.signer) {
+        const pubkey = await ndk.signer.user().then(user => user.pubkey);
+        isAdminUser = await isAdmin(ndk, pubkey);
+      }
     } catch (e) {
       console.error('Error loading organization:', e);
       error = e instanceof Error ? e.message : 'Failed to load organization';
@@ -41,14 +50,16 @@
 </script>
 
 <div class="max-w-4xl mx-auto px-4 py-12">
-  <div class="flex justify-end mb-4">
-    <a
-      href="/organizations/{$page.params.id}/edit"
-      class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-lg transition-colors"
-    >
-      Edit Organization
-    </a>
-  </div>
+  {#if isAdminUser}
+    <div class="flex justify-end mb-4">
+      <a
+        href="/organizations/{$page.params.id}/edit"
+        class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-lg transition-colors"
+      >
+        Edit Organization
+      </a>
+    </div>
+  {/if}
   {#if loading}
     <div class="text-center">
       <div class="inline-block animate-spin rounded-full h-8 w-8 border-4 border-purple-500 border-t-transparent"></div>
