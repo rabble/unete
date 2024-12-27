@@ -1,6 +1,7 @@
 import type { PageLoad } from './$types';
 import { topics } from '$lib/topics';
-import { ndk, ensureConnection } from '$lib/stores/ndk';
+import { ndk, ensureConnection, getCachedEvents } from '$lib/stores/ndk';
+import { ORGANIZATION } from '$lib/nostr/kinds';
 
 export const ssr = false;
 export const csr = true;
@@ -23,7 +24,7 @@ export const load: PageLoad = async ({ params }) => {
     organizations: [], // Empty initially
     allTopics: topics, // Use static topics initially
     promise: getCachedEvents({
-      kinds: [34550],
+      kinds: [ORGANIZATION],
       '#t': [slug] // Only fetch organizations with this topic tag
     }).then(events => {
       const eventsArray = Array.from(events);
