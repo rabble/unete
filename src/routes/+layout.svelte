@@ -84,7 +84,7 @@
                   <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
                 </svg>
               </a>
-              <div class="absolute hidden group-hover:block w-48 bg-white shadow-lg py-2 rounded-md" style="top: 100%; margin-top: -2px;">
+              <div class="absolute hidden group-hover:block w-48 bg-white shadow-lg py-2 rounded-md z-50" style="top: 100%; margin-top: -2px;">
                 <a href="/organizations" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Search</a>
                 <a href="/add-organization" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Add Organization</a>
                 {#if isLoggedIn}
@@ -101,7 +101,7 @@
                   <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
                 </svg>
               </a>
-              <div class="absolute hidden group-hover:block w-64 bg-white shadow-lg py-2 rounded-md" style="top: 100%; margin-top: -2px;">
+              <div class="absolute hidden group-hover:block w-64 bg-white shadow-lg py-2 rounded-md z-50" style="top: 100%; margin-top: -2px;">
                 <a href="/topics" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">All Topics</a>
                 <div class="border-t border-gray-100 my-1"></div>
                 <a href="/topics/climate" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Climate Justice</a>
@@ -131,7 +131,7 @@
                   <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
                 </svg>
               </a>
-              <div class="absolute hidden group-hover:block w-48 bg-white shadow-lg py-2 rounded-md" style="top: 100%; margin-top: -2px;">
+              <div class="absolute hidden group-hover:block w-48 bg-white shadow-lg py-2 rounded-md z-50" style="top: 100%; margin-top: -2px;">
                 <!-- Social Media Links will go here -->
               </div>
             </div>
@@ -144,7 +144,7 @@
                   <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
                 </svg>
               </a>
-              <div class="absolute hidden group-hover:block w-48 bg-white shadow-lg py-2 rounded-md" style="top: 100%; margin-top: -2px;">
+              <div class="absolute hidden group-hover:block w-48 bg-white shadow-lg py-2 rounded-md z-50" style="top: 100%; margin-top: -2px;">
                 <a href="/about" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">About</a>
                 <a href="/conveners" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Conveners</a>
                 <a href="/testimonials" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Testimonials</a>
