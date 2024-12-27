@@ -1,5 +1,5 @@
 import type { PageLoad } from './$types';
-import { getCachedEvents } from '$lib/stores/ndk';
+import { getCachedEvents, ensureConnection } from '$lib/stores/ndk';
 import { ORGANIZATION } from '$lib/nostr/kinds';
 
 export const ssr = false;
