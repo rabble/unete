@@ -111,6 +111,6 @@
         {/each}
       </div>
     </section>
-  </div>
+    </div>
   {/if}
 </div>
