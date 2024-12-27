@@ -6,35 +6,38 @@
   <h1 class="text-3xl font-bold mb-6">Join All Of Us</h1>
   
   <div class="prose max-w-none">
-    <h2 class="text-2xl font-semibold mb-4">A Directory Built for Social Movements</h2>
+    <h2 class="text-2xl font-semibold mb-4">Stand Up, Take Action, Join A Movement</h2>
     <p class="mb-4">
-      All of Us Directory is built on Nostr - a revolutionary protocol designed to resist censorship and control. 
-      Unlike traditional social platforms that can be shut down or censored, Nostr creates an unstoppable network 
-      for organizing and connecting.
+      All of Us Directory is built on Nostr - a revolutionary protocol that empowers activists with powerful tools and connections. 
+      Unlike traditional platforms, Nostr creates an unstoppable digital commons where movements can organize freely, 
+      without fear of censorship or control.
     </p>
 
-    <h2 class="text-2xl font-semibold mb-4">Why This Matters for Movements</h2>
+    <h2 class="text-2xl font-semibold mb-4">A Central Source for Movement Building</h2>
     <p class="mb-4">
-      With Nostr:
+      With Nostr powering our directory:
     </p>
     <ul class="list-disc ml-6 mb-6">
-      <li class="mb-2">Your movement's data can't be deleted or censored by governments or corporations</li>
-      <li class="mb-2">Organizations maintain control of their own information and connections</li>
-      <li class="mb-2">The network stays alive even if specific websites or servers are taken down</li>
-      <li class="mb-2">Activists can connect securely using encryption</li>
-      <li class="mb-2">Information flows freely across borders and firewalls</li>
+      <li class="mb-2">Your movement's voice can't be silenced by corporate or government interference</li>
+      <li class="mb-2">Organizations maintain complete control of their information and connections</li>
+      <li class="mb-2">The network remains accessible even if specific websites are blocked</li>
+      <li class="mb-2">Activists can coordinate securely using strong encryption</li>
+      <li class="mb-2">Information flows freely across digital borders and firewalls</li>
+      <li class="mb-2">Communities can build lasting connections for sustained organizing</li>
     </ul>
 
-    <h2 class="text-2xl font-semibold mb-4">Built for Resilience</h2>
+    <h2 class="text-2xl font-semibold mb-4">Built for the Global Movement</h2>
     <p class="mb-6">
-      Social movements need communication tools that can't be silenced. All of Us Directory uses Nostr to create an 
-      unstoppable network - your organizations, connections, and communications stay intact even under pressure. 
-      The directory lives everywhere and nowhere, making it resilient against attempts to shut down activist networks.
+      What activists have always needed is a central source of information that can't be shut down or controlled. 
+      All of Us Directory uses Nostr to create exactly that - an unstoppable network where your organizations, 
+      connections, and communications stay intact no matter what. The directory lives on a distributed network, 
+      making it resilient against any attempts to disrupt activist organizing.
     </p>
 
     <p class="mb-6">
       When you join All of Us Directory through Nostr, you're not just joining another website - you're becoming 
-      part of a decentralized movement infrastructure built for the long haul of social change.
+      part of an open-source digital commons built to amplify movements and create lasting social change. This is 
+      your portal to unite with activists under one decentralized network.
     </p>
 
     <h2 class="text-2xl font-semibold mb-4">Ways to Get Started</h2>
