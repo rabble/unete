@@ -7,55 +7,32 @@
   import { ORGANIZATION } from '$lib/nostr/kinds';
   import { isAdmin } from '$lib/nostr/admin';
 
+  export let data;
+  
   let organization: OrganizationContent | null = null;
   let loading = true;
   let error: string | null = null;
   let isAdminUser = false;
 
-  onMount(async () => {
-    try {
-      await ensureConnection();
-
-      const events = await getCachedEvents({
-        kinds: [ORGANIZATION],
-        ids: [$page.params.id]
+  // Handle the promise when data changes
+  $: {
+    loading = true;
+    data.promise
+      .then(result => {
+        organization = result;
+        loading = false;
+      })
+      .catch(e => {
+        error = e instanceof Error ? e.message : 'Failed to load organization';
+        loading = false;
       });
+  }
 
-      const event = Array.from(events)[0];
-      if (!event) {
-        throw new Error('Organization not found');
-      }
-
-      try {
-        organization = JSON.parse(event.content);
-        
-        // Add additional fields from tags if they exist
-        organization.focusAreas = event.tags
-          .filter(t => t[0] === 'f')
-          .map(t => t[1]);
-          
-        organization.locations = event.tags
-          .filter(t => t[0] === 'l')
-          .map(t => t[1]);
-          
-        organization.engagementTypes = event.tags
-          .filter(t => t[0] === 'e')
-          .map(t => t[1]);
-      } catch (e) {
-        console.error('Failed to parse organization content:', e);
-        throw new Error('Invalid organization data');
-      }
-      
-      // Check if current user is admin
-      if (ndk.signer) {
-        const pubkey = await ndk.signer.user().then(user => user.pubkey);
-        isAdminUser = await isAdmin(pubkey);
-      }
-    } catch (e) {
-      console.error('Error loading organization:', e);
-      error = e instanceof Error ? e.message : 'Failed to load organization';
-    } finally {
-      loading = false;
+  onMount(async () => {
+    // Check if current user is admin
+    if (ndk.signer) {
+      const pubkey = await ndk.signer.user().then(user => user.pubkey);
+      isAdminUser = await isAdmin(pubkey);
     }
   });
 </script>
