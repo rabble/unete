@@ -219,6 +219,7 @@
       <a 
         href="/organizations/{event.id}" 
         class="block bg-white rounded-lg shadow-lg p-6 hover:shadow-xl transition-shadow"
+        data-sveltekit-preload-data
       >
         <div class="flex items-start gap-4">
           {#if org.picture}
