@@ -56,6 +56,7 @@
     'Social Movement',
     'Other'
   ];
+
   const locationOptions = [
     'National',
     'International',
@@ -94,6 +95,8 @@
     'Translation',
     'Writing'
   ];
+
+  // Replace or fill these placeholders as needed
   const languageOptions = [ /* ... */ ];
   const sizeOptions = [ /* ... */ ];
 
@@ -113,14 +116,19 @@
       ndk.pool.on('relay:connect', (relay) => {
         console.log('Connected to relay:', relay.url);
       });
-      
       ndk.pool.on('relay:error', (relay, error) => {
         console.error('Relay error:', relay.url, error);
       });
 
       await ndk.connect();
       console.log('NDK connected successfully');
-    focusAreas = await getTopics(ndk); // e.g. load dynamic "Focus Areas"
+
+      // Load dynamic "Focus Areas" from your function
+      focusAreas = await getTopics(ndk);
+    } catch (err) {
+      console.error('Error connecting to NDK or loading topics:', err);
+      error = 'Failed to initialize. Please try again.';
+    }
   });
 
   // --- Utility
@@ -141,10 +149,6 @@
     success = false;
     loading = true;
 
-    // 1) Validate
-    // 2) Submit
-    // 3) Catch errors
-
     try {
       if (!ndk?.signer) {
         throw new SignerRequiredError();
@@ -160,6 +164,7 @@
       console.log('Organization created successfully:', event);
 
       success = true;
+      // Redirect to the newly created organization's page
       window.location.href = `/organizations/${event.id}`;
     } catch (e) {
       if (e instanceof ValidationError) {
@@ -178,6 +183,7 @@
   }
 </script>
 
+<!-- Your Svelte Markup -->
 <div class="max-w-4xl mx-auto px-4 py-12">
   <h1 class="text-4xl font-bold text-center mb-8">Add Your Organization</h1>
 
@@ -199,7 +205,9 @@
       <h2 class="text-2xl font-bold">Basic Information</h2>
       
       <div>
-        <label for="name" class="block text-sm font-medium text-gray-700">Organization Name *</label>
+        <label for="name" class="block text-sm font-medium text-gray-700">
+          Organization Name *
+        </label>
         <input
           type="text"
           id="name"
@@ -224,7 +232,9 @@
       </div>
 
       <div>
-        <label for="description" class="block text-sm font-medium text-gray-700">Description *</label>
+        <label for="description" class="block text-sm font-medium text-gray-700">
+          Description *
+        </label>
         <textarea
           id="description"
           bind:value={formData.description}
@@ -296,7 +306,10 @@
               formData.locations.splice(oldOtherIndex, 1);
             }
             // Add new location if checkbox is checked and text is not empty
-            if (formData.locations.includes(otherLocation) && otherLocation.trim()) {
+            if (
+              formData.locations.includes(otherLocation) &&
+              otherLocation.trim()
+            ) {
               formData.locations = [...formData.locations, otherLocation];
             }
           }}
@@ -328,7 +341,9 @@
       <h2 class="text-2xl font-bold">Contact Information</h2>
       
       <div>
-        <label for="website" class="block text-sm font-medium text-gray-700">Website</label>
+        <label for="website" class="block text-sm font-medium text-gray-700">
+          Website
+        </label>
         <input
           type="url"
           id="website"
@@ -339,7 +354,9 @@
       </div>
 
       <div>
-        <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
+        <label for="email" class="block text-sm font-medium text-gray-700">
+          Email
+        </label>
         <input
           type="email"
           id="email"
@@ -349,7 +366,9 @@
       </div>
 
       <div>
-        <label for="picture" class="block text-sm font-medium text-gray-700">Logo/Picture URL</label>
+        <label for="picture" class="block text-sm font-medium text-gray-700">
+          Logo/Picture URL
+        </label>
         <input
           type="url"
           id="picture"
@@ -365,7 +384,9 @@
       <h2 class="text-2xl font-bold">Additional Information</h2>
       
       <div>
-        <label for="about" class="block text-sm font-medium text-gray-700">About</label>
+        <label for="about" class="block text-sm font-medium text-gray-700">
+          About
+        </label>
         <textarea
           id="about"
           bind:value={formData.about}
@@ -375,7 +396,9 @@
       </div>
 
       <div>
-        <label for="mission" class="block text-sm font-medium text-gray-700">Mission</label>
+        <label for="mission" class="block text-sm font-medium text-gray-700">
+          Mission
+        </label>
         <textarea
           id="mission"
           bind:value={formData.mission}
@@ -385,7 +408,9 @@
       </div>
 
       <div>
-        <label for="vision" class="block text-sm font-medium text-gray-700">Vision</label>
+        <label for="vision" class="block text-sm font-medium text-gray-700">
+          Vision
+        </label>
         <textarea
           id="vision"
           bind:value={formData.vision}
@@ -395,7 +420,9 @@
       </div>
 
       <div>
-        <label for="founded" class="block text-sm font-medium text-gray-700">Founded Year</label>
+        <label for="founded" class="block text-sm font-medium text-gray-700">
+          Founded Year
+        </label>
         <input
           type="text"
           id="founded"
@@ -405,7 +432,9 @@
       </div>
 
       <div>
-        <label for="size" class="block text-sm font-medium text-gray-700">Organization Size</label>
+        <label for="size" class="block text-sm font-medium text-gray-700">
+          Organization Size
+        </label>
         <select
           id="size"
           bind:value={formData.size}
@@ -419,14 +448,16 @@
       </div>
 
       <div>
-        <label class="block text-sm font-medium text-gray-700 mb-2">Languages</label>
+        <label class="block text-sm font-medium text-gray-700 mb-2">
+          Languages
+        </label>
         <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
           {#each languageOptions as language}
             <label class="flex items-center space-x-2">
               <input
                 type="checkbox"
                 checked={formData.languages?.includes(language)}
-                on:change={() => toggleSelection(formData.languages || [], language)}
+                on:change={() => toggleSelection(formData.languages, language)}
                 class="rounded border-gray-300 text-purple-600 focus:ring-purple-500"
               />
               <span>{language}</span>
@@ -441,7 +472,9 @@
       <h2 class="text-2xl font-bold">Social Media Links</h2>
       
       <div>
-        <label for="twitter" class="block text-sm font-medium text-gray-700">Twitter</label>
+        <label for="twitter" class="block text-sm font-medium text-gray-700">
+          Twitter
+        </label>
         <input
           type="url"
           id="twitter"
@@ -452,7 +485,9 @@
       </div>
 
       <div>
-        <label for="github" class="block text-sm font-medium text-gray-700">GitHub</label>
+        <label for="github" class="block text-sm font-medium text-gray-700">
+          GitHub
+        </label>
         <input
           type="url"
           id="github"
@@ -463,7 +498,9 @@
       </div>
 
       <div>
-        <label for="linkedin" class="block text-sm font-medium text-gray-700">LinkedIn</label>
+        <label for="linkedin" class="block text-sm font-medium text-gray-700">
+          LinkedIn
+        </label>
         <input
           type="url"
           id="linkedin"
@@ -474,7 +511,9 @@
       </div>
 
       <div>
-        <label for="facebook" class="block text-sm font-medium text-gray-700">Facebook</label>
+        <label for="facebook" class="block text-sm font-medium text-gray-700">
+          Facebook
+        </label>
         <input
           type="url"
           id="facebook"
@@ -485,7 +524,9 @@
       </div>
 
       <div>
-        <label for="instagram" class="block text-sm font-medium text-gray-700">Instagram</label>
+        <label for="instagram" class="block text-sm font-medium text-gray-700">
+          Instagram
+        </label>
         <input
           type="url"
           id="instagram"
