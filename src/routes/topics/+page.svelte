@@ -151,9 +151,9 @@
 
   <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
     {#each topics as topic}
-      <div class="bg-white rounded-lg shadow-lg overflow-hidden">
-        <a href="/topics/{topic.slug}" class="block">
-          <div class="p-6">
+      <div class="bg-white rounded-lg shadow-lg overflow-hidden transform transition-transform hover:scale-[1.02] hover:shadow-xl">
+        <a href="/topics/{topic.slug}" class="block focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-opacity-50 rounded-lg">
+          <div class="p-6 hover:bg-gray-50 transition-colors">
             <div class="flex items-center justify-between mb-4">
               <div>
                 <h3 class="text-xl font-semibold mb-1">{topic.title}</h3>
@@ -164,7 +164,12 @@
             <div class="border-t border-gray-200 my-4"></div>
             <p class="text-gray-700">{topic.description}</p>
             <div class="mt-4">
-              <span class="text-purple-600 hover:text-purple-800">Learn more →</span>
+              <span class="text-purple-600 hover:text-purple-800 inline-flex items-center">
+                Learn more 
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 ml-1" viewBox="0 0 20 20" fill="currentColor">
+                  <path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd" />
+                </svg>
+              </span>
             </div>
           </div>
         </a>
