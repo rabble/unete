@@ -1,5 +1,6 @@
 <script>
-  // Login functionality is handled in the layout component
+  import { getContext } from 'svelte';
+  const login = getContext('login');
 </script>
 
 <div class="max-w-4xl mx-auto px-4 py-8">

@@ -3,6 +3,7 @@
   import { ParaglideJS } from "@inlang/paraglide-sveltekit";
   import { page } from '$app/stores';
   import { onMount } from 'svelte';
+  import { setContext } from 'svelte';
   import NDK, { NDKNip07Signer } from '@nostr-dev-kit/ndk';
   import '../app.css';
   
@@ -10,6 +11,9 @@
   let isLoggedIn = false;
   let profile;
   
+  // Make login function available to all pages
+  setContext('login', login);
+
   onMount(() => {
     ndk = new NDK({
       explicitRelayUrls: [
