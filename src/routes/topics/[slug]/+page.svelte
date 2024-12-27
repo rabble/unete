@@ -2,7 +2,7 @@
   import { topics } from '$lib/topics';
 
   export let data;
-  const { topic, organizations } = data;
+  const { topic, organizations, allTopics } = data;
   let loading = true;
 
   $: loading = !organizations;
@@ -36,7 +36,7 @@
         <div class="mb-8">
           <h3 class="text-xl font-bold mb-4">Focus Areas</h3>
           <ul class="space-y-2">
-            {#each topics as t}
+            {#each allTopics as t}
               <li>
                 <a 
                   href="/topics/{t.slug}" 
@@ -112,5 +112,6 @@
         </div>
       </section>
     </div>
-  {/if}
+  </div>
+{/if}
 </div>
