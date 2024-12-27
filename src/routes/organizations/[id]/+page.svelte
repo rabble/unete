@@ -31,7 +31,7 @@
       // Check if current user is admin
       if (ndk.signer) {
         const pubkey = await ndk.signer.user().then(user => user.pubkey);
-        isAdminUser = await isAdmin(ndk, pubkey);
+        isAdminUser = await isAdmin(pubkey);
       }
     } catch (e) {
       console.error('Error loading organization:', e);

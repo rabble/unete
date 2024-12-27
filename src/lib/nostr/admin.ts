@@ -1,4 +1,4 @@
-import type NDK from '@nostr-dev-kit/ndk';
+import { ndk, ensureConnection } from '$lib/stores/ndk';
 import { NDKEvent } from '@nostr-dev-kit/ndk';
 
 // Admin list kind (30000-32000 range for addressable events)
@@ -7,7 +7,8 @@ export const ADMIN_LIST = 31314;
 // Default admin
 export const DEFAULT_ADMIN = "npub1wmr34t36fy03m8hvgl96zl3znndyzyaqhwmwdtshwmtkg03fetaqhjg240";
 
-export async function isAdmin(ndk: NDK, pubkey: string): Promise<boolean> {
+export async function isAdmin(pubkey: string): Promise<boolean> {
+  await ensureConnection();
   if (pubkey === DEFAULT_ADMIN) {
     return true;
   }
@@ -33,7 +34,8 @@ export async function isAdmin(ndk: NDK, pubkey: string): Promise<boolean> {
   }
 }
 
-export async function addAdmin(ndk: NDK, newAdminPubkey: string): Promise<NDKEvent> {
+export async function addAdmin(newAdminPubkey: string): Promise<NDKEvent> {
+  await ensureConnection();
   if (!ndk.signer) {
     throw new Error('NDK signer required');
   }

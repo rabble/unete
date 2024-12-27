@@ -1,4 +1,5 @@
-import NDK, { NDKEvent } from '@nostr-dev-kit/ndk';
+import { ndk, ensureConnection } from '$lib/stores/ndk';
+import { NDKEvent } from '@nostr-dev-kit/ndk';
 import { ORGANIZATION, type OrganizationContent, ORGANIZATION_TAGS } from './kinds';
 import { SignerRequiredError, ValidationError, PublishError } from './errors';
 
@@ -83,11 +84,12 @@ function validateOrganizationContent(content: OrganizationContent): void {
 }
 
 export async function updateOrganization(
-  ndk: NDK,
   content: OrganizationContent,
   originalEvent: NDKEvent
 ): Promise<NDKEvent> {
   try {
+    await ensureConnection();
+    await ensureConnection();
     if (!ndk.signer) {
       throw new SignerRequiredError();
     }
@@ -120,7 +122,6 @@ export async function updateOrganization(
 }
 
 export async function createOrganization(
-  ndk: NDK,
   content: OrganizationContent,
   identifier: string
 ): Promise<NDKEvent> {
@@ -250,7 +251,8 @@ export async function createOrganization(
 }
 
 // Helper function to test organization creation
-export async function createTestOrganization(ndk: NDK): Promise<NDKEvent> {
+export async function createTestOrganization(): Promise<NDKEvent> {
+  await ensureConnection();
   const content: OrganizationContent = {
     name: "Test Organization",
     category: "Nonprofit",
