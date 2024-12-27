@@ -7,6 +7,7 @@
   import { NDKNip07Signer } from '@nostr-dev-kit/ndk';
   import { ndk, ensureConnection } from '$lib/stores/ndk';
   import '../app.css';
+  import { browser } from '$app/environment';
   
   let isLoggedIn = false;
   let profile;
@@ -14,9 +15,30 @@
   // Make login function available to all pages
   setContext('login', login);
 
-  onMount(() => {
-    // Only set up signer, connection is handled by store
-    ndk.signer = new NDKNip07Signer();
+  onMount(async () => {
+    if (browser) {
+      // Import and initialize nostr-login only on client side
+      const { init: initNostrLogin } = await import('nostr-login');
+      initNostrLogin({
+        startScreen: 'welcome-login',
+        noBanner: true,
+        theme: 'purple'
+      });
+
+      // Listen for auth events
+      document.addEventListener('nlAuth', (e) => {
+        if (e.detail.type === 'login' || e.detail.type === 'signup') {
+          isLoggedIn = true;
+          ndk.signer = new NDKNip07Signer();
+          ndk.connect();
+        } else if (e.detail.type === 'logout') {
+          isLoggedIn = false;
+        }
+      });
+
+      // Only set up signer, connection is handled by store
+      ndk.signer = new NDKNip07Signer();
+    }
   });
 
   async function login() {
@@ -24,6 +46,19 @@
       // First check if window.nostr is available
       if (!window.nostr) {
         throw new Error('No Nostr extension found. Please install Alby or another Nostr extension.');
+      }
+
+      // Check if already logged in by trying to get the public key
+      try {
+        const pubkey = await window.nostr.getPublicKey();
+        if (pubkey) {
+          // Already logged in, just connect NDK
+          await ndk.connect();
+          isLoggedIn = true;
+          return;
+        }
+      } catch (e) {
+        // Not logged in, continue with login flow
       }
 
       // Connect NDK
@@ -41,7 +76,6 @@
           profile = await user.fetchProfile();
         } catch (profileError) {
           console.warn('Could not fetch profile:', profileError);
-          // Don't fail login if profile fetch fails
           profile = { name: 'Anonymous User' };
         }
       } catch (userError) {
@@ -53,7 +87,7 @@
       }
     } catch (error) {
       console.error('Login failed:', error);
-      alert(error.message); // Show error to user
+      alert(error.message);
     }
   }
 </script>
