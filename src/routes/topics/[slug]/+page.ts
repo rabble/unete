@@ -3,15 +3,15 @@ import NDK from '@nostr-dev-kit/ndk';
 import { topics } from '$lib/topics';
 
 export const load: PageLoad = async ({ params }) => {
-  const { slug } = params
+  const { slug } = params;
 
-  // Find the topic details
-  const topic = topics.find((t) => t.slug === slug)
+  // Find the topic details first
+  const topic = topics.find((t) => t.slug === slug);
   if (!topic) {
-    throw new Error(`Topic ${slug} not found`)
+    throw new Error(`Topic ${slug} not found`);
   }
 
-  // Connect to Nostr
+  // Initialize NDK right away to start connecting
   const ndk = new NDK({
     explicitRelayUrls: [
       'wss://relay.nos.social',

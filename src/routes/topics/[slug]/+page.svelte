@@ -3,6 +3,13 @@
 
   export let data;
   const { topic, organizations } = data;
+  let loading = true;
+
+  $: {
+    if (organizations) {
+      loading = false;
+    }
+  }
 
   // Get all engagement types from organizations
   const engagementTypes = [...new Set(
@@ -22,6 +29,11 @@
 </script>
 
 <div class="max-w-4xl mx-auto px-4 py-8">
+  {#if loading}
+    <div class="flex justify-center items-center py-12">
+      <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
+    </div>
+  {:else}
   <!-- Focus Areas Sidebar -->
   <div class="mb-8">
     <h3 class="text-xl font-bold mb-4">Focus Areas</h3>
@@ -97,4 +109,5 @@
       </div>
     </section>
   </div>
+  {/if}
 </div>
