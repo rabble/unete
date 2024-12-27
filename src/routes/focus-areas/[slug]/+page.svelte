@@ -2,7 +2,6 @@
   import { topics } from '$lib/topics';
 
   export let data;
-  export let data;
   const { topic, organizations } = data;
 
   // Get all engagement types from organizations
