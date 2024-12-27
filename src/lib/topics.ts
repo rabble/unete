@@ -13,22 +13,11 @@ export interface Topic {
 // Topics array for UI
 export const topics: Topic[] = [
   {
-    slug: 'housing',
-    title: 'Housing',
-    description: 'The housing rights movement advocates for accessible, affordable, and adequate housing as a fundamental human right.',
-    icon: '/assets/icons/housing.png'
-  },
-  {
-    slug: 'racial',
-    title: 'Racial Justice',
-    description: 'The racial justice movement strives to dismantle systemic racism and promote equity across all facets of society.',
-    icon: '/assets/icons/racial.png'
-  },
-  {
-    slug: 'economic',
-    title: 'Economic Democracy',
-    description: 'The economic democracy movement promotes alternative economic models that prioritize community control and worker ownership.',
-    icon: '/assets/icons/economic.png'
+    slug: 'climate',
+    title: 'Climate Justice',
+    count: 29,
+    description: 'The climate justice movement addresses the disproportionate impact of climate change on marginalized communities, emphasizing equitable solutions.',
+    icon: '/assets/icons/climate.png'
   },
   {
     slug: 'community',
@@ -38,32 +27,17 @@ export const topics: Topic[] = [
     icon: '/assets/icons/community.png'
   },
   {
-    slug: 'immigration',
-    title: 'Immigration',
-    count: 12,
-    description: 'The immigrant rights movement advocates for the fair treatment and integration of immigrants into society.',
-    icon: '/assets/icons/immigration.png'
+    slug: 'democracy',
+    title: 'Democracy',
+    count: 77,
+    description: 'The democracy movement works to create more direct and meaningful forms of democratic participation beyond traditional representative democracy.',
+    icon: '/assets/icons/direct-democracy.png'
   },
   {
-    slug: 'youth',
-    title: 'Youth',
-    count: 22,
-    description: 'The youth empowerment movement advocates for the active participation of young people in shaping the decisions and policies that affect their lives.',
-    icon: '/assets/icons/youth.png'
-  },
-  {
-    slug: 'climate',
-    title: 'Climate Justice',
-    count: 29,
-    description: 'The climate justice movement addresses the disproportionate impact of climate change on marginalized communities, emphasizing equitable solutions.',
-    icon: '/assets/icons/climate.png'
-  },
-  {
-    slug: 'workplace',
-    title: 'Workplace Justice',
-    count: 15,
-    description: 'The workplace justice movement fights for workers\' rights, fair wages, safe working conditions, and the right to organize.',
-    icon: '/assets/icons/workplace.png'
+    slug: 'economic',
+    title: 'Economic Democracy',
+    description: 'The economic democracy movement promotes alternative economic models that prioritize community control and worker ownership.',
+    icon: '/assets/icons/economic.png'
   },
   {
     slug: 'feminism',
@@ -71,20 +45,6 @@ export const topics: Topic[] = [
     count: 26,
     description: 'The feminist movement advocates for the political, economic, and social equality of all genders.',
     icon: '/assets/icons/feminism.png'
-  },
-  {
-    slug: 'lgbtqia',
-    title: 'LGBTQIA+',
-    count: 13,
-    description: 'The LGBTQIA+ rights movement advocates for the equal treatment and acceptance of individuals across diverse sexual orientations and gender identities.',
-    icon: '/assets/icons/lgbtqia.png'
-  },
-  {
-    slug: 'indigenous',
-    title: 'Indigenous',
-    count: 22,
-    description: 'The Indigenous movement advocates for the rights, sovereignty, and self-determination of Native American and Indigenous peoples.',
-    icon: '/assets/icons/indigenous.png'
   },
   {
     slug: 'food',
@@ -101,11 +61,31 @@ export const topics: Topic[] = [
     icon: '/assets/icons/healthcare.png'
   },
   {
-    slug: 'democracy',
-    title: 'Democracy',
-    count: 77,
-    description: 'The democracy movement works to create more direct and meaningful forms of democratic participation beyond traditional representative democracy.',
-    icon: '/assets/icons/direct-democracy.png'
+    slug: 'housing',
+    title: 'Housing',
+    description: 'The housing rights movement advocates for accessible, affordable, and adequate housing as a fundamental human right.',
+    icon: '/assets/icons/housing.png'
+  },
+  {
+    slug: 'immigration',
+    title: 'Immigration',
+    count: 12,
+    description: 'The immigrant rights movement advocates for the fair treatment and integration of immigrants into society.',
+    icon: '/assets/icons/immigration.png'
+  },
+  {
+    slug: 'indigenous',
+    title: 'Indigenous',
+    count: 22,
+    description: 'The Indigenous movement advocates for the rights, sovereignty, and self-determination of Native American and Indigenous peoples.',
+    icon: '/assets/icons/indigenous.png'
+  },
+  {
+    slug: 'lgbtqia',
+    title: 'LGBTQIA+',
+    count: 13,
+    description: 'The LGBTQIA+ rights movement advocates for the equal treatment and acceptance of individuals across diverse sexual orientations and gender identities.',
+    icon: '/assets/icons/lgbtqia.png'
   },
   {
     slug: 'palestine',
@@ -115,34 +95,54 @@ export const topics: Topic[] = [
     icon: '/assets/icons/palestine.png'
   },
   {
+    slug: 'racial',
+    title: 'Racial Justice',
+    description: 'The racial justice movement strives to dismantle systemic racism and promote equity across all facets of society.',
+    icon: '/assets/icons/racial.png'
+  },
+  {
     slug: 'reproductive',
     title: 'Reproductive Justice',
     count: 11,
     description: 'The reproductive justice movement advocates for the human right to maintain personal bodily autonomy and access comprehensive reproductive healthcare.',
     icon: '/assets/icons/reproductive.png'
+  },
+  {
+    slug: 'workplace',
+    title: 'Workplace Justice',
+    count: 15,
+    description: 'The workplace justice movement fights for workers\' rights, fair wages, safe working conditions, and the right to organize.',
+    icon: '/assets/icons/workplace.png'
+  },
+  {
+    slug: 'youth',
+    title: 'Youth',
+    count: 22,
+    description: 'The youth empowerment movement advocates for the active participation of young people in shaping the decisions and policies that affect their lives.',
+    icon: '/assets/icons/youth.png'
   }
 ];
 
 // Default topics if no list exists
 export const DEFAULT_TOPICS = [
-  'Housing',
-  'Racial Justice', 
-  'Economic Democracy',
-  'Community',
-  'Immigration',
-  'Youth',
   'Climate Justice',
-  'Workplace Justice',
+  'Community',
+  'Democracy',
+  'Economic Democracy',
+  'Education',
   'Feminism',
-  'LGBTQIA+',
-  'Indigenous',
   'Food',
   'Healthcare',
-  'Education',
-  'Democracy',
-  'Palestine Solidarity',
+  'Housing',
+  'Immigration',
+  'Indigenous',
+  'International',
   'Legal',
-  'International'
+  'LGBTQIA+',
+  'Palestine Solidarity',
+  'Racial Justice',
+  'Workplace Justice',
+  'Youth'
 ];
 
 export async function getTopics(ndk: NDK): Promise<string[]> {
