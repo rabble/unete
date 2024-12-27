@@ -28,48 +28,56 @@
   }, {});
 </script>
 
-<div class="max-w-4xl mx-auto px-4 py-8">
+<div class="container mx-auto px-4 py-8">
   {#if loading}
     <div class="flex justify-center items-center py-12">
       <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
     </div>
   {:else}
-  <!-- Focus Areas Sidebar -->
-  <div class="mb-8">
-    <h3 class="text-xl font-bold mb-4">Focus Areas</h3>
-    <ul class="space-y-2">
-      {#each topics as t}
-        <li>
-          <a 
-            href="/topics/{t.slug}" 
-            class="text-gray-700 hover:text-purple-600 {t.slug === topic.slug ? 'font-bold text-purple-600' : ''}"
-          >
-            {t.title} {t.count}
-          </a>
-        </li>
-      {/each}
-    </ul>
-  </div>
+  <div class="flex flex-col md:flex-row gap-8">
+    <!-- Sidebar -->
+    <div class="md:w-1/4">
+      <div class="bg-white rounded-lg shadow p-6 sticky top-4">
+        <div class="mb-8">
+          <h3 class="text-xl font-bold mb-4">Focus Areas</h3>
+          <ul class="space-y-2">
+            {#each topics as t}
+              <li>
+                <a 
+                  href="/topics/{t.slug}" 
+                  class="text-gray-700 hover:text-purple-600 flex items-center justify-between {t.slug === topic.slug ? 'font-bold text-purple-600' : ''}"
+                >
+                  <span>{t.title}</span>
+                  {#if t.count}
+                    <span class="text-sm text-gray-500">{t.count}</span>
+                  {/if}
+                </a>
+              </li>
+            {/each}
+          </ul>
+        </div>
 
-  <!-- Engagement Types -->
-  <div class="mb-12">
-    <h3 class="text-xl font-bold mb-4">Engagement Types</h3>
-    <ul class="space-y-2">
-      {#each Object.entries(engagementCounts) as [type, count]}
-        <li>
-          <a 
-            href="/engagement-types/{type.toLowerCase()}" 
-            class="text-gray-700 hover:text-purple-600"
-          >
-            {type} {count}
-          </a>
-        </li>
-      {/each}
-    </ul>
-  </div>
+        <div>
+          <h3 class="text-xl font-bold mb-4">Engagement Types</h3>
+          <ul class="space-y-2">
+            {#each Object.entries(engagementCounts) as [type, count]}
+              <li>
+                <a 
+                  href="/engagement-types/{type.toLowerCase()}" 
+                  class="text-gray-700 hover:text-purple-600 flex items-center justify-between"
+                >
+                  <span>{type}</span>
+                  <span class="text-sm text-gray-500">{count}</span>
+                </a>
+              </li>
+            {/each}
+          </ul>
+        </div>
+      </div>
+    </div>
 
-  <!-- Main Content -->
-  <div>
+    <!-- Main Content -->
+    <div class="md:w-3/4">
     <h1 class="text-4xl font-bold mb-8">{topic.title}</h1>
 
     <section class="prose max-w-none mb-12">
