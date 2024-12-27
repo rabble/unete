@@ -24,7 +24,7 @@ export const load: PageLoad = async ({ params }) => {
     allTopics: topics, // Use static topics initially
     promise: getCachedEvents({
       kinds: [34550],
-      '#t': [] // Fetch all organizations with any topic tag
+      '#t': [slug] // Only fetch organizations with this topic tag
     }).then(events => {
       const eventsArray = Array.from(events);
       
