@@ -82,7 +82,7 @@
               </button>
               <div class="absolute hidden group-hover:block w-48 bg-white shadow-lg py-2 rounded-md" style="top: 100%; margin-top: -2px;">
                 <a href="/organizations" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Search</a>
-                <a href="/add-organization" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Add Your Organization</a>
+                <a href="/add-organization" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Add Organization</a>
                 {#if isLoggedIn}
                   <a href="/organizations/manage" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Manage Your Organizations</a>
                 {/if}
@@ -147,7 +147,6 @@
                 <a href="/testimonials" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Testimonials</a>
                 <a href="/join" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Join All Of Us</a>
                 <a href="/contact" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Contact</a>
-                <a href="/add-organization" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Add Organization</a>
               </div>
             </div>
           </div>
