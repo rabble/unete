@@ -5,22 +5,17 @@
   const { topic, organizations } = data;
   let loading = true;
 
-  $: {
-    if (organizations) {
-      loading = false;
-    }
-  }
+  $: loading = !organizations;
 
   // Get all engagement types from organizations
   const engagementTypes = [...new Set(
     organizations.flatMap(org => 
-      org.tags?.filter(t => t[0] === 'engagement')
-        .map(t => t[1]) || []
+      org.tags?.filter(t => t[0] === 'engagement').map(t => t[1]) || []
     )
   )];
 
   // Count organizations per engagement type
-  const engagementCounts = engagementTypes.reduce((acc, type) => {
+  const engagementCounts = engagementTypes.reduce<Record<string, number>>((acc, type) => {
     acc[type] = organizations.filter(org => 
       org.tags?.some(t => t[0] === 'engagement' && t[1] === type)
     ).length;
