@@ -73,17 +73,17 @@
 
     <!-- Main Content -->
     <div class="md:w-3/4">
-    <h1 class="text-4xl font-bold mb-8">{topic.title}</h1>
+      <h1 class="text-4xl font-bold mb-8">{topic.title}</h1>
 
-    <section class="prose max-w-none mb-12">
-      <h2 class="text-2xl font-semibold mb-4">About this Movement</h2>
-      <p class="mb-8">{topic.description}</p>
-    </section>
+      <section class="prose max-w-none mb-12">
+        <h2 class="text-2xl font-semibold mb-4">About this Movement</h2>
+        <p class="mb-8">{topic.description}</p>
+      </section>
 
-    <section class="mb-12">
-      <h2 class="text-2xl font-semibold mb-6">Organizations Working on {topic.title}</h2>
-      
-      <div class="space-y-8">
+      <section class="mb-12">
+        <h2 class="text-2xl font-semibold mb-6">Organizations Working on {topic.title}</h2>
+        
+        <div class="space-y-8">
         {#each organizations as org}
           <div class="bg-white rounded-lg shadow-lg p-6">
             <a href="/organizations/{org.id}" class="block">
@@ -109,8 +109,8 @@
             </a>
           </div>
         {/each}
-      </div>
-    </section>
+        </div>
+      </section>
     </div>
   {/if}
 </div>
