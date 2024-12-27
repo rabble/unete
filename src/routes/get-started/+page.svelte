@@ -3,7 +3,7 @@
 </script>
 
 <div class="max-w-4xl mx-auto px-4 py-8">
-  <h1 class="text-3xl font-bold mb-6">Get Started with Nostr</h1>
+  <h1 class="text-3xl font-bold mb-6">Join All Of Us</h1>
   
   <div class="prose max-w-none">
     <h2 class="text-2xl font-semibold mb-4">Why We Use Nostr</h2>
