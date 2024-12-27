@@ -245,7 +245,7 @@
 </script>
 
 <main class="container mx-auto max-w-4xl p-8">
-  <div class="text-center mb-12">
+  <div class="mb-12">
     <h1 class="text-4xl font-bold mb-4">All of Us: A Directory To Connect, Care, and Build</h1>
     <h3 class="text-xl text-gray-700 mb-8">Contact campaigns and organizations that need your help to help everyone.</h3>
     
