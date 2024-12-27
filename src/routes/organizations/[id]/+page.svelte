@@ -1,10 +1,8 @@
 <script lang="ts">
-  import { onMount } from 'svelte';
   import { page } from '$app/stores';
   import TagLink from '$lib/components/TagLink.svelte';
-  import { ndk, ensureConnection, getCachedEvents } from '$lib/stores/ndk';
+  import { ndk } from '$lib/stores/ndk';
   import type { OrganizationContent } from '$lib/nostr/kinds';
-  import { ORGANIZATION } from '$lib/nostr/kinds';
   import { isAdmin } from '$lib/nostr/admin';
 
   export let data;
@@ -28,13 +26,15 @@
       });
   }
 
-  onMount(async () => {
-    // Check if current user is admin
-    if (ndk.signer) {
-      const pubkey = await ndk.signer.user().then(user => user.pubkey);
-      isAdminUser = await isAdmin(pubkey);
-    }
-  });
+  // Check admin status when NDK signer is available
+  $: if (ndk.signer) {
+    ndk.signer.user()
+      .then(user => isAdmin(user.pubkey))
+      .then(isAdmin => {
+        isAdminUser = isAdmin;
+      })
+      .catch(console.error);
+  }
 </script>
 
 <div class="max-w-4xl mx-auto px-4 py-12">
