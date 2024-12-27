@@ -18,7 +18,7 @@
   onMount(async () => {
     if (browser) {
       // Import and initialize nostr-login only on client side
-      const { init: initNostrLogin } = await import('nostr-login');
+      const { init: initNostrLogin } = await import('@allofus/nostr-login');
       initNostrLogin({
         startScreen: 'welcome-login',
         noBanner: true,
