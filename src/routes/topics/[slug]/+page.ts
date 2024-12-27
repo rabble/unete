@@ -22,7 +22,7 @@ export const load: PageLoad = async ({ params }) => {
     topic: currentTopic,
     organizations: [], // Empty initially
     allTopics: topics, // Use static topics initially
-    promise: ndk.fetchEvents({
+    promise: getCachedEvents({
       kinds: [34550],
       '#t': [] // Fetch all organizations with any topic tag
     }).then(events => {
