@@ -1,5 +1,6 @@
 <script lang="ts">
   import { topics } from '$lib/topics';
+  import TagLink from '$lib/components/TagLink.svelte';
 
   export let data;
   const { topic, organizations, allTopics } = data;
@@ -96,14 +97,33 @@
               {#if org.focusAreas?.length > 0}
                 <div class="mb-4">
                   <h4 class="font-semibold mb-2">Focus Areas:</h4>
-                  <p class="text-gray-600">{org.focusAreas.join(' ')}</p>
+                  <div class="flex flex-wrap">
+                    {#each org.focusAreas as area}
+                      <TagLink type="topic" value={area} />
+                    {/each}
+                  </div>
+                </div>
+              {/if}
+
+              {#if org.engagementTypes?.length > 0}
+                <div class="mb-4">
+                  <h4 class="font-semibold mb-2">Ways to Engage:</h4>
+                  <div class="flex flex-wrap">
+                    {#each org.engagementTypes as type}
+                      <TagLink type="engagement" value={type} />
+                    {/each}
+                  </div>
                 </div>
               {/if}
               
               {#if org.locations?.length > 0}
                 <div>
                   <h4 class="font-semibold mb-2">Locations:</h4>
-                  <p class="text-gray-600">{org.locations.join(' ')}</p>
+                  <div class="flex flex-wrap">
+                    {#each org.locations as location}
+                      <TagLink type="location" value={location} />
+                    {/each}
+                  </div>
                 </div>
               {/if}
             </a>
