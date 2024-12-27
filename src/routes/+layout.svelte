@@ -4,10 +4,10 @@
   import { page } from '$app/stores';
   import { onMount } from 'svelte';
   import { setContext } from 'svelte';
-  import NDK, { NDKNip07Signer } from '@nostr-dev-kit/ndk';
+  import { NDKNip07Signer } from '@nostr-dev-kit/ndk';
+  import { ndk, ensureConnection } from '$lib/stores/ndk';
   import '../app.css';
   
-  let ndk;
   let isLoggedIn = false;
   let profile;
   
@@ -15,15 +15,8 @@
   setContext('login', login);
 
   onMount(() => {
-    ndk = new NDK({
-      explicitRelayUrls: [
-        'wss://relay.nos.social',
-        'wss://relay.damus.io',
-        'wss://relay.nostr.band'
-      ],
-      signer: new NDKNip07Signer()
-    });
-    ndk.connect();
+    // Only set up signer, connection is handled by store
+    ndk.signer = new NDKNip07Signer();
   });
 
   async function login() {

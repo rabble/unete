@@ -2,7 +2,7 @@
   import { onMount } from 'svelte';
   import { page } from '$app/stores';
   import TagLink from '$lib/components/TagLink.svelte';
-  import NDK, { NDKNip07Signer } from '@nostr-dev-kit/ndk';
+  import { ndk, ensureConnection } from '$lib/stores/ndk';
   import type { OrganizationContent } from '$lib/nostr/kinds';
   import { ORGANIZATION } from '$lib/nostr/kinds';
   import { isAdmin } from '$lib/nostr/admin';
@@ -11,18 +11,10 @@
   let loading = true;
   let error: string | null = null;
   let isAdminUser = false;
-  let ndk: NDK;
 
   onMount(async () => {
     try {
-      ndk = new NDK({
-        explicitRelayUrls: [
-          'wss://relay.nos.social',
-          'wss://relay.damus.io',
-          'wss://relay.nostr.band'
-        ]
-      });
-      await ndk.connect();
+      await ensureConnection();
 
       const events = await ndk.fetchEvents({
         kinds: [ORGANIZATION],

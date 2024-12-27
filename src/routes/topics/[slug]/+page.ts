@@ -1,6 +1,6 @@
 import type { PageLoad } from './$types';
 import { topics } from '$lib/topics';
-import NDK from '@nostr-dev-kit/ndk';
+import { ndk, ensureConnection } from '$lib/stores/ndk';
 
 export const ssr = false;
 export const csr = true;
@@ -14,15 +14,8 @@ export const load: PageLoad = async ({ params }) => {
     throw new Error(`Topic ${slug} not found`);
   }
 
-  // Initialize NDK
-  const ndk = new NDK({
-    explicitRelayUrls: [
-      'wss://relay.nos.social',
-      'wss://relay.damus.io',
-      'wss://relay.nostr.band'
-    ]
-  });
-  await ndk.connect();
+  // Ensure NDK is connected
+  await ensureConnection();
 
   // Return initial data immediately
   return {
