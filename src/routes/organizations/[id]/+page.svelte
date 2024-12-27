@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import { page } from '$app/stores';
+  import TagLink from '$lib/components/TagLink.svelte';
   import NDK, { NDKNip07Signer } from '@nostr-dev-kit/ndk';
   import type { OrganizationContent } from '$lib/nostr/kinds';
   import { ORGANIZATION } from '$lib/nostr/kinds';
@@ -117,11 +118,9 @@
         {#if organization.focusAreas?.length}
           <div class="mb-8">
             <h2 class="text-2xl font-bold mb-4">Focus Areas</h2>
-            <div class="flex flex-wrap gap-2">
+            <div class="flex flex-wrap">
               {#each organization.focusAreas as area}
-                <span class="bg-purple-100 text-purple-800 px-3 py-1 rounded-full text-sm">
-                  {area}
-                </span>
+                <TagLink type="topic" value={area} />
               {/each}
             </div>
           </div>
@@ -131,11 +130,9 @@
         {#if organization.locations?.length}
           <div class="mb-8">
             <h2 class="text-2xl font-bold mb-4">Locations</h2>
-            <div class="flex flex-wrap gap-2">
+            <div class="flex flex-wrap">
               {#each organization.locations as location}
-                <span class="bg-gray-100 text-gray-800 px-3 py-1 rounded-full text-sm">
-                  {location}
-                </span>
+                <TagLink type="location" value={location} />
               {/each}
             </div>
           </div>
@@ -145,11 +142,9 @@
         {#if organization.engagementTypes?.length}
           <div class="mb-8">
             <h2 class="text-2xl font-bold mb-4">Ways to Engage</h2>
-            <div class="flex flex-wrap gap-2">
+            <div class="flex flex-wrap">
               {#each organization.engagementTypes as type}
-                <span class="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm">
-                  {type}
-                </span>
+                <TagLink type="engagement" value={type} />
               {/each}
             </div>
           </div>
