@@ -3,6 +3,19 @@
   import { goto } from '$app/navigation';
   import NDK, { NDKNip07Signer, type NDKUser, type NDKEvent } from '@nostr-dev-kit/ndk';
 
+  const images = [
+    'diego_rivera_mural.jpg',
+    'solidarity.jpg',
+    'solar_commons_mural.jpg',
+    'chalk_mural.jpg',
+    'imagine_wall.jpg',
+    'students_trafford.jpg',
+    'in_solidarity_mural.jpg',
+    'BLM_street_art.jpg',
+    'iowa_mural.jpg'
+  ];
+  const randomImage = images[Math.floor(Math.random() * images.length)];
+
   let ndk: NDK;
   
   // Interface for relay sets
@@ -275,18 +288,6 @@
       </a>
 
       <!-- Random inspirational image -->
-      {@const images = [
-        'diego_rivera_mural.jpg',
-        'solidarity.jpg',
-        'solar_commons_mural.jpg',
-        'chalk_mural.jpg',
-        'imagine_wall.jpg',
-        'students_trafford.jpg',
-        'in_solidarity_mural.jpg',
-        'BLM_street_art.jpg',
-        'iowa_mural.jpg'
-      ]}
-      {@const randomImage = images[Math.floor(Math.random() * images.length)]}
       <img 
         src={`/assets/${randomImage}`}
         alt="Inspirational Movement Art"
