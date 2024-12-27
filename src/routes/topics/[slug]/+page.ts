@@ -38,9 +38,7 @@ export const load: PageLoad = async ({ params }) => {
   }));
 
   // Get organizations for the current topic
-  const topicOrganizations = Array.from(events).filter(event => 
-    event.tags.some(t => t[0] === 't' && t[1] === slug)
-  )
+  const topicOrganizations = Array.from(events)
     .filter(event => event.tags.some(t => t[0] === 't' && t[1] === slug))
     .map(event => {
       const name = event.tags.find(t => t[0] === 'name')?.[1] || 'Unnamed Organization';
