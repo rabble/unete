@@ -250,7 +250,7 @@
     <h3 class="text-xl text-gray-700 mb-8">Contact campaigns and organizations that need your help to help everyone.</h3>
     
     <div class="bg-white rounded-lg shadow-lg p-8 mb-12">
-      <p class="text-gray-700 mb-6">
+      <p class="text-gray-700 mb-6 text-left">
         <strong>All of Us</strong> wants to help you find and join efforts to make
         neighborhoods, schools, jobs, and daily lives better. Use the search
         below to find and work with organizations on a wide range of issues
