@@ -104,23 +104,22 @@
               <div class="absolute hidden group-hover:block w-64 bg-white shadow-lg py-2 rounded-md" style="top: 100%; margin-top: -2px;">
                 <a href="/topics" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">All Topics</a>
                 <div class="border-t border-gray-100 my-1"></div>
-                <a href="/focus-areas/climate" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Climate Justice</a>
-                <a href="/focus-areas/community" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Community</a>
-                <a href="/focus-areas/democracy" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Democracy</a>
-                <a href="/focus-areas/economic" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Economic Democracy</a>
-                <a href="/focus-areas/electoral" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Electoral Organizing</a>
-                <a href="/focus-areas/feminism" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Feminism</a>
-                <a href="/focus-areas/food" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Food</a>
-                <a href="/focus-areas/healthcare" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Healthcare</a>
-                <a href="/focus-areas/housing" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Housing</a>
-                <a href="/focus-areas/immigration" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Immigration</a>
-                <a href="/focus-areas/indigenous" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Indigenous</a>
-                <a href="/focus-areas/lgbtqia" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">LGBTQIA+</a>
-                <a href="/focus-areas/palestine" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Palestine Solidarity</a>
-                <a href="/focus-areas/racial" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Racial Justice</a>
-                <a href="/focus-areas/reproductive" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Reproductive Justice</a>
-                <a href="/focus-areas/workplace" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Workplace Justice</a>
-                <a href="/focus-areas/youth" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Youth</a>
+                <a href="/topics/climate" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Climate Justice</a>
+                <a href="/topics/community" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Community</a>
+                <a href="/topics/democracy" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Democracy</a>
+                <a href="/topics/economic" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Economic Democracy</a>
+                <a href="/topics/feminism" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Feminism</a>
+                <a href="/topics/food" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Food</a>
+                <a href="/topics/healthcare" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Healthcare</a>
+                <a href="/topics/housing" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Housing</a>
+                <a href="/topics/immigration" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Immigration</a>
+                <a href="/topics/indigenous" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Indigenous</a>
+                <a href="/topics/lgbtqia" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">LGBTQIA+</a>
+                <a href="/topics/palestine" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Palestine Solidarity</a>
+                <a href="/topics/racial" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Racial Justice</a>
+                <a href="/topics/reproductive" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Reproductive Justice</a>
+                <a href="/topics/workplace" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Workplace Justice</a>
+                <a href="/topics/youth" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Youth</a>
               </div>
             </div>
 
