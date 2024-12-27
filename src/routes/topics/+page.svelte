@@ -154,11 +154,13 @@
       <div class="bg-white rounded-lg shadow-lg overflow-hidden">
         <a href="/focus-areas/{topic.slug}" class="block">
           <div class="p-6">
-            <div class="flex items-center gap-3 mb-2">
-              <img src={topic.icon} alt={topic.title} class="w-8 h-8" />
-              <h3 class="text-xl font-semibold">{topic.title}</h3>
+            <div class="flex items-center justify-between mb-4">
+              <div>
+                <h3 class="text-xl font-semibold mb-1">{topic.title}</h3>
+                <p class="text-gray-600">{topic.count} organizations</p>
+              </div>
+              <img src={topic.icon} alt={topic.title} class="w-16 h-16" />
             </div>
-            <p class="text-gray-600 mb-4">{topic.count} organizations</p>
             <div class="border-t border-gray-200 my-4"></div>
             <p class="text-gray-700">{topic.description}</p>
             <div class="mt-4">
