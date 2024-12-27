@@ -145,7 +145,7 @@
                 <a href="/about" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">About</a>
                 <a href="/conveners" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Conveners</a>
                 <a href="/testimonials" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Testimonials</a>
-                <a href="/join" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Join All Of Us</a>
+                <a href="/get-started" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Get Started with Nostr</a>
                 <a href="/contact" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Contact</a>
               </div>
             </div>
