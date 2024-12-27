@@ -7,6 +7,8 @@
   <h1 class="text-3xl font-bold mb-6">Join All Of Us</h1>
   
   <div class="prose max-w-none">
+    <h2 class="text-2xl font-semibold mb-4">All of Us: A Directory To Connect, Care, and Build</h2>
+    <p class="mb-4">Contact campaigns and organizations that need your help to help everyone.</p>
     <h2 class="text-2xl font-semibold mb-4">Stand Up, Take Action, Join A Movement</h2>
     <p class="mb-4">
       All of Us Directory is built on Nostr - a revolutionary protocol that empowers activists with powerful tools and connections. 
