@@ -26,7 +26,25 @@
         throw new Error('Organization not found');
       }
 
-      organization = JSON.parse(event.content);
+      try {
+        organization = JSON.parse(event.content);
+        
+        // Add additional fields from tags if they exist
+        organization.focusAreas = event.tags
+          .filter(t => t[0] === 'f')
+          .map(t => t[1]);
+          
+        organization.locations = event.tags
+          .filter(t => t[0] === 'l')
+          .map(t => t[1]);
+          
+        organization.engagementTypes = event.tags
+          .filter(t => t[0] === 'e')
+          .map(t => t[1]);
+      } catch (e) {
+        console.error('Failed to parse organization content:', e);
+        throw new Error('Invalid organization data');
+      }
       
       // Check if current user is admin
       if (ndk.signer) {
