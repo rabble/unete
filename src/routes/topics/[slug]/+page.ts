@@ -3,6 +3,9 @@ import NDK from '@nostr-dev-kit/ndk';
 import { topics } from '$lib/topics';
 
 export const load: PageLoad = async ({ params }) => {
+  // Invalidate the page data when params change
+  export const ssr = false;
+  export const csr = true;
   const { slug } = params;
 
   // Initialize NDK
