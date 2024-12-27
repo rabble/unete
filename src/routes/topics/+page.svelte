@@ -152,7 +152,7 @@
   <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
     {#each topics as topic}
       <div class="bg-white rounded-lg shadow-lg overflow-hidden">
-        <a href="/focus-areas/{topic.slug}" class="block">
+        <a href="/topics/{topic.slug}" class="block">
           <div class="p-6">
             <div class="flex items-center justify-between mb-4">
               <div>
