@@ -1,6 +1,28 @@
 <script lang="ts">
   import { topics } from '$lib/topics';
-    {
+</script>
+
+<div class="max-w-4xl mx-auto px-4 py-8">
+  <h1 class="text-4xl font-bold mb-8">Movement Topics</h1>
+
+  <section class="prose max-w-none mb-12">
+    <h2 class="text-2xl font-semibold mb-4">About All of Us Directory</h2>
+    <p class="mb-4">
+      Welcome to the All of Us Directory, a comprehensive resource connecting
+      individuals with organizations working across various social justice
+      movements.
+    </p>
+    <p class="mb-8">
+      Browse the topics below to learn more about each movement area and find
+      organizations working on issues you care about. Whether you're looking
+      to get involved locally or connect with national campaigns, you'll find
+      opportunities to contribute your skills and energy to building a better
+      world.
+    </p>
+  </section>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+    {#each topics as topic}
       slug: 'democracy',
       title: 'Democracy',
       count: 77,
