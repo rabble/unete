@@ -39,15 +39,25 @@ export const load: PageLoad = async ({ params }) => {
 
       const topicOrganizations = eventsArray
         .filter(event => event.tags.some(t => t[0] === 't' && t[1] === slug))
-        .map(event => ({
-          id: event.id,
-          name: event.tags.find(t => t[0] === 'name')?.[1] || 'Unnamed Organization',
-          category: event.tags.find(t => t[0] === 'category')?.[1],
-          description: event.content,
-          focusAreas: event.tags.filter(t => t[0] === 't').map(t => t[1]),
-          locations: event.tags.filter(t => t[0] === 'l').map(t => t[1]),
-          tags: event.tags
-        }));
+        .map(event => {
+          try {
+            const content = JSON.parse(event.content);
+            return {
+              id: event.id,
+              name: content.name,
+              category: content.category,
+              description: content.description,
+              focusAreas: event.tags.filter(t => t[0] === 'f').map(t => t[1]),
+              locations: event.tags.filter(t => t[0] === 'l').map(t => t[1]),
+              engagementTypes: event.tags.filter(t => t[0] === 'e').map(t => t[1]),
+              tags: event.tags
+            };
+          } catch (e) {
+            console.error('Failed to parse organization content:', e);
+            return null;
+          }
+        })
+        .filter(org => org !== null); // Remove any failed parses
 
       return {
         organizations: topicOrganizations,
