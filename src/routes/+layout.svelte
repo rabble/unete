@@ -22,7 +22,8 @@
       initNostrLogin({
         startScreen: 'welcome-login',
         noBanner: true,
-        theme: 'purple'
+        theme: 'purple',
+        'data-skip-if-logged-in': 'true'
       });
 
       // Listen for auth events
