@@ -67,16 +67,16 @@
             Send
           </button>
         </div>
+
+        <!-- Solidarity image under send button -->
+        <div class="mt-8">
+          <img 
+            src="/assets/solidarity.jpg" 
+            alt="Solidarity" 
+            class="w-full rounded-lg shadow-lg"
+          />
+        </div>
       </form>
     {/if}
-  </div>
-  
-  <!-- Solidarity image under the form -->
-  <div class="mt-12">
-    <img 
-      src="/assets/solidarity.jpg" 
-      alt="Solidarity" 
-      class="w-full rounded-lg shadow-lg"
-    />
   </div>
 </div>
