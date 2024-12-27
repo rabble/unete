@@ -7,21 +7,18 @@ export const topics = [
   {
     slug: 'housing',
     title: 'Housing',
-    count: 24,
     description: 'The housing rights movement advocates for accessible, affordable, and adequate housing as a fundamental human right.',
     icon: '/assets/icons/housing.png'
   },
   {
     slug: 'racial',
     title: 'Racial Justice',
-    count: 65,
     description: 'The racial justice movement strives to dismantle systemic racism and promote equity across all facets of society.',
     icon: '/assets/icons/racial.png'
   },
   {
     slug: 'economic',
     title: 'Economic Democracy',
-    count: 90,
     description: 'The economic democracy movement promotes alternative economic models that prioritize community control and worker ownership.',
     icon: '/assets/icons/economic.png'
   },
