@@ -5,13 +5,7 @@ import { topics } from '$lib/topics';
 export const load: PageLoad = async ({ params }) => {
   const { slug } = params;
 
-  // Find the topic details first
-  const topic = topics.find((t) => t.slug === slug);
-  if (!topic) {
-    throw new Error(`Topic ${slug} not found`);
-  }
-
-  // Initialize NDK right away to start connecting
+  // Initialize NDK
   const ndk = new NDK({
     explicitRelayUrls: [
       'wss://relay.nos.social',
@@ -19,33 +13,59 @@ export const load: PageLoad = async ({ params }) => {
       'wss://relay.nostr.band'
     ]
   });
-  await ndk.connect()
+  await ndk.connect();
 
-  // Fetch organizations with this topic tag
+  // First fetch all organizations with topic tags
   const events = await ndk.fetchEvents({
-    kinds: [34550], // Organization kind
-    '#t': [slug] // Filter by topic tag
-  })
+    kinds: [31312],
+    '#t': [] // Fetch all organizations with any topic tag
+  });
 
-  const organizations = Array.from(events).map((event) => {
-    const name = event.tags.find((t) => t[0] === 'name')?.[1] || 'Unnamed Organization'
-    const category = event.tags.find((t) => t[0] === 'category')?.[1]
-    const description = event.content
-    const focusAreas = event.tags.filter((t) => t[0] === 't').map((t) => t[1])
-    const locations = event.tags.filter((t) => t[0] === 'l').map((t) => t[1])
-    
-    return {
-      id: event.id,
-      name,
-      category,
-      description,
-      focusAreas,
-      locations
-    }
-  })
+  // Get all unique topics from organizations
+  const orgTopics = new Set<string>();
+  events.forEach(event => {
+    event.tags
+      .filter(t => t[0] === 't')
+      .forEach(t => orgTopics.add(t[1]));
+  });
+
+  // Update topic counts
+  const topicsWithCounts = topics.map(topic => ({
+    ...topic,
+    count: events.filter(event => 
+      event.tags.some(t => t[0] === 't' && t[1] === topic.slug)
+    ).length
+  }));
+
+  // Get organizations for the current topic
+  const topicOrganizations = Array.from(events)
+    .filter(event => event.tags.some(t => t[0] === 't' && t[1] === slug))
+    .map(event => {
+      const name = event.tags.find(t => t[0] === 'name')?.[1] || 'Unnamed Organization';
+      const category = event.tags.find(t => t[0] === 'category')?.[1];
+      const description = event.content;
+      const focusAreas = event.tags.filter(t => t[0] === 't').map(t => t[1]);
+      const locations = event.tags.filter(t => t[0] === 'l').map(t => t[1]);
+      
+      return {
+        id: event.id,
+        name,
+        category,
+        description,
+        focusAreas,
+        locations,
+        tags: event.tags // Include all tags for engagement types
+      };
+    });
+
+  const currentTopic = topicsWithCounts.find(t => t.slug === slug);
+  if (!currentTopic) {
+    throw new Error(`Topic ${slug} not found`);
+  }
 
   return {
-    topic,
-    organizations
-  }
-}
+    topic: currentTopic,
+    organizations: topicOrganizations,
+    allTopics: topicsWithCounts
+  };
+};
