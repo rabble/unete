@@ -65,6 +65,8 @@
   let organizations: NDKEvent[] = [];
   let ndk: NDK;
 
+  let loading = true;
+
   onMount(async () => {
     try {
       // Initialize NDK
@@ -88,6 +90,8 @@
       organizations = Array.from(events);
     } catch (error) {
       console.error('Failed to initialize:', error);
+    } finally {
+      loading = false;
     }
   });
 
@@ -201,7 +205,16 @@
 
   <!-- Organizations List -->
   <div class="space-y-8">
-    {#each filteredOrganizations as event}
+    {#if loading}
+      <div class="flex justify-center items-center py-12">
+        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
+      </div>
+    {:else if filteredOrganizations.length === 0}
+      <div class="text-center py-12">
+        <p class="text-gray-600">No organizations found matching your criteria.</p>
+      </div>
+    {:else}
+      {#each filteredOrganizations as event}
       {@const org = getOrgContent(event)}
       <a 
         href="/organizations/{event.id}" 
@@ -257,6 +270,7 @@
           </div>
         </div>
       </a>
-    {/each}
+      {/each}
+    {/if}
   </div>
 </div>
