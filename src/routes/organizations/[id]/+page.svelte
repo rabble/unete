@@ -41,6 +41,14 @@
 </script>
 
 <div class="max-w-4xl mx-auto px-4 py-12">
+  <div class="flex justify-end mb-4">
+    <a
+      href="/organizations/{$page.params.id}/edit"
+      class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-lg transition-colors"
+    >
+      Edit Organization
+    </a>
+  </div>
   {#if loading}
     <div class="text-center">
       <div class="inline-block animate-spin rounded-full h-8 w-8 border-4 border-purple-500 border-t-transparent"></div>

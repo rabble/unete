@@ -82,6 +82,43 @@ function validateOrganizationContent(content: OrganizationContent): void {
   }
 }
 
+export async function updateOrganization(
+  ndk: NDK,
+  content: OrganizationContent,
+  originalEvent: NDKEvent
+): Promise<NDKEvent> {
+  try {
+    if (!ndk.signer) {
+      throw new SignerRequiredError();
+    }
+
+    // Validate content
+    validateOrganizationContent(content);
+
+    // Create new event based on original
+    const event = new NDKEvent(ndk);
+    event.kind = ORGANIZATION;
+    event.content = JSON.stringify(content);
+    event.tags = originalEvent.tags;
+
+    try {
+      await event.publish();
+      return event;
+    } catch (error) {
+      console.error('Publish error:', error);
+      throw new PublishError(
+        `Failed to update organization: ${error instanceof Error ? error.message : 'Unknown error'}`
+      );
+    }
+  } catch (error) {
+    console.error('Organization update error:', error);
+    if (error instanceof ValidationError || error instanceof SignerRequiredError || error instanceof PublishError) {
+      throw error;
+    }
+    throw new PublishError(`Unexpected error updating organization: ${error instanceof Error ? error.message : 'Unknown error'}`);
+  }
+}
+
 export async function createOrganization(
   ndk: NDK,
   content: OrganizationContent,
