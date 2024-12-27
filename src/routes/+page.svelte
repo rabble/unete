@@ -261,29 +261,37 @@
         achieve climate justice, win electoral reforms, and more opportunities for organizing together.
       </p>
 
-      <h2 class="text-2xl font-bold mb-4 mt-8">Search Our Directory of Organizations</h2>
+      <h2 class="text-2xl font-bold mb-4">Get Involved</h2>
       <p class="text-gray-700 mb-6">
-        Choose your location, your focus area, and the way you want to engage,
-        and then click Search to see a list of organizations that fit your
-        criteria. Each entry you see links to an organization page where you
-        will learn more about the organization and projects they have and the
-        help they need.
-      </p>
-      
-      <div class="flex justify-center mb-8">
-        <a 
-          href="/organizations" 
-          class="inline-block bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-8 rounded-lg transition-colors"
-        >
-          Search Organizations
-        </a>
-      </div>
-
-      <h2 class="text-2xl font-bold mb-4">Search Now: Get Involved</h2>
-      <p class="text-gray-700">
         Use your skills for positive change, learn new ones, and connect with
         campaigns and organizations that need your help to help your community.
       </p>
+      
+      <a 
+        href="/organizations" 
+        class="block bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-8 rounded-lg transition-colors text-center mb-8"
+      >
+        Get Involved Now
+      </a>
+
+      <!-- Random inspirational image -->
+      {@const images = [
+        'diego_rivera_mural.jpg',
+        'solidarity.jpg',
+        'solar_commons_mural.jpg',
+        'chalk_mural.jpg',
+        'imagine_wall.jpg',
+        'students_trafford.jpg',
+        'in_solidarity_mural.jpg',
+        'BLM_street_art.jpg',
+        'iowa_mural.jpg'
+      ]}
+      {@const randomImage = images[Math.floor(Math.random() * images.length)]}
+      <img 
+        src={`/assets/${randomImage}`}
+        alt="Inspirational Movement Art"
+        class="w-full rounded-lg shadow-lg"
+      />
     </div>
   </div>
 
