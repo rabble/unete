@@ -71,3 +71,23 @@
     {/if}
   </div>
 </div>
+<div class="max-w-4xl mx-auto px-4 py-8">
+  <h1 class="text-3xl font-bold mb-6">Contact Us</h1>
+  
+  <div class="prose max-w-none mb-12">
+    <p>
+      Get in touch with All of Us Directory. We want to hear from you!
+    </p>
+  </div>
+
+  <!-- Contact form or contact info would go here -->
+  
+  <!-- Solidarity image at bottom -->
+  <div class="mt-12">
+    <img 
+      src="/assets/solidarity.jpg" 
+      alt="Solidarity" 
+      class="w-full rounded-lg shadow-lg"
+    />
+  </div>
+</div>
