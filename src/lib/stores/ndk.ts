@@ -13,9 +13,11 @@ const ndk = new NDK({
 // Create a store for connection status
 export const ndkConnected = writable(false);
 
+import { get } from 'svelte/store';
+
 // Function to ensure connection
 export async function ensureConnection() {
-  if (!ndkConnected.get()) {
+  if (!get(ndkConnected)) {
     try {
       await ndk.connect();
       ndkConnected.set(true);
