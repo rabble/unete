@@ -272,23 +272,6 @@
     {/if}
   </div>
 </div>
-<script lang="ts">
-  import { onMount } from 'svelte';
-  import { ndk } from '$lib/stores/ndk';
-  import type { OrganizationContent } from '$lib/nostr/kinds';
-
-  let organizations: OrganizationContent[] = [];
-  let filteredOrganizations: OrganizationContent[] = [];
-  let loading = true;
-  let error: string | null = null;
-
-  // Filter states
-  let selectedLocations: string[] = [];
-  let selectedFocusAreas: string[] = [];
-  let selectedEngagementTypes: string[] = [];
-
-  // Available filter options
-  const locationOptions = [
     'National',
     'International',
     'USA',
