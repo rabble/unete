@@ -162,7 +162,7 @@
                 </svg>
               </a>
               <div class="absolute hidden group-hover:block w-48 bg-white shadow-lg py-2 rounded-md z-50" style="top: 100%; margin-top: -2px;">
-                <a href="/about" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">About</a>
+                <a href="/about" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">About Us</a>
                 <a href="/conveners" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Conveners</a>
                 <a href="/testimonials" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Testimonials</a>
                 <a href="/get-started" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Join All Of Us</a>
