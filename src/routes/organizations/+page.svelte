@@ -157,7 +157,7 @@
       org.locations.some(loc => $searchFilters.locations.includes(loc));
     
     const focusMatch = $searchFilters.focusAreas.length === 0 ||
-      org.focusAreas.some(area => $searchFilters.focusAreas.includes(area));
+      $searchFilters.focusAreas.every(area => org.focusAreas.includes(area));
     
     const engagementMatch = $searchFilters.engagementTypes.length === 0 ||
       org.engagementTypes.some(type => $searchFilters.engagementTypes.includes(type));
