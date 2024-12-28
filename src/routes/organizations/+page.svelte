@@ -7,7 +7,6 @@
   import SearchField from '$lib/components/SearchField.svelte';
   import { page } from '$app/stores';
   import { getTopics } from '$lib/topics';
-  import { Select } from 'svelte-select';
 
   // Store for organizations
   let organizations: NDKEvent[] = [];
