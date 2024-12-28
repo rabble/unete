@@ -36,7 +36,6 @@
     mission: '',
     vision: '',
     founded: '',
-    size: '',
     languages: [],
     socialLinks: {
       twitter: '',
@@ -108,7 +107,6 @@
   ];
 
   const languageOptions = ['en', 'es', 'fr'];
-  const sizeOptions = ['1-10', '11-50', '51-200', '201-500', '500+'];
 
   onMount(async () => {
     try {
@@ -436,21 +434,6 @@
         />
       </div>
 
-      <div>
-        <label for="size" class="block text-sm font-medium text-gray-700">
-          Organization Size
-        </label>
-        <select
-          id="size"
-          bind:value={formData.size}
-          class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500"
-        >
-          <option value="">Select size...</option>
-          {#each sizeOptions as size}
-            <option value={size}>{size}</option>
-          {/each}
-        </select>
-      </div>
 
       <div class="space-y-4">
         <label class="block text-sm font-medium text-gray-700">
