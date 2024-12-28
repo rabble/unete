@@ -87,6 +87,9 @@
     'Writing'
   ].sort();
 
+  // Store all fetched organizations
+  let allOrganizations: NDKEvent[] = [];
+
   onMount(async () => {
     try {
       // Initialize NDK
@@ -107,13 +110,12 @@
         engagementTypes: params.getAll('engagementTypes') || []
       });
 
-      // Fetch organizations with explicit filters
+      // Fetch all organizations once
       const events = await ndk.fetchEvents({
         kinds: [ORGANIZATION],
-        limit: 100,
-        "#t": [ORGANIZATION_TAGS] // Add tag filter
+        limit: 100
       });
-      organizations = Array.from(events);
+      allOrganizations = Array.from(events);
     } catch (error) {
       console.error('Failed to initialize:', error);
     } finally {
@@ -150,8 +152,8 @@
     window.history.pushState({}, '', `?${queryParams.toString()}`);
   }
 
-  // Filter organizations based on selected criteria
-  $: filteredOrganizations = organizations.filter(event => {
+  // Filter organizations in memory based on selected criteria
+  $: filteredOrganizations = allOrganizations.filter(event => {
     const org = getOrgContent(event);
     const filters = $searchFilters;
     
