@@ -244,7 +244,7 @@
         multiple
         bind:value={$searchFilters.locations}
         placeholder="Select locations..."
-        class="!bg-white"
+        class="!bg-white !outline-none !cursor-default"
       >
         <div slot="item" let:item>
           {item.label}
@@ -260,7 +260,7 @@
         multiple
         bind:value={$searchFilters.focusAreas}
         placeholder="Select focus areas..."
-        class="!bg-white"
+        class="!bg-white !outline-none !cursor-default"
       >
         <div slot="item" let:item>
           {item.label}
@@ -276,7 +276,7 @@
         multiple
         bind:value={$searchFilters.engagementTypes}
         placeholder="Select engagement types..."
-        class="!bg-white"
+        class="!bg-white !outline-none !cursor-default"
       >
         <div slot="item" let:item>
           {item.label}
