@@ -167,21 +167,15 @@
                 <a href="/testimonials" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Testimonials</a>
                 <a href="/get-started" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Join All Of Us</a>
                 <a href="/contact" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Contact</a>
+                <a href="/dashboard" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">
+                  {isLoggedIn ? 'Dashboard' : 'Login'}
+                </a>
               </div>
             </div>
           </div>
           
           <!-- Right side navigation items -->
           <div class="flex items-center">
-            <!-- Dashboard link (only shown when logged in) -->
-            {#if isLoggedIn}
-              <a 
-                href="/dashboard" 
-                class="text-gray-500 hover:text-gray-700 px-3 py-2 rounded-md text-sm font-medium"
-              >
-                Dashboard
-              </a>
-            {/if}
           </div>
         </div>
       </div>
