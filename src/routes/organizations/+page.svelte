@@ -107,10 +107,11 @@
         engagementTypes: params.getAll('engagementTypes') || []
       });
 
-      // Fetch organizations
+      // Fetch organizations with explicit filters
       const events = await ndk.fetchEvents({
         kinds: [ORGANIZATION],
-        limit: 100
+        limit: 100,
+        "#t": [ORGANIZATION_TAGS] // Add tag filter
       });
       organizations = Array.from(events);
     } catch (error) {
@@ -187,7 +188,7 @@
     <div class="bg-white p-6 rounded-lg shadow-lg">
       <h3 class="text-xl font-semibold mb-4">Select Locations</h3>
       <Select
-        items={locationOptions}
+        items={locationOptions.map(loc => ({ value: loc, label: loc }))}
         isMulti={true}
         bind:value={$searchFilters.locations}
         placeholder="Select locations..."
@@ -199,7 +200,7 @@
     <div class="bg-white p-6 rounded-lg shadow-lg">
       <h3 class="text-xl font-semibold mb-4">Select Focus Areas</h3>
       <Select
-        items={focusAreaOptions}
+        items={focusAreaOptions.map(area => ({ value: area, label: area }))}
         isMulti={true}
         bind:value={$searchFilters.focusAreas}
         placeholder="Select focus areas..."
@@ -211,7 +212,7 @@
     <div class="bg-white p-6 rounded-lg shadow-lg">
       <h3 class="text-xl font-semibold mb-4">Select Engagement Types</h3>
       <Select
-        items={engagementTypeOptions}
+        items={engagementTypeOptions.map(type => ({ value: type, label: type }))}
         isMulti={true}
         bind:value={$searchFilters.engagementTypes}
         placeholder="Select engagement types..."
