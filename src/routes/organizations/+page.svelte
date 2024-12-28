@@ -198,11 +198,15 @@
       <h3 class="text-xl font-semibold mb-4">Select Locations</h3>
       <Select
         items={locationOptions.map(loc => ({ value: loc, label: loc }))}
-        isMulti={true}
+        multiple
         bind:value={$searchFilters.locations}
         placeholder="Select locations..."
         class="!bg-white"
-      />
+      >
+        <div slot="item" let:item>
+          {item.label}
+        </div>
+      </Select>
     </div>
 
     <!-- Focus Areas Filter -->
@@ -210,11 +214,15 @@
       <h3 class="text-xl font-semibold mb-4">Select Focus Areas</h3>
       <Select
         items={focusAreaOptions.map(area => ({ value: area, label: area }))}
-        isMulti={true}
+        multiple
         bind:value={$searchFilters.focusAreas}
         placeholder="Select focus areas..."
         class="!bg-white"
-      />
+      >
+        <div slot="item" let:item>
+          {item.label}
+        </div>
+      </Select>
     </div>
 
     <!-- Engagement Types Filter -->
@@ -222,11 +230,15 @@
       <h3 class="text-xl font-semibold mb-4">Select Engagement Types</h3>
       <Select
         items={engagementTypeOptions.map(type => ({ value: type, label: type }))}
-        isMulti={true}
+        multiple
         bind:value={$searchFilters.engagementTypes}
         placeholder="Select engagement types..."
         class="!bg-white"
-      />
+      >
+        <div slot="item" let:item>
+          {item.label}
+        </div>
+      </Select>
     </div>
   </form>
 
