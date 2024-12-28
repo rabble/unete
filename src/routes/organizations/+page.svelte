@@ -4,6 +4,7 @@
   import NDK, { NDKEvent } from '@nostr-dev-kit/ndk';
   import { searchFilters } from '$lib/stores/searchStore';
   import SearchField from '$lib/components/SearchField.svelte';
+  import Select from 'svelte-select';
   import { page } from '$app/stores';
   import { getTopics } from '$lib/topics';
 
@@ -180,55 +181,37 @@
     <!-- Locations Filter -->
     <div class="bg-white p-6 rounded-lg shadow-lg">
       <h3 class="text-xl font-semibold mb-4">Select Locations</h3>
-      <div class="space-y-2">
-        {#each locationOptions as location}
-          <label class="flex items-center space-x-2">
-            <input
-              type="checkbox"
-              checked={selectedLocations.includes(location)}
-              on:change={() => toggleSelection(selectedLocations, location)}
-              class="form-checkbox h-5 w-5 text-purple-600"
-            />
-            <span>{location}</span>
-          </label>
-        {/each}
-      </div>
+      <Select
+        items={locationOptions}
+        isMulti={true}
+        bind:value={selectedLocations}
+        placeholder="Select locations..."
+        class="!bg-white"
+      />
     </div>
 
     <!-- Focus Areas Filter -->
     <div class="bg-white p-6 rounded-lg shadow-lg">
       <h3 class="text-xl font-semibold mb-4">Select Focus Areas</h3>
-      <div class="space-y-2">
-        {#each focusAreaOptions as area}
-          <label class="flex items-center space-x-2">
-            <input
-              type="checkbox"
-              checked={selectedFocusAreas.includes(area)}
-              on:change={() => toggleSelection(selectedFocusAreas, area)}
-              class="form-checkbox h-5 w-5 text-purple-600"
-            />
-            <span>{area}</span>
-          </label>
-        {/each}
-      </div>
+      <Select
+        items={focusAreaOptions}
+        isMulti={true}
+        bind:value={selectedFocusAreas}
+        placeholder="Select focus areas..."
+        class="!bg-white"
+      />
     </div>
 
     <!-- Engagement Types Filter -->
     <div class="bg-white p-6 rounded-lg shadow-lg">
       <h3 class="text-xl font-semibold mb-4">Select Engagement Types</h3>
-      <div class="space-y-2">
-        {#each engagementTypeOptions as type}
-          <label class="flex items-center space-x-2">
-            <input
-              type="checkbox"
-              checked={selectedEngagementTypes.includes(type)}
-              on:change={() => toggleSelection(selectedEngagementTypes, type)}
-              class="form-checkbox h-5 w-5 text-purple-600"
-            />
-            <span>{type}</span>
-          </label>
-        {/each}
-      </div>
+      <Select
+        items={engagementTypeOptions}
+        isMulti={true}
+        bind:value={selectedEngagementTypes}
+        placeholder="Select engagement types..."
+        class="!bg-white"
+      />
     </div>
   </form>
 
