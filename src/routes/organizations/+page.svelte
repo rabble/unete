@@ -138,16 +138,145 @@
   }
 </script>
 
+<script lang="ts">
+  import { onMount } from 'svelte';
+  import { ORGANIZATION, type OrganizationContent } from '$lib/nostr/kinds';
+  import NDK, { NDKEvent } from '@nostr-dev-kit/ndk';
+  import { searchFilters } from '$lib/stores/searchStore';
+  import SearchField from '$lib/components/SearchField.svelte';
+  import { page } from '$app/stores';
+
+  // Store for organizations
+  let organizations: NDKEvent[] = [];
+  let ndk: NDK;
+  let loading = true;
+  
+  const focusAreaOptions = [
+    'Climate Justice',
+    'Community',
+    'Democracy',
+    'Economic Democracy',
+    'Education',
+    'Feminism',
+    'Food',
+    'Healthcare',
+    'Housing',
+    'Immigration',
+    'Indigenous',
+    'International',
+    'LGBTQIA+',
+    'Palestine Solidarity',
+    'Racial Justice',
+    'Reproductive Justice',
+    'Workplace Justice',
+    'Youth'
+  ].sort();
+
+  const engagementTypeOptions = [
+    'In-person',
+    'Online',
+    'Hybrid',
+    'Construction',
+    'Cooking',
+    'Driving/transporting',
+    'Editing',
+    'Event planning',
+    'Fundraising',
+    'Legal',
+    'Medical',
+    'Media/Graphics',
+    'Outreach',
+    'Research',
+    'Tech support',
+    'Translation',
+    'Writing'
+  ].sort();
+
+  onMount(async () => {
+    try {
+      // Initialize NDK
+      ndk = new NDK({
+        explicitRelayUrls: [
+          'wss://relay.nos.social',
+          'wss://relay.damus.io',
+          'wss://relay.nostr.band'
+        ]
+      });
+      await ndk.connect();
+
+      // Set initial filters from URL params
+      const params = $page.url.searchParams;
+      searchFilters.set({
+        location: params.get('location') || '',
+        focusArea: params.get('focusArea') || '',
+        engagementType: params.get('engagementType') || ''
+      });
+
+      // Fetch organizations
+      const events = await ndk.fetchEvents({
+        kinds: [ORGANIZATION],
+        limit: 100
+      });
+      organizations = Array.from(events);
+    } catch (error) {
+      console.error('Failed to initialize:', error);
+    } finally {
+      loading = false;
+    }
+  });
+
+  function getOrgContent(event: NDKEvent): OrganizationContent {
+    try {
+      return JSON.parse(event.content);
+    } catch (e) {
+      console.error('Failed to parse organization content:', e);
+      return {
+        name: 'Unknown Organization',
+        category: 'Unknown',
+        description: 'Invalid organization data',
+        focusAreas: [],
+        locations: [],
+        engagementTypes: []
+      };
+    }
+  }
+
+  function handleSubmit() {
+    const queryParams = new URLSearchParams();
+    if ($searchFilters.location) queryParams.set('location', $searchFilters.location);
+    if ($searchFilters.focusArea) queryParams.set('focusArea', $searchFilters.focusArea);
+    if ($searchFilters.engagementType) queryParams.set('engagementType', $searchFilters.engagementType);
+    
+    window.history.pushState({}, '', `?${queryParams.toString()}`);
+  }
+
+  // Filter organizations based on selected criteria
+  $: filteredOrganizations = organizations.filter(event => {
+    const org = getOrgContent(event);
+    
+    const locationMatch = !$searchFilters.location || 
+      org.locations.some(loc => loc.toLowerCase().includes($searchFilters.location.toLowerCase()));
+    
+    const focusMatch = !$searchFilters.focusArea ||
+      org.focusAreas.includes($searchFilters.focusArea);
+    
+    const engagementMatch = !$searchFilters.engagementType ||
+      org.engagementTypes.includes($searchFilters.engagementType);
+    
+    return locationMatch && focusMatch && engagementMatch;
+  });
+</script>
+
 <div class="max-w-7xl mx-auto px-4 py-12">
   <h1 class="text-4xl font-bold text-center mb-8">Search Organizations</h1>
   
   <p class="text-lg text-gray-700 text-center mb-12">
     Use the search to find and share resources and skills in your area or online. 
     For your locale, your issue interests, and how you would like to help, 
-    choose one or more preferences for each drop down list to filter your search.
+    choose one or more preferences to filter your search.
   </p>
 
-  <div class="grid md:grid-cols-3 gap-8 mb-12">
+  <form on:submit|preventDefault={handleSubmit} class="grid md:grid-cols-3 gap-6 mb-12">
     <!-- Locations Filter -->
     <div class="bg-white p-6 rounded-lg shadow-lg">
       <h3 class="text-xl font-semibold mb-4">Select Locations</h3>
