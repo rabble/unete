@@ -1,155 +1,24 @@
 <script lang="ts">
+  import { Select } from 'svelte-select';
   import { onMount } from 'svelte';
   import { ORGANIZATION, type OrganizationContent, ORGANIZATION_TAGS } from '$lib/nostr/kinds';
   import NDK, { NDKEvent } from '@nostr-dev-kit/ndk';
+  import { searchFilters } from '$lib/stores/searchStore';
+  import SearchField from '$lib/components/SearchField.svelte';
+  import { page } from '$app/stores';
+  import { getTopics } from '$lib/topics';
+  import { Select } from 'svelte-select';
+
+  // Store for organizations
+  let organizations: NDKEvent[] = [];
+  let ndk: NDK;
+  let loading = true;
+  let error: string | null = null;
 
   // Filter state
   let selectedLocations: string[] = [];
   let selectedFocusAreas: string[] = [];
   let selectedEngagementTypes: string[] = [];
-
-  import { getTopics } from '$lib/topics';
-  
-  let focusAreas: string[] = [
-    'Housing',
-    'Racial Justice', 
-    'Economic Democracy',
-    'Community',
-    'Immigration',
-    'Youth',
-    'Climate Justice',
-    'Workplace Justice',
-    'Feminism',
-    'LGBTQIA+',
-    'Indigenous',
-    'Food',
-    'Healthcare',
-    'Education',
-    'Democracy',
-    'Palestine Solidarity',
-    'Legal',
-    'International'
-  ];
-
-  // Filter options  
-  const locations = [
-    'National',
-    'International',
-    'USA',
-    'Canada',
-    'UK',
-    'California',
-    'New York',
-    'Florida',
-    'Texas',
-    'Massachusetts',
-    'Washington D.C.',
-    'Southern U.S.',
-    'Border regions'
-  ];
-
-
-  const engagementTypes = [
-    'Direct Action',
-    'Community Organizing',
-    'Policy Advocacy',
-    'Education',
-    'Mutual Aid',
-    'Legal Support',
-    'Research',
-    'Media',
-    'Technical Support'
-  ];
-
-  // Store for organizations
-  let organizations: NDKEvent[] = [];
-  let ndk: NDK;
-
-  let loading = true;
-
-  onMount(async () => {
-    try {
-      // Initialize NDK
-      ndk = new NDK({
-        explicitRelayUrls: [
-          'wss://relay.nos.social',
-          'wss://relay.damus.io',
-          'wss://relay.nostr.band'
-        ]
-      });
-      await ndk.connect();
-
-      // Load focus areas
-      focusAreas = await getTopics(ndk);
-
-      // Fetch organizations
-      const events = await ndk.fetchEvents({
-        kinds: [ORGANIZATION],
-        limit: 100 // Adjust as needed
-      });
-      organizations = Array.from(events);
-    } catch (error) {
-      console.error('Failed to initialize:', error);
-    } finally {
-      loading = false;
-    }
-  });
-
-  function getOrgContent(event: NDKEvent): OrganizationContent {
-    try {
-      return JSON.parse(event.content);
-    } catch (e) {
-      console.error('Failed to parse organization content:', e);
-      return {
-        name: 'Unknown Organization',
-        category: 'Unknown',
-        description: 'Invalid organization data',
-        focusAreas: [],
-        locations: [],
-        engagementTypes: []
-      };
-    }
-  }
-
-  // Filter organizations based on selected criteria
-  $: filteredOrganizations = organizations.filter(event => {
-    const org = getOrgContent(event);
-    const locationMatch = selectedLocations.length === 0 || 
-      org.locations.some(loc => selectedLocations.includes(loc));
-    
-    const focusMatch = selectedFocusAreas.length === 0 ||
-      org.focusAreas.some(focus => selectedFocusAreas.includes(focus));
-    
-    const engagementMatch = selectedEngagementTypes.length === 0 ||
-      org.engagementTypes.some(type => selectedEngagementTypes.includes(type));
-    
-    return locationMatch && focusMatch && engagementMatch;
-  });
-
-  // Toggle selection in array
-  function toggleSelection(array: string[], item: string) {
-    const index = array.indexOf(item);
-    if (index === -1) {
-      array.push(item);
-    } else {
-      array.splice(index, 1);
-    }
-    array = [...array]; // Trigger reactivity
-  }
-</script>
-
-<script lang="ts">
-  import { onMount } from 'svelte';
-  import { ORGANIZATION, type OrganizationContent } from '$lib/nostr/kinds';
-  import NDK, { NDKEvent } from '@nostr-dev-kit/ndk';
-  import { searchFilters } from '$lib/stores/searchStore';
-  import SearchField from '$lib/components/SearchField.svelte';
-  import { page } from '$app/stores';
-
-  // Store for organizations
-  let organizations: NDKEvent[] = [];
-  let ndk: NDK;
-  let loading = true;
   
   const focusAreaOptions = [
     'Climate Justice',
