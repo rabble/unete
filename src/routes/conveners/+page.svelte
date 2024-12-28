@@ -62,16 +62,20 @@
           alt="Cynthia Peters"
           class="float-left w-32 h-32 object-cover rounded-lg mr-6 mb-4"
         />
-        <p class="text-gray-700">
-        Cynthia Peters is a longtime Boston-based community organizer in housing
-        justice and anti-war efforts.
-
-        She is an editor and writer, whose essays have been published in ZNet, 
-        Dollars and Sense, various books, and other media outlets.
-
-        She edits The Change Agent, an online social justice magazine for 
-        immigrant and other adult learners.
-      </p>
+        <div class="text-gray-700">
+          <p>
+            Cynthia Peters is a longtime Boston-based community organizer in housing
+            justice and anti-war efforts.
+          </p>
+          <p class="mt-4">
+            She is an editor and writer, whose essays have been published in ZNet, 
+            Dollars and Sense, various books, and other media outlets.
+          </p>
+          <p class="mt-4">
+            She edits The Change Agent, an online social justice magazine for 
+            immigrant and other adult learners.
+          </p>
+        </div>
     </section>
 
     <!-- Arash Kolahi -->
@@ -112,14 +116,17 @@
           alt="Leslie Cagan"
           class="float-left w-32 h-32 object-cover rounded-lg mr-6 mb-4"
         />
-        <p class="text-gray-700">
-        Leslie Cagan is an American activist, writer, and socialist organizer
-        involved with the peace and social justice movements.
-
-        She is the former national coordinator of United for Peace and Justice,
-        the former cochair of Committees of Correspondence for Democracy and 
-        Socialism, and the former chair of Pacifica Radio.
-      </p>
+        <div class="text-gray-700">
+          <p>
+            Leslie Cagan is an American activist, writer, and socialist organizer
+            involved with the peace and social justice movements.
+          </p>
+          <p class="mt-4">
+            She is the former national coordinator of United for Peace and Justice,
+            the former cochair of Committees of Correspondence for Democracy and 
+            Socialism, and the former chair of Pacifica Radio.
+          </p>
+        </div>
     </section>
 
     <!-- Michael Albert -->
