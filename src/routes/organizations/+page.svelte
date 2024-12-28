@@ -189,7 +189,7 @@
     <div class="bg-white p-6 rounded-lg shadow-lg">
       <h3 class="text-xl font-semibold mb-4">Select Focus Areas</h3>
       <div class="space-y-2">
-        {#each focusAreas as area}
+        {#each focusAreaOptions as area}
           <label class="flex items-center space-x-2">
             <input
               type="checkbox"
