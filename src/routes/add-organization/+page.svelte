@@ -42,7 +42,6 @@
       facebook: '',
       instagram: '',
       nostr: '',
-      nip05: '',
     },
     supporter: {
       range: [0, 0],
@@ -700,26 +699,13 @@
 
         <div>
           <label for="nostr" class="block text-sm font-medium text-gray-700">
-            Nostr Public Key (npub)
+            Nostr Public Key
           </label>
           <input
             type="text"
             id="nostr" 
             bind:value={formData.socialLinks.nostr}
             placeholder="npub1..."
-            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500"
-          />
-        </div>
-
-        <div>
-          <label for="nip05" class="block text-sm font-medium text-gray-700">
-            Nostr Name (NIP-05)
-          </label>
-          <input
-            type="text"
-            id="nip05"
-            bind:value={formData.socialLinks.nip05}
-            placeholder="name@domain.com"
             class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500"
           />
         </div>
