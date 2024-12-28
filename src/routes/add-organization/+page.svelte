@@ -555,11 +555,11 @@
 
         <div class="space-y-4">
           <label class="block text-sm font-medium text-gray-700">
-            Supporters
+            Supporters (estimated)
           </label>
           <div class="flex gap-4">
             <div class="flex-1">
-              <label class="block text-xs text-gray-500">Minimum</label>
+              <label class="block text-xs text-gray-500">Minimum range</label>
               <input
                 type="number"
                 min="0"
@@ -568,7 +568,7 @@
               />
             </div>
             <div class="flex-1">
-              <label class="block text-xs text-gray-500">Maximum</label>
+              <label class="block text-xs text-gray-500">Maximum range</label>
               <input
                 type="number"
                 min="0"
@@ -590,11 +590,11 @@
 
         <div class="space-y-4">
           <label class="block text-sm font-medium text-gray-700">
-            Staff
+            Staff (estimated)
           </label>
           <div class="flex gap-4">
             <div class="flex-1">
-              <label class="block text-xs text-gray-500">Minimum</label>
+              <label class="block text-xs text-gray-500">Minimum range</label>
               <input
                 type="number"
                 min="0"
@@ -603,7 +603,7 @@
               />
             </div>
             <div class="flex-1">
-              <label class="block text-xs text-gray-500">Maximum</label>
+              <label class="block text-xs text-gray-500">Maximum range</label>
               <input
                 type="number"
                 min="0"
