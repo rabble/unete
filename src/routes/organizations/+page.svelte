@@ -154,10 +154,6 @@
           resolve();
         });
       });
-        const orgA = getOrgContent(a);
-        const orgB = getOrgContent(b);
-        return orgA.name.localeCompare(orgB.name);
-      });
     } catch (error) {
       console.error('Failed to initialize:', error);
       error = `Failed to load organizations: ${error.message}`;
