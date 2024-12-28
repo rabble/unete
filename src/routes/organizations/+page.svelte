@@ -70,20 +70,23 @@
 
   const engagementTypeOptions = [
     'In-person',
-    'Online',
+    'Online', 
     'Hybrid',
     'Construction',
     'Cooking',
     'Driving/transporting',
     'Editing',
-    'Event planning',
+    'Event/protest planning & logistics',
     'Fundraising',
     'Legal',
     'Medical',
-    'Media/Graphics',
+    'Messaging and Narrative (arts/media/graphics)',
     'Outreach',
+    'Participate in trainings',
     'Research',
-    'Tech support',
+    'Strike Support',
+    'Sanctuary support', 
+    'Tech support (programming, etc.)',
     'Translation',
     'Writing'
   ].sort();
