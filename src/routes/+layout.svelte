@@ -173,7 +173,15 @@
           
           <!-- Right side navigation items -->
           <div class="flex items-center">
-            <!-- Login functionality moved to profile page -->
+            <!-- Dashboard link (only shown when logged in) -->
+            {#if isLoggedIn}
+              <a 
+                href="/dashboard" 
+                class="text-gray-500 hover:text-gray-700 px-3 py-2 rounded-md text-sm font-medium"
+              >
+                Dashboard
+              </a>
+            {/if}
           </div>
         </div>
       </div>
