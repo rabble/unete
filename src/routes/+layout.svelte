@@ -1,4 +1,13 @@
-<script>
+<script lang="ts">
+  declare global {
+    interface Window {
+      nostrLogin: {
+        getUserInfo: () => any;
+        getCurrentUser: () => any;
+      }
+    }
+  }
+
   import { i18n } from "$lib/i18n";
   import { ParaglideJS } from "@inlang/paraglide-sveltekit";
   import { page } from '$app/stores';
@@ -17,8 +26,8 @@
 
   onMount(async () => {
     if (browser) {
-      // Import and initialize nostr-login only on client side
-      const { init: initNostrLogin } = await import('@allofus/nostr-login');
+      // Update this line to use the correct package name
+      const { init: initNostrLogin } = await import('nostr-login');
       initNostrLogin({
         startScreen: 'welcome-login',
         noBanner: true,

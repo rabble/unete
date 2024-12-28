@@ -2,6 +2,7 @@
   import NDK, { NDKNip07Signer, NDKKind } from '@nostr-dev-kit/ndk';
   import type { NDKUser, NDKEvent } from '@nostr-dev-kit/ndk';
   import { onMount } from 'svelte';
+  import { authStore, handleLogin } from '$lib/auth';
 
   let ndk: NDK;
   
@@ -183,40 +184,14 @@
   });
 
   async function login() {
-    try {
-      console.log('Starting login process...');
-      await ndk.connect();
-      console.log('NDK connected');
-      
-      user = await ndk.signer?.user();
-      console.log('User obtained:', user);
-      
-      if (user) {
-        isLoggedIn = true;
-        console.log('User logged in, fetching profile...');
-        
-        // Fetch profile data
-        const profileData = await user.fetchProfile();
-        profile = profileData;
-        console.log('Profile fetched:', profile);
-        
-        // Initialize user content
-        await fetchUserContent();
-        console.log('User content fetched');
-        
-        // Force a UI update
-        userLists = { ...userLists };
-      }
-    } catch (error) {
-      console.error('Login failed:', error);
-    }
+    await handleLogin();
   }
 </script>
 
 <main class="container mx-auto max-w-2xl p-8 text-center">
   <h1 class="text-4xl font-bold mb-8">Profile</h1>
   
-  {#if isLoggedIn && user}
+  {#if $authStore.isLoggedIn}
     <!-- Rest of the existing profile content -->
     <div class="bg-white shadow-lg rounded-lg p-6 mt-8">
       <!-- ... (keep all the existing profile content) ... -->

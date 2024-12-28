@@ -59,7 +59,6 @@
     "@tailwindcss/container-queries": "^0.1.1",
     "@tailwindcss/forms": "^0.5.9",
     "@tailwindcss/typography": "^0.5.15",
-    "nostr-login": "github:verse-pbc/nostr-login#3f361e4fdb55e450a26f21b39b7e7f43e0bb7f62",
-    "nostr-login-workspace": "github:verse-pbc/nostr-login#3f361e4fdb55e450a26f21b39b7e7f43e0bb7f62"
+    "nostr-login": "^1.6.14"
   }
 }

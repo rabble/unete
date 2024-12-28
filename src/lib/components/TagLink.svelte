@@ -19,6 +19,8 @@
 
 <a 
   href={getHref(type, value)}
+  data-sveltekit-preload-data
+  data-sveltekit-noscroll
   class="inline-block px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-sm font-medium hover:bg-purple-200 transition-colors mr-2 mb-2"
 >
   {value}

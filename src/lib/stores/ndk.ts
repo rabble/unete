@@ -73,6 +73,6 @@ export async function getCachedEvents(filter: any): Promise<Set<NDKEvent>> {
 
   return events;
 }
-
 // Export NDK instance
 export { ndk };
+

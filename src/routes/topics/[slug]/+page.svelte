@@ -1,35 +1,40 @@
 <script lang="ts">
-  import { topics } from '$lib/topics';
+  import { navigating } from '$app/stores';
   import TagLink from '$lib/components/TagLink.svelte';
 
   export let data;
-  const { topic, organizations, allTopics } = data;
-  let loading = true;
+  
+  let nostrData = { organizations: [], allTopics: [] };
+  let loadingNostr = true;
 
-  $: loading = !organizations;
+  // Handle the promise when data changes
+  $: {
+    loadingNostr = true;
+    data.promise.then(result => {
+      nostrData = result;
+      loadingNostr = false;
+    });
+  }
 
-  // Get all engagement types from organizations
-  const engagementTypes = [...new Set(
-    organizations.flatMap(org => 
+  // Use either Nostr data or initial data
+  $: organizations = nostrData.organizations.length ? nostrData.organizations : [];
+  $: allTopics = nostrData.allTopics.length ? nostrData.allTopics : data.allTopics;
+  
+  $: engagementTypes = [...new Set(
+    organizations?.flatMap(org => 
       org.tags?.filter(t => t[0] === 'engagement').map(t => t[1]) || []
-    )
+    ) || []
   )];
 
-  // Count organizations per engagement type
-  const engagementCounts = engagementTypes.reduce<Record<string, number>>((acc, type) => {
-    acc[type] = organizations.filter(org => 
+  $: engagementCounts = engagementTypes.reduce<Record<string, number>>((acc, type) => {
+    acc[type] = organizations?.filter(org => 
       org.tags?.some(t => t[0] === 'engagement' && t[1] === type)
-    ).length;
+    ).length || 0;
     return acc;
   }, {});
 </script>
 
-<div class="container mx-auto px-4 py-8" key={topic.slug}>
-  {#if loading}
-    <div class="flex justify-center items-center py-12">
-      <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
-    </div>
-  {:else}
+<div class="container mx-auto px-4 py-8" key={data.topic.slug}>
   <div class="flex flex-col md:flex-row gap-8">
     <!-- Sidebar -->
     <div class="md:w-1/4">
@@ -41,7 +46,9 @@
               <li>
                 <a 
                   href="/topics/{t.slug}" 
-                  class="text-gray-700 hover:text-purple-600 flex items-center justify-between {t.slug === topic.slug ? 'font-bold text-purple-600' : ''}"
+                  data-sveltekit-preload-data
+                  data-sveltekit-noscroll
+                  class="text-gray-700 hover:text-purple-600 flex items-center justify-between {t.slug === data.topic.slug ? 'font-bold text-purple-600' : ''}"
                 >
                   <span>{t.title}</span>
                   {#if t.count}
@@ -74,64 +81,69 @@
 
     <!-- Main Content -->
     <div class="md:w-3/4">
-      <h1 class="text-4xl font-bold mb-8">{topic.title}</h1>
+      <h1 class="text-4xl font-bold mb-8">{data.topic.title}</h1>
 
       <section class="prose max-w-none mb-12">
         <h2 class="text-2xl font-semibold mb-4">About this Movement</h2>
-        <p class="mb-8">{topic.description}</p>
+        <p class="mb-8">{data.topic.description}</p>
       </section>
 
       <section class="mb-12">
-        <h2 class="text-2xl font-semibold mb-6">Organizations Working on {topic.title}</h2>
+        <h2 class="text-2xl font-semibold mb-6">Organizations Working on {data.topic.title}</h2>
         
-        <div class="space-y-8">
-        {#each organizations as org}
-          <div class="bg-white rounded-lg shadow-lg p-6">
-            <a href="/organizations/{org.id}" class="block">
-              <h3 class="text-2xl font-semibold mb-2">{org.name}</h3>
-              {#if org.category}
-                <p class="text-purple-600 mb-4">{org.category}</p>
-              {/if}
-              <p class="text-gray-700 mb-6">{org.description}</p>
-              
-              {#if org.focusAreas?.length > 0}
-                <div class="mb-4">
-                  <h4 class="font-semibold mb-2">Focus Areas:</h4>
-                  <div class="flex flex-wrap">
-                    {#each org.focusAreas as area}
-                      <TagLink type="topic" value={area} />
-                    {/each}
-                  </div>
-                </div>
-              {/if}
-
-              {#if org.engagementTypes?.length > 0}
-                <div class="mb-4">
-                  <h4 class="font-semibold mb-2">Ways to Engage:</h4>
-                  <div class="flex flex-wrap">
-                    {#each org.engagementTypes as type}
-                      <TagLink type="engagement" value={type} />
-                    {/each}
-                  </div>
-                </div>
-              {/if}
-              
-              {#if org.locations?.length > 0}
-                <div>
-                  <h4 class="font-semibold mb-2">Locations:</h4>
-                  <div class="flex flex-wrap">
-                    {#each org.locations as location}
-                      <TagLink type="location" value={location} />
-                    {/each}
-                  </div>
-                </div>
-              {/if}
-            </a>
+        {#if loadingNostr}
+          <div class="flex justify-center items-center py-12">
+            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
           </div>
-        {/each}
-        </div>
+        {:else}
+          <div class="space-y-8">
+            {#each organizations as org}
+              <div class="bg-white rounded-lg shadow-lg p-6">
+                <a href="/organizations/{org.id}" class="block">
+                  <h3 class="text-2xl font-semibold mb-2">{org.name}</h3>
+                  {#if org.category}
+                    <p class="text-purple-600 mb-4">{org.category}</p>
+                  {/if}
+                  <p class="text-gray-700 mb-6">{org.description}</p>
+                  
+                  {#if org.focusAreas?.length > 0}
+                    <div class="mb-4">
+                      <h4 class="font-semibold mb-2">Focus Areas:</h4>
+                      <div class="flex flex-wrap">
+                        {#each org.focusAreas as area}
+                          <TagLink type="topic" value={area} />
+                        {/each}
+                      </div>
+                    </div>
+                  {/if}
+
+                  {#if org.engagementTypes?.length > 0}
+                    <div class="mb-4">
+                      <h4 class="font-semibold mb-2">Ways to Engage:</h4>
+                      <div class="flex flex-wrap">
+                        {#each org.engagementTypes as type}
+                          <TagLink type="engagement" value={type} />
+                        {/each}
+                      </div>
+                    </div>
+                  {/if}
+                  
+                  {#if org.locations?.length > 0}
+                    <div>
+                      <h4 class="font-semibold mb-2">Locations:</h4>
+                      <div class="flex flex-wrap">
+                        {#each org.locations as location}
+                          <TagLink type="location" value={location} />
+                        {/each}
+                      </div>
+                    </div>
+                  {/if}
+                </a>
+              </div>
+            {/each}
+          </div>
+        {/if}
       </section>
     </div>
   </div>
-{/if}
 </div>
