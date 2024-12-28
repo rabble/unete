@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-  import NDK, { NDKEvent } from '@nostr-dev-kit/ndk';
+  import NDK, { NDKEvent, NDKNip07Signer } from '@nostr-dev-kit/ndk';
   import { ndk } from '$lib/stores/ndk';
   import { initNostrLogin } from '$lib/nostr/login';
   import type { OrganizationContent } from '$lib/nostr/kinds';
