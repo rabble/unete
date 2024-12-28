@@ -64,10 +64,13 @@
         />
         <p class="text-gray-700">
         Cynthia Peters is a longtime Boston-based community organizer in housing
-        justice and anti-war efforts. She is an editor and writer, whose essays
-        have been published in ZNet, Dollars and Sense, various books, and other
-        media outlets. She edits The Change Agent, an online social justice
-        magazine for immigrant and other adult learners.
+        justice and anti-war efforts.
+
+        She is an editor and writer, whose essays have been published in ZNet, 
+        Dollars and Sense, various books, and other media outlets.
+
+        She edits The Change Agent, an online social justice magazine for 
+        immigrant and other adult learners.
       </p>
     </section>
 
@@ -111,10 +114,11 @@
         />
         <p class="text-gray-700">
         Leslie Cagan is an American activist, writer, and socialist organizer
-        involved with the peace and social justice movements. She is the former
-        national coordinator of United for Peace and Justice, the former cochair
-        of Committees of Correspondence for Democracy and Socialism, and the
-        former chair of Pacifica Radio.
+        involved with the peace and social justice movements.
+
+        She is the former national coordinator of United for Peace and Justice,
+        the former cochair of Committees of Correspondence for Democracy and 
+        Socialism, and the former chair of Pacifica Radio.
       </p>
     </section>
 
