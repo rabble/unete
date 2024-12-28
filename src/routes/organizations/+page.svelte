@@ -161,12 +161,18 @@
     choose one or more preferences to filter your search.
   </p>
 
+  {#if error}
+    <div class="bg-red-50 border-l-4 border-red-400 p-4 mb-6">
+      <p class="text-red-700">{error}</p>
+    </div>
+  {/if}
+
   <form on:submit|preventDefault={handleSubmit} class="grid md:grid-cols-3 gap-6 mb-12">
     <!-- Locations Filter -->
     <div class="bg-white p-6 rounded-lg shadow-lg">
       <h3 class="text-xl font-semibold mb-4">Select Locations</h3>
       <div class="space-y-2">
-        {#each locations as location}
+        {#each locationOptions as location}
           <label class="flex items-center space-x-2">
             <input
               type="checkbox"
@@ -202,7 +208,7 @@
     <div class="bg-white p-6 rounded-lg shadow-lg">
       <h3 class="text-xl font-semibold mb-4">Select Engagement Types</h3>
       <div class="space-y-2">
-        {#each engagementTypes as type}
+        {#each engagementTypeOptions as type}
           <label class="flex items-center space-x-2">
             <input
               type="checkbox"
@@ -229,183 +235,63 @@
       </div>
     {:else}
       {#each filteredOrganizations as event}
-      {@const org = getOrgContent(event)}
-      <a 
-        href="/organizations/{event.id}" 
-        class="block bg-white rounded-lg shadow-lg p-6 hover:shadow-xl transition-shadow"
-        data-sveltekit-preload-data
-      >
-        <div class="flex items-start gap-4">
-          {#if org.picture}
-            <img 
-              src={org.picture} 
-              alt={org.name}
-              class="w-24 h-24 object-cover rounded-lg"
-            />
-          {/if}
-          <div class="flex-1">
-            <h2 class="text-2xl font-bold mb-2">{org.name}</h2>
-            <p class="text-purple-600 font-medium mb-4">{org.category}</p>
-            <p class="text-gray-700 mb-6">{org.description}</p>
-            
-            <div class="space-y-4">
-              <div>
-                <h3 class="font-semibold mb-2">Focus Areas:</h3>
-                <div class="flex flex-wrap gap-2">
-                  {#each org.focusAreas as area}
-                    <span class="bg-purple-100 text-purple-800 px-3 py-1 rounded-full text-sm">
-                      {area}
-                    </span>
-                  {/each}
-                </div>
-              </div>
+        {@const org = getOrgContent(event)}
+        <a 
+          href="/organizations/{event.id}" 
+          class="block bg-white rounded-lg shadow-lg p-6 hover:shadow-xl transition-shadow"
+          data-sveltekit-preload-data
+        >
+          <div class="flex items-start gap-4">
+            {#if org.picture}
+              <img 
+                src={org.picture} 
+                alt={org.name}
+                class="w-24 h-24 object-cover rounded-lg"
+              />
+            {/if}
+            <div class="flex-1">
+              <h2 class="text-2xl font-bold mb-2">{org.name}</h2>
+              <p class="text-purple-600 font-medium mb-4">{org.category}</p>
+              <p class="text-gray-700 mb-6">{org.description}</p>
               
-              <div>
-                <h3 class="font-semibold mb-2">Locations:</h3>
-                <div class="flex flex-wrap gap-2">
-                  {#each org.locations as location}
-                    <span class="bg-gray-100 text-gray-800 px-3 py-1 rounded-full text-sm">
-                      {location}
-                    </span>
-                  {/each}
+              <div class="space-y-4">
+                <div>
+                  <h3 class="font-semibold mb-2">Focus Areas:</h3>
+                  <div class="flex flex-wrap gap-2">
+                    {#each org.focusAreas as area}
+                      <span class="bg-purple-100 text-purple-800 px-3 py-1 rounded-full text-sm">
+                        {area}
+                      </span>
+                    {/each}
+                  </div>
                 </div>
-              </div>
+                
+                <div>
+                  <h3 class="font-semibold mb-2">Locations:</h3>
+                  <div class="flex flex-wrap gap-2">
+                    {#each org.locations as location}
+                      <span class="bg-gray-100 text-gray-800 px-3 py-1 rounded-full text-sm">
+                        {location}
+                      </span>
+                    {/each}
+                  </div>
+                </div>
 
-              <div>
-                <h3 class="font-semibold mb-2">Engagement Types:</h3>
-                <div class="flex flex-wrap gap-2">
-                  {#each org.engagementTypes as type}
-                    <span class="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm">
-                      {type}
-                    </span>
-                  {/each}
+                <div>
+                  <h3 class="font-semibold mb-2">Engagement Types:</h3>
+                  <div class="flex flex-wrap gap-2">
+                    {#each org.engagementTypes as type}
+                      <span class="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm">
+                        {type}
+                      </span>
+                    {/each}
+                  </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
-      </a>
+        </a>
       {/each}
     {/if}
   </div>
-</div>
-</script>
-
-<div class="max-w-7xl mx-auto px-4 py-12">
-  <h1 class="text-4xl font-bold text-center mb-8">Search Organizations</h1>
-  
-  <p class="text-lg text-center mb-12">
-    Use the search to find and share resources and skills in your area or online. 
-    For your locale, your issue interests, and how you would like to help, 
-    choose one or more preferences for each drop down list to filter your search.
-  </p>
-
-  {#if error}
-    <div class="bg-red-50 border-l-4 border-red-400 p-4 mb-6">
-      <p class="text-red-700">{error}</p>
-    </div>
-  {/if}
-
-  <!-- Filters -->
-  <div class="grid md:grid-cols-3 gap-8 mb-12">
-    <!-- Locations Filter -->
-    <div>
-      <h3 class="text-xl font-semibold mb-4">Select Locations</h3>
-      <div class="space-y-2 max-h-60 overflow-y-auto">
-        {#each locationOptions as location}
-          <label class="flex items-center space-x-2">
-            <input
-              type="checkbox"
-              checked={selectedLocations.includes(location)}
-              on:change={() => toggleFilter(selectedLocations, location)}
-              class="rounded border-gray-300 text-purple-600 focus:ring-purple-500"
-            />
-            <span>{location}</span>
-          </label>
-        {/each}
-      </div>
-    </div>
-
-    <!-- Focus Areas Filter -->
-    <div>
-      <h3 class="text-xl font-semibold mb-4">Select Focus Areas</h3>
-      <div class="space-y-2 max-h-60 overflow-y-auto">
-        {#each focusAreaOptions as area}
-          <label class="flex items-center space-x-2">
-            <input
-              type="checkbox"
-              checked={selectedFocusAreas.includes(area)}
-              on:change={() => toggleFilter(selectedFocusAreas, area)}
-              class="rounded border-gray-300 text-purple-600 focus:ring-purple-500"
-            />
-            <span>{area}</span>
-          </label>
-        {/each}
-      </div>
-    </div>
-
-    <!-- Engagement Types Filter -->
-    <div>
-      <h3 class="text-xl font-semibold mb-4">Select Engagement Types</h3>
-      <div class="space-y-2 max-h-60 overflow-y-auto">
-        {#each engagementTypeOptions as type}
-          <label class="flex items-center space-x-2">
-            <input
-              type="checkbox"
-              checked={selectedEngagementTypes.includes(type)}
-              on:change={() => toggleFilter(selectedEngagementTypes, type)}
-              class="rounded border-gray-300 text-purple-600 focus:ring-purple-500"
-            />
-            <span>{type}</span>
-          </label>
-        {/each}
-      </div>
-    </div>
-  </div>
-
-  <!-- Organizations List -->
-  {#if loading}
-    <div class="flex justify-center items-center py-12">
-      <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
-    </div>
-  {:else}
-    <div class="grid gap-8">
-      {#each filteredOrganizations as org}
-        <a 
-          href="/organizations/{org.id}" 
-          class="block bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow p-6"
-        >
-          <h2 class="text-2xl font-bold mb-2">{org.name}</h2>
-          <p class="text-gray-600 mb-4">{org.category}</p>
-          <p class="text-gray-700 mb-6">{org.description}</p>
-          
-          {#if org.focusAreas?.length > 0}
-            <div class="mb-4">
-              <h3 class="font-semibold mb-2">Focus Areas:</h3>
-              <div class="flex flex-wrap gap-2">
-                {#each org.focusAreas as area}
-                  <span class="bg-purple-100 text-purple-800 px-2 py-1 rounded-full text-sm">
-                    {area}
-                  </span>
-                {/each}
-              </div>
-            </div>
-          {/if}
-
-          {#if org.locations?.length > 0}
-            <div>
-              <h3 class="font-semibold mb-2">Locations:</h3>
-              <div class="flex flex-wrap gap-2">
-                {#each org.locations as location}
-                  <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-sm">
-                    {location}
-                  </span>
-                {/each}
-              </div>
-            </div>
-          {/if}
-        </a>
-      {/each}
-    </div>
-  {/if}
 </div>
