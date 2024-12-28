@@ -110,12 +110,19 @@
         engagementTypes: params.getAll('engagementTypes') || []
       });
 
-      // Fetch all organizations once
-      const events = await ndk.fetchEvents({
+      // Fetch all organizations with proper filters
+      const filter = {
         kinds: [ORGANIZATION],
+        "#t": [ORGANIZATION_TAGS.organization],
         limit: 100
+      };
+      
+      const events = await ndk.fetchEvents(filter);
+      allOrganizations = Array.from(events).sort((a, b) => {
+        const orgA = getOrgContent(a);
+        const orgB = getOrgContent(b);
+        return orgA.name.localeCompare(orgB.name);
       });
-      allOrganizations = Array.from(events);
     } catch (error) {
       console.error('Failed to initialize:', error);
     } finally {
