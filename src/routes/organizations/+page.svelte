@@ -102,9 +102,9 @@
       // Set initial filters from URL params
       const params = $page.url.searchParams;
       searchFilters.set({
-        location: params.get('location') || '',
-        focusArea: params.get('focusArea') || '',
-        engagementType: params.get('engagementType') || ''
+        locations: params.getAll('locations') || [],
+        focusAreas: params.getAll('focusAreas') || [],
+        engagementTypes: params.getAll('engagementTypes') || []
       });
 
       // Fetch organizations
@@ -138,9 +138,13 @@
 
   function handleSubmit() {
     const queryParams = new URLSearchParams();
-    if ($searchFilters.location) queryParams.set('location', $searchFilters.location);
-    if ($searchFilters.focusArea) queryParams.set('focusArea', $searchFilters.focusArea);
-    if ($searchFilters.engagementType) queryParams.set('engagementType', $searchFilters.engagementType);
+    
+    $searchFilters.locations.forEach(loc => 
+      queryParams.append('locations', loc));
+    $searchFilters.focusAreas.forEach(area => 
+      queryParams.append('focusAreas', area));
+    $searchFilters.engagementTypes.forEach(type => 
+      queryParams.append('engagementTypes', type));
     
     window.history.pushState({}, '', `?${queryParams.toString()}`);
   }
@@ -149,14 +153,14 @@
   $: filteredOrganizations = organizations.filter(event => {
     const org = getOrgContent(event);
     
-    const locationMatch = !$searchFilters.location || 
-      org.locations.some(loc => loc.toLowerCase().includes($searchFilters.location.toLowerCase()));
+    const locationMatch = $searchFilters.locations.length === 0 || 
+      org.locations.some(loc => $searchFilters.locations.includes(loc));
     
-    const focusMatch = !$searchFilters.focusArea ||
-      org.focusAreas.includes($searchFilters.focusArea);
+    const focusMatch = $searchFilters.focusAreas.length === 0 ||
+      org.focusAreas.some(area => $searchFilters.focusAreas.includes(area));
     
-    const engagementMatch = !$searchFilters.engagementType ||
-      org.engagementTypes.includes($searchFilters.engagementType);
+    const engagementMatch = $searchFilters.engagementTypes.length === 0 ||
+      org.engagementTypes.some(type => $searchFilters.engagementTypes.includes(type));
     
     return locationMatch && focusMatch && engagementMatch;
   });
@@ -184,7 +188,7 @@
       <Select
         items={locationOptions}
         isMulti={true}
-        bind:value={selectedLocations}
+        bind:value={$searchFilters.locations}
         placeholder="Select locations..."
         class="!bg-white"
       />
@@ -196,7 +200,7 @@
       <Select
         items={focusAreaOptions}
         isMulti={true}
-        bind:value={selectedFocusAreas}
+        bind:value={$searchFilters.focusAreas}
         placeholder="Select focus areas..."
         class="!bg-white"
       />
@@ -208,7 +212,7 @@
       <Select
         items={engagementTypeOptions}
         isMulti={true}
-        bind:value={selectedEngagementTypes}
+        bind:value={$searchFilters.engagementTypes}
         placeholder="Select engagement types..."
         class="!bg-white"
       />
