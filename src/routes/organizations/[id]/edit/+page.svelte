@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import { page } from '$app/stores';
+  import { initNostrLogin } from '$lib/nostr/login';
   import type { OrganizationContent, OrganizationCategory } from '$lib/nostr/kinds';
   import { updateOrganization } from '$lib/nostr/organizations';
   import { getTopics } from '$lib/topics';
@@ -113,6 +114,9 @@
       });
 
       await ndk.connect();
+      
+      // Initialize Nostr login
+      await initNostrLogin();
       
       // Load organization data
       const events = await ndk.fetchEvents({

@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import type { OrganizationContent, OrganizationCategory } from '$lib/nostr/kinds';
+  import { initNostrLogin } from '$lib/nostr/login';
   import { createOrganization } from '$lib/nostr/organizations';
   import { getTopics } from '$lib/topics';
   import NDK, { NDKNip07Signer } from '@nostr-dev-kit/ndk';
@@ -130,6 +131,9 @@
 
       await ndk.connect();
       console.log('NDK connected successfully');
+      
+      // Initialize Nostr login
+      await initNostrLogin();
 
       // Load dynamic "Focus Areas" from your function
       focusAreas = await getTopics(ndk);

@@ -26,26 +26,6 @@
 
   onMount(async () => {
     if (browser) {
-      // Update this line to use the correct package name
-      const { init: initNostrLogin } = await import('nostr-login');
-      initNostrLogin({
-        startScreen: 'welcome-login',
-        noBanner: true,
-        theme: 'purple',
-        'data-skip-if-logged-in': 'true'
-      });
-
-      // Listen for auth events
-      document.addEventListener('nlAuth', (e) => {
-        if (e.detail.type === 'login' || e.detail.type === 'signup') {
-          isLoggedIn = true;
-          ndk.signer = new NDKNip07Signer();
-          ndk.connect();
-        } else if (e.detail.type === 'logout') {
-          isLoggedIn = false;
-        }
-      });
-
       // Only set up signer, connection is handled by store
       ndk.signer = new NDKNip07Signer();
     }
