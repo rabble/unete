@@ -214,10 +214,17 @@
 <div class="max-w-7xl mx-auto px-4 py-12">
   <h1 class="text-4xl font-bold text-center mb-8">Search Organizations</h1>
   
-  {#if ndk}
+  {#if ndk?.pool?.relays}
     <div class="mb-8 bg-white rounded-lg shadow-lg p-4">
       <h2 class="text-xl font-semibold mb-4">Relay Status</h2>
-      <RelayList {ndk} />
+      <div class="space-y-2">
+        {#each Object.entries(ndk.pool.relays) as [url, relay]}
+          <div class="flex items-center gap-2">
+            <div class={`w-2 h-2 rounded-full ${relay.status === 1 ? 'bg-green-500' : 'bg-red-500'}`}></div>
+            <span class="text-sm">{url}</span>
+          </div>
+        {/each}
+      </div>
     </div>
   {/if}
   
