@@ -43,6 +43,10 @@
       facebook: '',
       instagram: '',
     },
+    supporter: {
+      range: [0, 0],
+      description: '',
+    },
   };
 
   // Category, location, etc. options
@@ -543,6 +547,41 @@
               <option value={size}>{size}</option>
             {/each}
           </select>
+        </div>
+
+        <div class="space-y-4">
+          <label class="block text-sm font-medium text-gray-700">
+            Supporters
+          </label>
+          <div class="flex gap-4">
+            <div class="flex-1">
+              <label class="block text-xs text-gray-500">Minimum</label>
+              <input
+                type="number"
+                min="0"
+                bind:value={formData.supporter.range[0]}
+                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500"
+              />
+            </div>
+            <div class="flex-1">
+              <label class="block text-xs text-gray-500">Maximum</label>
+              <input
+                type="number"
+                min="0"
+                bind:value={formData.supporter.range[1]}
+                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500"
+              />
+            </div>
+          </div>
+          <div>
+            <label class="block text-xs text-gray-500">Description</label>
+            <textarea
+              bind:value={formData.supporter.description}
+              rows="2"
+              placeholder="Describe your supporter base..."
+              class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500"
+            ></textarea>
+          </div>
         </div>
 
         <div>
