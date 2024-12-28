@@ -2,6 +2,7 @@
   import { onMount } from 'svelte';
   import NDK, { NDKEvent, NDKNip07Signer } from '@nostr-dev-kit/ndk';
   import { ndk } from '$lib/stores/ndk';
+  import { onDestroy } from 'svelte';
   import { initNostrLogin } from '$lib/nostr/login';
   import type { OrganizationContent } from '$lib/nostr/kinds';
 
@@ -38,7 +39,7 @@
       });
 
       await ndkInstance.connect();
-      ndk.set(ndkInstance);
+      $ndk = ndkInstance;
 
       // Check if we have a signer
       if (!ndkInstance.signer) {
@@ -76,7 +77,7 @@
   {/if}
 
   <!-- Relay Status -->
-  {#if $ndk?.pool?.relays}
+  {#if $ndk?.pool?.relays && browser}
     <div class="mb-8 bg-white rounded-lg shadow-lg p-4">
       <h2 class="text-xl font-semibold mb-4">Relay Status</h2>
       <div class="space-y-2">
