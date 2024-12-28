@@ -99,8 +99,7 @@
           'wss://relay.nos.social',
           'wss://relay.damus.io',
           'wss://relay.nostr.band'
-        ],
-        debug: true // Enable debug logging
+        ]
       });
       await ndk.connect();
       console.log('NDK connected successfully');
