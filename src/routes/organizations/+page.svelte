@@ -1,5 +1,4 @@
 <script lang="ts">
-  import { Select } from 'svelte-select';
   import { onMount } from 'svelte';
   import { ORGANIZATION, type OrganizationContent, ORGANIZATION_TAGS } from '$lib/nostr/kinds';
   import NDK, { NDKEvent } from '@nostr-dev-kit/ndk';
