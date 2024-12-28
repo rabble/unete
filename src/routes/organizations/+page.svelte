@@ -14,8 +14,18 @@
   let error: string | null = null;
 
   // Filter state
-  // Filter state
   let selectedLocations: string[] = [];
+
+  // Toggle selection helper function
+  function toggleSelection(array: string[], item: string) {
+    const index = array.indexOf(item);
+    if (index === -1) {
+      array.push(item);
+    } else {
+      array.splice(index, 1);
+    }
+    array = [...array]; // Trigger reactivity
+  }
   let selectedFocusAreas: string[] = [];
   let selectedEngagementTypes: string[] = [];
 
