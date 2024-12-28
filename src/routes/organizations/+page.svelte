@@ -101,6 +101,7 @@
         ]
       });
       await ndk.connect();
+      console.log('NDK connected successfully');
 
       // Set initial filters from URL params
       const params = $page.url.searchParams;
@@ -110,14 +111,17 @@
         engagementTypes: params.getAll('engagementTypes') || []
       });
 
-      // Fetch all organizations with proper filters
+      // Fetch all organizations
       const filter = {
         kinds: [ORGANIZATION],
-        "#t": [ORGANIZATION_TAGS.organization],
         limit: 100
       };
       
       const events = await ndk.fetchEvents(filter);
+      if (!events) {
+        throw new Error('No organizations found');
+      }
+      
       allOrganizations = Array.from(events).sort((a, b) => {
         const orgA = getOrgContent(a);
         const orgB = getOrgContent(b);
@@ -125,6 +129,7 @@
       });
     } catch (error) {
       console.error('Failed to initialize:', error);
+      error = `Failed to load organizations: ${error.message}`;
     } finally {
       loading = false;
     }
