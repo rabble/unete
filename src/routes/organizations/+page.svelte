@@ -7,6 +7,7 @@
   import Select from 'svelte-select';
   import { page } from '$app/stores';
   import { getTopics } from '$lib/topics';
+  import { Avatar, RelayList } from '@nostr-dev-kit/ndk-svelte-components';
 
   // Store for organizations
   let organizations: NDKEvent[] = [];
@@ -189,6 +190,13 @@
 
 <div class="max-w-7xl mx-auto px-4 py-12">
   <h1 class="text-4xl font-bold text-center mb-8">Search Organizations</h1>
+  
+  {#if ndk}
+    <div class="mb-8 bg-white rounded-lg shadow-lg p-4">
+      <h2 class="text-xl font-semibold mb-4">Relay Status</h2>
+      <RelayList {ndk} />
+    </div>
+  {/if}
   
   <p class="text-lg text-gray-700 text-center mb-12">
     Use the search to find and share resources and skills in your area or online. 
