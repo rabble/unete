@@ -113,22 +113,47 @@
         engagementTypes: params.getAll('engagementTypes') || []
       });
 
-      // Fetch all organizations with explicit filters
-      const filter = {
-        kinds: [ORGANIZATION],
-        limit: 100,
-        since: 0 // Add a since filter to ensure we get all historical events
-      };
-      
-      const events = await ndk.fetchEvents(filter);
-      if (!events) {
-        console.error('No events returned from NDK');
-        throw new Error('No organizations found');
-      }
-      
-      console.log('Fetched events:', events);
-      
-      allOrganizations = Array.from(events).sort((a, b) => {
+      // Create a subscription for organizations
+      const subscription = ndk.subscribe(
+        {
+          kinds: [ORGANIZATION],
+          since: 0 // Get all historical events
+        },
+        {
+          closeOnEose: false, // Keep subscription open for updates
+          groupableDelay: 1000,
+          groupableDelayType: 'at-most'
+        }
+      );
+
+      // Handle incoming events
+      subscription.on('event', (event) => {
+        // Add new events to our list if they're not already there
+        const exists = allOrganizations.some(e => e.id === event.id);
+        if (!exists) {
+          allOrganizations = [...allOrganizations, event].sort((a, b) => {
+            const orgA = getOrgContent(a);
+            const orgB = getOrgContent(b);
+            return orgA.name.localeCompare(orgB.name);
+          });
+        }
+      });
+
+      // Handle errors
+      subscription.on('error', (error) => {
+        console.error('Subscription error:', error);
+      });
+
+      // Initialize empty array
+      allOrganizations = [];
+
+      // Wait for initial load
+      await new Promise((resolve) => {
+        subscription.on('eose', () => {
+          console.log('Initial load complete');
+          resolve();
+        });
+      });
         const orgA = getOrgContent(a);
         const orgB = getOrgContent(b);
         return orgA.name.localeCompare(orgB.name);
