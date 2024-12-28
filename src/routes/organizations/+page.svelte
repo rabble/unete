@@ -230,7 +230,7 @@
   <form on:submit|preventDefault={handleSubmit} class="grid md:grid-cols-3 gap-6 mb-12">
     <!-- Locations Filter -->
     <div class="bg-white p-6 rounded-lg shadow-lg">
-      <h3 class="text-xl font-semibold mb-4 select-none">Select Locations</h3>
+      <h3 class="text-xl font-semibold mb-4 select-none">Location</h3>
       <Select
         items={locationOptions.map(loc => ({ value: loc, label: loc }))}
         multiple
@@ -247,7 +247,7 @@
 
     <!-- Focus Areas Filter -->
     <div class="bg-white p-6 rounded-lg shadow-lg">
-      <h3 class="text-xl font-semibold mb-4 select-none">Select Focus Areas</h3>
+      <h3 class="text-xl font-semibold mb-4 select-none">Focus Area</h3>
       <Select
         items={focusAreaOptions.map(area => ({ value: area, label: area }))}
         multiple
@@ -264,7 +264,7 @@
 
     <!-- Engagement Types Filter -->
     <div class="bg-white p-6 rounded-lg shadow-lg">
-      <h3 class="text-xl font-semibold mb-4 select-none">Select Engagement Types</h3>
+      <h3 class="text-xl font-semibold mb-4 select-none">Engagement Types</h3>
       <Select
         items={engagementTypeOptions.map(type => ({ value: type, label: type }))}
         multiple
