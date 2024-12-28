@@ -15,9 +15,26 @@
   let error: string | null = null;
 
   // Filter state
+  // Filter state
   let selectedLocations: string[] = [];
   let selectedFocusAreas: string[] = [];
   let selectedEngagementTypes: string[] = [];
+
+  const locationOptions = [
+    'National',
+    'International',
+    'USA',
+    'Canada',
+    'UK', 
+    'California',
+    'New York',
+    'Florida',
+    'Texas',
+    'Massachusetts',
+    'Washington D.C.',
+    'Southern U.S.',
+    'Border regions'
+  ];
   
   const focusAreaOptions = [
     'Climate Justice',
@@ -198,7 +215,7 @@
         {/each}
       </div>
     </div>
-  </div>
+  </form>
 
   <!-- Organizations List -->
   <div class="space-y-8">
@@ -272,22 +289,6 @@
     {/if}
   </div>
 </div>
-    'National',
-    'International',
-    'USA',
-    'Canada',
-    'UK',
-    'California',
-    'New York',
-    'Florida',
-    'Texas',
-    'Massachusetts',
-    'Washington D.C.',
-    'Southern U.S.',
-    'Border regions'
-  ];
-
-  const focusAreaOptions = [
     'Climate Justice',
     'Community',
     'Democracy',
