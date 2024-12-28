@@ -98,7 +98,8 @@
           'wss://relay.nos.social',
           'wss://relay.damus.io',
           'wss://relay.nostr.band'
-        ]
+        ],
+        debug: true // Enable debug logging
       });
       await ndk.connect();
       console.log('NDK connected successfully');
@@ -111,16 +112,20 @@
         engagementTypes: params.getAll('engagementTypes') || []
       });
 
-      // Fetch all organizations
+      // Fetch all organizations with explicit filters
       const filter = {
         kinds: [ORGANIZATION],
-        limit: 100
+        limit: 100,
+        since: 0 // Add a since filter to ensure we get all historical events
       };
       
       const events = await ndk.fetchEvents(filter);
       if (!events) {
+        console.error('No events returned from NDK');
         throw new Error('No organizations found');
       }
+      
+      console.log('Fetched events:', events);
       
       allOrganizations = Array.from(events).sort((a, b) => {
         const orgA = getOrgContent(a);
