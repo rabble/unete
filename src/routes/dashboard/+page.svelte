@@ -26,8 +26,17 @@
 
   onMount(async () => {
     try {
+      // Initialize Nostr login first
+      await initNostrLogin();
+      
+      // Wait a bit for login to complete if needed
       if (!$ndk?.signer) {
-        throw new Error('Please login first');
+        await new Promise(resolve => setTimeout(resolve, 1000));
+      }
+
+      // Check again after initialization
+      if (!$ndk?.signer) {
+        throw new Error('Please login using the Nostr extension');
       }
 
       const user = await $ndk.signer.user();
