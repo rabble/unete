@@ -152,15 +152,16 @@
   // Filter organizations based on selected criteria
   $: filteredOrganizations = organizations.filter(event => {
     const org = getOrgContent(event);
+    const filters = $searchFilters;
     
-    const locationMatch = $searchFilters?.locations?.length === 0 || 
-      org.locations?.some(loc => $searchFilters?.locations?.includes(loc));
+    const locationMatch = !filters.locations?.length || 
+      org.locations?.some(loc => filters.locations.includes(loc));
     
-    const focusMatch = $searchFilters?.focusAreas?.length === 0 ||
-      org.focusAreas?.some(area => $searchFilters?.focusAreas?.includes(area));
+    const focusMatch = !filters.focusAreas?.length ||
+      org.focusAreas?.some(area => filters.focusAreas.includes(area));
     
-    const engagementMatch = $searchFilters?.engagementTypes?.length === 0 ||
-      org.engagementTypes?.some(type => $searchFilters?.engagementTypes?.includes(type));
+    const engagementMatch = !filters.engagementTypes?.length ||
+      org.engagementTypes?.some(type => filters.engagementTypes.includes(type));
     
     return locationMatch && focusMatch && engagementMatch;
   });
