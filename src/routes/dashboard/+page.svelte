@@ -2,6 +2,7 @@
   import { onMount } from 'svelte';
   import NDK, { NDKEvent } from '@nostr-dev-kit/ndk';
   import { ndk } from '$lib/stores/ndk';
+  import { initNostrLogin } from '$lib/nostr/login';
   import type { OrganizationContent } from '$lib/nostr/kinds';
 
   let userEvents: NDKEvent[] = [];
@@ -26,26 +27,31 @@
 
   onMount(async () => {
     try {
-      // Initialize Nostr login first
-      await initNostrLogin();
-      
-      // Wait a bit for login to complete if needed
-      if (!$ndk?.signer) {
-        await new Promise(resolve => setTimeout(resolve, 1000));
-      }
+      // Initialize NDK with signer
+      const ndkInstance = new NDK({
+        explicitRelayUrls: [
+          'wss://relay.nos.social',
+          'wss://relay.damus.io',
+          'wss://relay.nostr.band',
+        ],
+        signer: new NDKNip07Signer(),
+      });
 
-      // Check again after initialization
-      if (!$ndk?.signer) {
+      await ndkInstance.connect();
+      ndk.set(ndkInstance);
+
+      // Check if we have a signer
+      if (!ndkInstance.signer) {
         throw new Error('Please login using the Nostr extension');
       }
 
-      const user = await $ndk.signer.user();
+      const user = await ndkInstance.signer.user();
       if (!user) {
         throw new Error('No user found');
       }
 
       // Fetch all events published by the user
-      const events = await $ndk.fetchEvents({
+      const events = await ndkInstance.fetchEvents({
         authors: [user.pubkey]
       });
 
