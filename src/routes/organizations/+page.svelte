@@ -241,6 +241,7 @@
         bind:value={$searchFilters.locations}
         placeholder="Select locations..."
         class="!bg-white !outline-none !cursor-default"
+        clearable={true}
       >
         <div slot="item" let:item>
           {item.label}
@@ -257,6 +258,7 @@
         bind:value={$searchFilters.focusAreas}
         placeholder="Select focus areas..."
         class="!bg-white !outline-none !cursor-default"
+        clearable={true}
       >
         <div slot="item" let:item>
           {item.label}
@@ -273,6 +275,7 @@
         bind:value={$searchFilters.engagementTypes}
         placeholder="Select engagement types..."
         class="!bg-white !outline-none !cursor-default"
+        clearable={true}
       >
         <div slot="item" let:item>
           {item.label}
