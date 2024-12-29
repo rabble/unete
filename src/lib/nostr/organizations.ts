@@ -204,14 +204,21 @@ export async function createOrganization(
 
     try {
       console.log('Publishing event:', event);
-      console.log('Connected relays:', Array.from(ndk.pool.relays.values()).map(r => r.url));
+      const connectedRelays = Array.from(ndk.pool.relays.values())
+        .filter(r => r.connected)
+        .map(r => r.url);
+      console.log('Connected relays:', connectedRelays);
       
+      if (connectedRelays.length === 0) {
+        throw new Error('No connected relays available');
+      }
+
       // First publish without waiting
-      await event.publish();
+      const publishPromise = event.publish();
       console.log('Event published, waiting for verification...');
       
       // Then wait for verification with a longer timeout
-      const verified = await new Promise((resolve, reject) => {
+      const verified = await new Promise<NDKEvent>((resolve, reject) => {
         const timeout = setTimeout(() => {
           console.warn('Event verification timed out after 30 seconds');
           // Don't reject - some relays might be slow

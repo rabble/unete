@@ -11,12 +11,19 @@ export async function initNostrLogin() {
       if (pubkey) {
         console.log('Found existing Nostr pubkey:', pubkey);
         
-        // Wait for nostr-login to initialize NDK
-        await new Promise<void>((resolve) => {
+        // Wait for nostr-login to initialize NDK with timeout
+        await new Promise<void>((resolve, reject) => {
+          const maxAttempts = 50; // 5 seconds total
+          let attempts = 0;
           const checkNDK = () => {
             const ndkInstance = ndk.get();
+            attempts++;
+            
             if (ndkInstance?.signer) {
+              console.log('NDK initialized with signer');
               resolve();
+            } else if (attempts >= maxAttempts) {
+              reject(new Error('NDK initialization timeout'));
             } else {
               setTimeout(checkNDK, 100);
             }
