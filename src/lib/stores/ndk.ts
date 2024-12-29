@@ -106,16 +106,39 @@ export async function getCachedEvents(filter: any): Promise<Set<NDKEvent>> {
   }
 
   // Otherwise fetch from network
-  console.log('Creating fetchEvents promise...');
+  console.log('Creating fetchEvents promise...', {
+    hasNDK: Boolean(ndk),
+    filter,
+    relayCount: ndk?.pool?.relays?.size || 0
+  });
+
+  // Create subscription to track individual relay responses
+  const sub = ndk.subscribe(filter, { closeOnEose: true });
+  console.log('Created subscription');
+
+  sub.on('event', (event) => {
+    console.log('Received event:', event.id);
+  });
+
+  sub.on('eose', () => {
+    console.log('Received EOSE from relay');
+  });
+
   const fetchPromise = ndk.fetchEvents(filter);
   console.log('Waiting for events...');
   
   const timeoutPromise = new Promise((_, reject) => {
-    setTimeout(() => reject(new Error('Fetch timeout after 30s')), 30000);
+    setTimeout(() => {
+      console.log('Timeout reached, forcing rejection');
+      reject(new Error('Fetch timeout after 30s'));
+    }, 30000);
   });
 
   const events = await Promise.race([fetchPromise, timeoutPromise]);
-  console.log('Fetch complete, got events:', events);
+  console.log('Fetch complete, got events:', {
+    count: events?.size,
+    firstEventId: Array.from(events || [])[0]?.id
+  });
   
   // Update cache with new events
   events.forEach(event => {
