@@ -49,34 +49,9 @@
   };
   let revealedSections: Set<string> = new Set();
 
-  onMount(() => {
-    const ndkInstance = new NDK({
-      explicitRelayUrls: [
-        'wss://relay.nos.social',
-        'wss://relay.damus.io',
-        'wss://relay.nostr.band'
-      ],
-      signer: new NDKNip07Signer()
-    });
-    ndk.set(ndkInstance);
-    ndkInstance.connect();
-  });
 
-  async function login() {
-    try {
-      const result = await initializeUser($ndk);
-      user = result.user;
-      profile = result.profile;
-      
-      if (user) {
-        isLoggedIn.set(true);
-        userPosts = await fetchUserContent($ndk, user);
-        userLists = { ...userLists };
-      }
-    } catch (error) {
-      console.error('Login failed:', error);
-    }
-  }
+  import { getContext } from 'svelte';
+  const { login } = getContext('login');
 
   async function logout() {
     try {

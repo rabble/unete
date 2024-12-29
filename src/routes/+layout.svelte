@@ -15,7 +15,10 @@
   let profile;
   
   // Make login function available to all pages
-  setContext('login', login);
+  setContext('login', {
+    login: login,
+    logout: logout
+  });
 
   onMount(async () => {
     if (browser) {
