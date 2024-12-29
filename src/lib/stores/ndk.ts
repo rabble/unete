@@ -1,23 +1,62 @@
 import { writable, get } from 'svelte/store';
 import NDK, { NDKEvent, NDKNip07Signer } from '@nostr-dev-kit/ndk';
 import { browser } from '$app/environment';
-import { browser } from '$app/environment';
-let nostrLogin: any;
 
-// Create NDK instance with more relays for redundancy
-const ndk = new NDK({
-  explicitRelayUrls: [
-    'wss://relay.nos.social',
-    'wss://relay.damus.io',
-    'wss://relay.nostr.band',
-    'wss://relay.snort.social',
-    'wss://nostr.mom',
-    'wss://relay.current.fyi'
-  ]
-});
+// Create stores
+export const ndkStore = writable<NDK | null>(null);
+export const ndkConnected = writable<boolean>(false);
+export const ndkSigner = writable<NDKNip07Signer | null>(null);
 
-// Connect immediately
-ndk.connect();
+// Initialize NDK with relays
+export async function initializeNDK() {
+  if (!browser) return null;
+
+  try {
+    // Create new NDK instance
+    const ndkInstance = new NDK({
+      explicitRelayUrls: [
+        'wss://relay.nos.social',
+        'wss://relay.damus.io',
+        'wss://relay.nostr.band',
+        'wss://relay.snort.social',
+        'wss://nostr.mom',
+        'wss://relay.current.fyi'
+      ]
+    });
+
+    // Set up connection promise
+    const connectionPromise = ndkInstance.connect();
+    
+    // Update store immediately with instance
+    ndkStore.set(ndkInstance);
+
+    // Wait for connection
+    await connectionPromise;
+    ndkConnected.set(true);
+
+    // If window.nostr exists, set up NDK signer
+    if (window.nostr) {
+      const signer = new NDKNip07Signer();
+      await signer.blockUntilReady();
+      ndkInstance.signer = signer;
+      ndkSigner.set(signer);
+    }
+
+    return ndkInstance;
+  } catch (error) {
+    console.error('Failed to initialize NDK:', error);
+    return null;
+  }
+}
+
+// Helper function to ensure NDK is connected
+export async function ensureNDKConnection() {
+  const currentNDK = get(ndkStore);
+  if (!currentNDK) {
+    return await initializeNDK();
+  }
+  return currentNDK;
+}
 
 // Create stores with explicit typing and initial values
 export const ndkConnected = writable<boolean>(false);

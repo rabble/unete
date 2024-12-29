@@ -14,7 +14,7 @@
   import { onMount } from 'svelte';
   import { setContext } from 'svelte';
   import { NDKNip07Signer } from '@nostr-dev-kit/ndk';
-  import { ndkState as ndk, ensureConnection, initializeNDK, ndkConnected } from '$lib/stores/ndk';
+  import { ndkStore as ndk, ndkConnected, initializeNDK } from '$lib/stores/ndk';
   import '../app.css';
   import { browser } from '$app/environment';
   
@@ -26,25 +26,10 @@
 
   onMount(async () => {
     if (browser) {
-      try {
-        // Initialize NDK first
-        await initializeNDK();
-
-        // Listen for nostr-login auth events
-        document.addEventListener('nlAuth', async (event: CustomEvent) => {
-          const { detail } = event;
-          console.log('nostr-login auth event:', detail);
-          
-          // Update NDK signer when nostr-login provides one
-          if (detail?.signer) {
-            ndk.signer = detail.signer;
-            ndkSigner.set(detail.signer);
-            console.log('NDK signer updated from nostr-login');
-          }
-        });
-
-      } catch (error) {
-        console.error('Failed to initialize:', error);
+      // Initialize NDK
+      const ndkInstance = await initializeNDK();
+      if (!ndkInstance) {
+        console.error('Failed to initialize NDK');
       }
     }
   });
