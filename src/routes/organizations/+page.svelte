@@ -110,47 +110,8 @@
       throw new Error('No relays connected before fetch');
     }
 
-    // Create a promise that will reject after 5 seconds
-    const timeoutPromise = new Promise((_, reject) => {
-      setTimeout(() => reject(new Error('Fetch timeout after 5s')), 5000);
-    });
-
-    // Create the fetch promise with explicit subscription options
-    const fetchPromise = new Promise((resolve, reject) => {
-      const events = new Set();
-      const sub = $ndk.subscribe({kinds: [ORGANIZATION]}, {
-        closeOnEose: true,
-        groupableDelay: 100
-      });
-
-      sub.on('event', (event) => {
-        console.log('Received event:', event.id);
-        events.add(event);
-      });
-
-      sub.on('eose', () => {
-        console.log(`EOSE received, got ${events.size} events`);
-        resolve(events);
-      });
-
-      // Add error handling
-      sub.on('error', (error) => {
-        console.error('Subscription error:', error);
-        reject(error);
-      });
-    });
-
-    const events = await Promise.race([fetchPromise, timeoutPromise]);
-    return events;
-  }
-
-  onMount(async () => {
-    try {
-      loading = true;
-      error = null;
-
-      // Wait for NDK to be initialized and connected
-      const connectionPromise = new Promise((resolve, reject) => {
+    // Wait for NDK to be initialized and connected
+    const connectionPromise = new Promise((resolve, reject) => {
         const timeout = setTimeout(() => {
           reject(new Error('Timeout waiting for NDK initialization'));
         }, 15000);
