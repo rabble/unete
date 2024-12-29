@@ -50,7 +50,6 @@
   }
 
   let user: NDKUser | undefined;
-  let isLoggedIn = false;
   let profile: { name?: string; about?: string; picture?: string; } | undefined;
   let userPosts: NDKEvent[] = [];
   let userLists: { [key: string]: NDKEvent[] } = {
