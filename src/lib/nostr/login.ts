@@ -13,21 +13,42 @@ export async function initNostrLogin() {
         
         // Wait for nostr-login to initialize NDK with timeout
         await new Promise<void>((resolve, reject) => {
-          const maxAttempts = 50; // 5 seconds total
+          const maxAttempts = 100; // 10 seconds total
           let attempts = 0;
+          
           const checkNDK = () => {
             const ndkInstance = ndk.get();
             attempts++;
             
             if (ndkInstance?.signer) {
-              console.log('NDK initialized with signer');
-              resolve();
+              // Additional verification of NDK instance
+              ndkInstance.signer.user().then(user => {
+                if (user?.pubkey === pubkey) {
+                  console.log('NDK initialized with verified signer');
+                  resolve();
+                } else {
+                  console.warn('NDK signer mismatch, retrying...');
+                  if (attempts >= maxAttempts) {
+                    reject(new Error('NDK signer verification failed'));
+                  } else {
+                    setTimeout(checkNDK, 100);
+                  }
+                }
+              }).catch(err => {
+                console.error('NDK signer verification error:', err);
+                if (attempts >= maxAttempts) {
+                  reject(new Error('NDK signer verification failed'));
+                } else {
+                  setTimeout(checkNDK, 100);
+                }
+              });
             } else if (attempts >= maxAttempts) {
               reject(new Error('NDK initialization timeout'));
             } else {
               setTimeout(checkNDK, 100);
             }
           };
+          
           checkNDK();
         });
         
