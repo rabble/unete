@@ -215,6 +215,28 @@ export async function getCachedEvents(filter: any): Promise<Set<NDKEvent>> {
 // Export the NDK store from the existing ndkStore
 export const ndk = ndkStore;
 
+// Function to check for existing Nostr login
+export async function checkExistingNostrLogin() {
+  const ndkInstance = get(ndkStore);
+  if (!ndkInstance) return false;
+
+  try {
+    if (window.nostr) {
+      ndkInstance.signer = new NDKNip07Signer();
+      const user = await ndkInstance.signer.user();
+      if (user?.pubkey) {
+        await user.fetchProfile();
+        ndkConnected.set(true);
+        return true;
+      }
+    }
+    return false;
+  } catch (error) {
+    console.error('Error checking existing login:', error);
+    return false;
+  }
+}
+
 // Initialize NDK on import if in browser
 if (browser) {
   initializeNDK().catch(error => {
