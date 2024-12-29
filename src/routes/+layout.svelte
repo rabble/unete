@@ -14,10 +14,22 @@
   let localLoginState = false;
   let profile;
   
-  // Make login function available to all pages
+  async function logout() {
+    try {
+      if ($ndk) {
+        $ndk.signer = undefined;
+        await $ndk.disconnect();
+        isLoggedIn.set(false);
+      }
+    } catch (error) {
+      console.error('Logout failed:', error);
+    }
+  }
+
+  // Make login and logout functions available to all pages
   setContext('login', {
-    login: login,
-    logout: logout
+    login,
+    logout
   });
 
   onMount(async () => {

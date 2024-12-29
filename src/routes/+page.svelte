@@ -53,20 +53,6 @@
   import { getContext } from 'svelte';
   const { login } = getContext('login');
 
-  async function logout() {
-    try {
-      $ndk.signer = undefined;
-      user = undefined;
-      profile = undefined;
-      userPosts = [];
-      userLists = {};
-      isLoggedIn.set(false);
-      revealedSections = new Set();
-      await $ndk.disconnect();
-    } catch (error) {
-      console.error('Logout failed:', error);
-    }
-  }
 </script>
 
 <main class="container mx-auto max-w-4xl p-8">
