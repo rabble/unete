@@ -57,20 +57,29 @@ export async function initializeNDK() {
     // Update store immediately with instance
     ndkStore.set(ndkInstance);
 
-    // Wait for at least one relay to connect
-    console.log('Waiting for relay connection...');
-    await connectionPromise;
-    
-    // Verify we have at least one connected relay
-    const connectedRelays = Array.from(ndkInstance.pool.relays.values())
-      .filter(relay => relay.status === 1);
-    
-    if (connectedRelays.length === 0) {
-      throw new Error('No relays connected after initialization');
+    // Wait for at least one relay to connect with explicit connection tracking
+    console.log('Waiting for relay connections...');
+      
+    const connectionTimeout = 10000; // 10 seconds
+    const startTime = Date.now();
+      
+    while (true) {
+      const connectedRelays = Array.from(ndkInstance.pool.relays.values())
+        .filter(relay => relay.status === 1);
+        
+      if (connectedRelays.length > 0) {
+        console.log('Connected to relays:', connectedRelays.map(r => r.url));
+        ndkConnected.set(true);
+        break;
+      }
+        
+      if (Date.now() - startTime > connectionTimeout) {
+        throw new Error('Timeout waiting for relay connections');
+      }
+        
+      // Wait a bit before checking again
+      await new Promise(resolve => setTimeout(resolve, 100));
     }
-
-    console.log('Connected to relays:', connectedRelays.map(r => r.url));
-    ndkConnected.set(true);
 
     // If window.nostr exists, set up NDK signer
     if (window.nostr) {
