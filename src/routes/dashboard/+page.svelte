@@ -4,7 +4,7 @@
   import { NDKNip07Signer } from '@nostr-dev-kit/ndk';
   import { ndk } from '$lib/stores/ndk';
   import { isLoggedIn, userProfile } from '$lib/stores/userProfile';
-  import type { OrganizationContent } from '$lib/nostr/kinds';
+  import { ORGANIZATION, type OrganizationContent } from '$lib/nostr/kinds';
   import { initializeUser } from '$lib/nostr/ndk-utils';
 
   let user: NDKUser | undefined;
@@ -98,7 +98,7 @@
       // Fetch organization events
       const events = await $ndk.fetchEvents({
         authors: [user.pubkey],
-        kinds: [31312] // Organization kind
+        kinds: [ORGANIZATION] // Organization kind
       });
       
       userEvents = Array.from(events).sort((a, b) => b.created_at - a.created_at);
