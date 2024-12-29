@@ -4,14 +4,20 @@ import { browser } from '$app/environment';
 import { browser } from '$app/environment';
 let nostrLogin: any;
 
-// Create NDK instance
+// Create NDK instance with more relays for redundancy
 const ndk = new NDK({
   explicitRelayUrls: [
     'wss://relay.nos.social',
     'wss://relay.damus.io',
-    'wss://relay.nostr.band'
+    'wss://relay.nostr.band',
+    'wss://relay.snort.social',
+    'wss://nostr.mom',
+    'wss://relay.current.fyi'
   ]
 });
+
+// Connect immediately
+ndk.connect();
 
 // Create stores with explicit typing and initial values
 export const ndkConnected = writable<boolean>(false);

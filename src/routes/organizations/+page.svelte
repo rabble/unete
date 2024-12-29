@@ -97,10 +97,12 @@
 
   onMount(async () => {
     try {
-      if (!$ndk) {
-        throw new Error('NDK not initialized');
+      // Wait for NDK to be available and connected
+      while (!$ndk || !$ndk.pool) {
+        console.log('Waiting for NDK to initialize...');
+        await new Promise(resolve => setTimeout(resolve, 100));
       }
-      console.log('Using global NDK instance');
+      console.log('Using global NDK instance:', $ndk);
 
       // Set initial filters from URL params
       const params = $page.url.searchParams;
@@ -111,10 +113,12 @@
       });
 
       // Create a subscription for organizations
+      console.log('Creating subscription...');
       const subscription = $ndk.subscribe(
         {
           kinds: [ORGANIZATION],
-          since: 0 // Get all historical events
+          since: 0, // Get all historical events
+          limit: 100 // Limit initial load
         },
         {
           closeOnEose: false, // Keep subscription open for updates
