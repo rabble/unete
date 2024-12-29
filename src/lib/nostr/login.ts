@@ -60,7 +60,10 @@ export async function initNostrLogin() {
         }
       }
     }
-  } catch (e) {
+  } finally {
+    // Clean up any resources if needed
+  }
+} catch (e) {
     console.error('Nostr login error:', e);
     throw e;
   }
