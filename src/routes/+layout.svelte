@@ -7,6 +7,7 @@
   import { setContext } from 'svelte';
   import { NDKNip07Signer } from '@nostr-dev-kit/ndk';
   import { ndkStore as ndk, ndkConnected, initializeNDK, initNostrLogin, checkExistingNostrLogin } from '$lib/stores/ndk';
+  import { isLoggedIn } from '$lib/stores/userProfile';
   import '../app.css';
   import { browser } from '$app/environment';
   
@@ -136,6 +137,14 @@
           
           <!-- Right side navigation items -->
           <div class="flex items-center">
+            {#if !$isLoggedIn}
+              <button
+                on:click={login}
+                class="bg-purple-600 text-white px-4 py-2 rounded-md hover:bg-purple-700 transition-colors"
+              >
+                Connect with Nostr
+              </button>
+            {/if}
           </div>
         </div>
       </div>
