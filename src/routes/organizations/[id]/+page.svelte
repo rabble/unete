@@ -45,15 +45,23 @@
 
   // Check ownership when NDK and organization are available
   $: if ($ndk?.signer && organization) {
+    console.log('Checking ownership - NDK signer and organization available');
     $ndk.signer.user()
       .then(user => {
+        console.log('Current user pubkey:', user.pubkey);
+        console.log('Organization pubkey:', organization.pubkey);
         isOwner = user.pubkey === organization.pubkey;
+        console.log('Is owner?', isOwner);
       })
       .catch(error => {
         console.error('Failed to check ownership:', error);
         isOwner = false;
       });
   } else {
+    console.log('Cannot check ownership - missing requirements:', {
+      hasSigner: Boolean($ndk?.signer),
+      hasOrganization: Boolean(organization)
+    });
     isOwner = false;
   }
 
