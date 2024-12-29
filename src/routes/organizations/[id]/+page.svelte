@@ -11,7 +11,6 @@
   let organization: OrganizationContent | null = null;
   let loading = true;
   let error: string | null = null;
-  let isAdminUser = false;
   let showJson = false;
   let rawEvent: any = null;
   let showRawData = false;
@@ -44,13 +43,10 @@
     }
   }
 
-  // Check admin status and ownership when NDK is available
+  // Check ownership when NDK is available
   $: if ($ndk?.signer) {
     $ndk.signer.user()
       .then(user => {
-        isAdmin(user.pubkey).then(result => {
-          isAdminUser = result;
-        });
         // Check if current user is the organization creator
         if (organization) {
           isOwner = user.pubkey === organization.pubkey;
@@ -74,19 +70,10 @@
       });
   }
 
-  // Check admin status when NDK signer is available
-  $: if (ndk.signer) {
-    ndk.signer.user()
-      .then(user => isAdmin(user.pubkey))
-      .then(isAdmin => {
-        isAdminUser = isAdmin;
-      })
-      .catch(console.error);
-  }
 </script>
 
 <div class="max-w-4xl mx-auto px-4 py-12">
-  {#if isAdminUser || isOwner}
+  {#if isOwner}
     <div class="flex justify-end mb-4 space-x-4">
       <button
         on:click={() => showJson = !showJson}
