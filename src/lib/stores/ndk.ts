@@ -19,7 +19,9 @@ export async function initializeNDK() {
   if (!browser) return null;
 
   try {
-    // Create new NDK instance
+    console.log('Initializing NDK...');
+    
+    // Create new NDK instance with explicit connection timeout
     const ndkInstance = new NDK({
       explicitRelayUrls: [
         'wss://relay.nos.social',
@@ -31,22 +33,53 @@ export async function initializeNDK() {
       ]
     });
 
-    // Set up connection promise
-    const connectionPromise = ndkInstance.connect();
-    
+    // Set up connection with timeout
+    const connectionPromise = Promise.race([
+      ndkInstance.connect(),
+      new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('NDK connection timeout')), 5000)
+      )
+    ]);
+
+    // Log relay pool status
+    ndkInstance.pool.on('relay:connect', (relay) => {
+      console.log('Connected to relay:', relay.url);
+    });
+
+    ndkInstance.pool.on('relay:disconnect', (relay) => {
+      console.log('Disconnected from relay:', relay.url);
+    });
+
+    ndkInstance.pool.on('relay:error', (relay, error) => {
+      console.error('Relay error:', relay.url, error);
+    });
+
     // Update store immediately with instance
     ndkStore.set(ndkInstance);
 
-    // Wait for connection
+    // Wait for at least one relay to connect
+    console.log('Waiting for relay connection...');
     await connectionPromise;
+    
+    // Verify we have at least one connected relay
+    const connectedRelays = Array.from(ndkInstance.pool.relays.values())
+      .filter(relay => relay.status === 1);
+    
+    if (connectedRelays.length === 0) {
+      throw new Error('No relays connected after initialization');
+    }
+
+    console.log('Connected to relays:', connectedRelays.map(r => r.url));
     ndkConnected.set(true);
 
     // If window.nostr exists, set up NDK signer
     if (window.nostr) {
+      console.log('Setting up NIP-07 signer...');
       const signer = new NDKNip07Signer();
       await signer.blockUntilReady();
       ndkInstance.signer = signer;
       ndkSigner.set(signer);
+      console.log('Signer ready');
     }
 
     return ndkInstance;
@@ -77,7 +110,12 @@ export const eventCache = writable<Map<string, NDKEvent>>(new Map());
 
 // Helper to get cached events or fetch new ones
 export async function getCachedEvents(filter: any): Promise<Set<NDKEvent>> {
-  await ensureConnection();
+  const ndk = await ensureConnection();
+  if (!ndk) {
+    throw new Error('NDK not initialized');
+  }
+  
+  console.log('Getting events with filter:', filter);
   
   // Check cache first
   const cache = get(eventCache);
@@ -102,51 +140,42 @@ export async function getCachedEvents(filter: any): Promise<Set<NDKEvent>> {
 
   // If we have cached events, return them
   if (cachedEvents.size > 0) {
+    console.log('Returning cached events:', cachedEvents.size);
     return cachedEvents;
   }
 
   // Otherwise fetch from network
-  console.log('Creating fetchEvents promise...', {
-    hasNDK: Boolean(ndk),
-    filter,
-    relayCount: ndk?.pool?.relays?.size || 0
-  });
-
-  // Create subscription to track individual relay responses
+  console.log('No cached events, fetching from network');
+  
+  // Create subscription with timeout
+  const events = new Set<NDKEvent>();
   const sub = ndk.subscribe(filter, { closeOnEose: true });
-  console.log('Created subscription');
-
-  sub.on('event', (event) => {
-    console.log('Received event:', event.id);
-  });
-
-  sub.on('eose', () => {
-    console.log('Received EOSE from relay');
-  });
-
-  const fetchPromise = ndk.fetchEvents(filter);
-  console.log('Waiting for events...');
   
-  const timeoutPromise = new Promise((_, reject) => {
-    setTimeout(() => {
-      console.log('Timeout reached, forcing rejection');
-      reject(new Error('Fetch timeout after 1s'));
-    }, 1000);
-  });
+  return new Promise((resolve, reject) => {
+    const timeout = setTimeout(() => {
+      sub.close();
+      if (events.size > 0) {
+        resolve(events);
+      } else {
+        reject(new Error('Fetch timeout with no events'));
+      }
+    }, 5000);
 
-  const events = await Promise.race([fetchPromise, timeoutPromise]);
-  console.log('Fetch complete, got events:', {
-    count: events?.size,
-    firstEventId: Array.from(events || [])[0]?.id
-  });
-  
-  // Update cache with new events
-  events.forEach(event => {
-    cache.set(event.id, event);
-  });
-  eventCache.set(cache);
+    sub.on('event', (event: NDKEvent) => {
+      console.log('Received event:', event.id);
+      events.add(event);
+      
+      // Update cache
+      cache.set(event.id, event);
+      eventCache.set(cache);
+    });
 
-  return events;
+    sub.on('eose', () => {
+      console.log('Received EOSE, total events:', events.size);
+      clearTimeout(timeout);
+      resolve(events);
+    });
+  });
 }
 // Initialize NDK store
 export const ndk = writable<NDK | null>(null);
