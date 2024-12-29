@@ -111,49 +111,47 @@
         engagementTypes: params.getAll('engagementTypes') || []
       });
 
-      // Create a subscription for organizations
-      console.log('Creating subscription...');
-      const subscription = $ndk.subscribe(
-        {
-          kinds: [ORGANIZATION],
-          since: 0, // Get all historical events
-          limit: 100 // Limit initial load
-        },
-        {
-          closeOnEose: false, // Keep subscription open for updates
-          groupableDelay: 1000,
-          groupableDelayType: 'at-most'
-        }
-      );
+      // Fetch organizations directly
+      console.log('Fetching organizations...');
+      const filter = {
+        kinds: [ORGANIZATION],
+        since: 0 // Get all historical events
+      };
 
-      // Handle incoming events
-      subscription.on('event', (event) => {
-        // Add new events to our list if they're not already there
-        const exists = allOrganizations.some(e => e.id === event.id);
-        if (!exists) {
-          allOrganizations = [...allOrganizations, event].sort((a, b) => {
-            const orgA = getOrgContent(a);
-            const orgB = getOrgContent(b);
-            return orgA.name.localeCompare(orgB.name);
-          });
-        }
-      });
-
-      // Handle errors
-      subscription.on('error', (error) => {
-        console.error('Subscription error:', error);
-      });
-
-      // Initialize empty array
-      allOrganizations = [];
-
-      // Wait for initial load
-      await new Promise((resolve) => {
-        subscription.on('eose', () => {
-          console.log('Initial load complete');
-          resolve();
+      try {
+        // Use NDK's fetchEvents method
+        const events = await $ndk.fetchEvents(filter);
+        console.log('Fetched events:', events);
+        
+        // Convert Set to Array and sort
+        allOrganizations = Array.from(events).sort((a, b) => {
+          const orgA = getOrgContent(a);
+          const orgB = getOrgContent(b);
+          return orgA.name.localeCompare(orgB.name);
         });
-      });
+        
+        console.log('Processed organizations:', allOrganizations.length);
+        
+        // Set up subscription for real-time updates
+        const subscription = $ndk.subscribe(filter, {
+          closeOnEose: false,
+          groupableDelay: 1000
+        });
+
+        subscription.on('event', (event) => {
+          const exists = allOrganizations.some(e => e.id === event.id);
+          if (!exists) {
+            allOrganizations = [...allOrganizations, event].sort((a, b) => {
+              const orgA = getOrgContent(a);
+              const orgB = getOrgContent(b);
+              return orgA.name.localeCompare(orgB.name);
+            });
+          }
+        });
+      } catch (err) {
+        console.error('Failed to fetch organizations:', err);
+        error = `Failed to fetch organizations: ${err.message}`;
+      }
     } catch (error) {
       console.error('Failed to initialize:', error);
       error = `Failed to load organizations: ${error.message}`;
