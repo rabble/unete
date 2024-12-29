@@ -79,22 +79,14 @@
 
   async function logout() {
     try {
-      ndk.signer = undefined;
+      $ndk.signer = undefined;
       user = undefined;
       profile = undefined;
       userPosts = [];
       userLists = {};
       isLoggedIn.set(false);
       revealedSections = new Set();
-      await ndk.disconnect();
-      ndk = new NDK({
-        explicitRelayUrls: [
-          'wss://relay.nos.social',
-          'wss://relay.damus.io',
-          'wss://relay.nostr.band'
-        ],
-        signer: new NDKNip07Signer()
-      });
+      await $ndk.disconnect();
     } catch (error) {
       console.error('Logout failed:', error);
     }
