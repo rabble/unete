@@ -232,7 +232,7 @@ export async function checkExistingNostrLogin() {
       if (user?.pubkey) {
         await user.fetchProfile();
         ndkConnected.set(true);
-        isLoggedIn.set(true);
+        loginState.set(true);
         return true;
       }
     }

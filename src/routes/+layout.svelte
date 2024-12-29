@@ -263,15 +263,19 @@
               <p class="text-sm text-red-500">Error loading user: {error.message}</p>
             </div>
           {/await}
-        {:else}
+        {:else if !$isLoggedIn}
           <div class="text-gray-500 pt-4 border-t">
-            <p class="mb-4">No NDK signer available. User info will appear here when logged in.</p>
+            <p class="mb-4">Not logged in. User info will appear here when logged in.</p>
             <button
               on:click={login}
               class="bg-purple-600 text-white px-4 py-2 rounded-md hover:bg-purple-700 transition-colors"
             >
               Connect with Nostr
             </button>
+          </div>
+        {:else}
+          <div class="text-gray-500 pt-4 border-t">
+            <p class="mb-4">Loading user information...</p>
           </div>
         {/if}
       </div>
