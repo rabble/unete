@@ -632,7 +632,8 @@
               if (!originalEvent) {
                 throw new Error('Original event not found');
               }
-              await deleteOrganization(ndk, originalEvent);
+              const reason = prompt('Please provide a reason for deletion (optional):');
+              await deleteOrganization(ndk, originalEvent, reason);
               window.location.href = '/organizations';
             } catch (e) {
               if (e instanceof SignerRequiredError) {

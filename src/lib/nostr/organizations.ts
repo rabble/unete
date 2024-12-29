@@ -321,26 +321,24 @@ export async function deleteOrganization(
       throw new SignerRequiredError();
     }
 
-    // Create a deletion event (kind 5)
-    const event = new NDKEvent(ndk);
-    event.kind = 5; // Standard Nostr deletion event kind
-    event.content = reason || ''; // Optional reason for deletion
-    event.tags = [
-      ['e', originalEvent.id], // Reference the event to delete
-      ['a', `${ORGANIZATION}:${originalEvent.tags.find(t => t[0] === 'd')?.[1]}`] // Reference the parameterized replaceable event
-    ];
+    // Create deletion event directly as an object
+    const deleteEvent = {
+      kind: 5,
+      content: reason || 'Organization deleted by owner',
+      tags: [
+        ['e', originalEvent.id],
+        ['a', `${ORGANIZATION}:${originalEvent.tags.find(t => t[0] === 'd')?.[1]}`]
+      ]
+    };
 
-    console.log('Creating deletion event:', {
-      kind: event.kind,
-      content: event.content,
-      tags: event.tags,
-      originalEventId: originalEvent.id
-    });
+    console.log('Creating deletion event:', deleteEvent);
 
     try {
-      // Ensure we're using NDK's publish method
-      await ndk.publish(event);
-      return event;
+      const signedEvent = await ndk.publish(deleteEvent);
+      if (!signedEvent) {
+        throw new Error('Failed to get signed event after publish');
+      }
+      return signedEvent;
     } catch (error) {
       console.error('Delete publish error:', error);
       throw new PublishError(
