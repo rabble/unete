@@ -206,7 +206,7 @@
       console.log('User obtained:', user);
       
       if (user) {
-        isLoggedIn = true;
+        $isLoggedIn = true;
         console.log('User logged in, fetching profile...');
         
         // Fetch profile data
