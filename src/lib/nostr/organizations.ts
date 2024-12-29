@@ -91,7 +91,8 @@ function validateOrganizationContent(content: OrganizationContent): void {
 
 export async function updateOrganization(
   content: OrganizationContent,
-  originalEvent: NDKEvent
+  identifier: string,
+  ndk: NDK
 ): Promise<NDKEvent> {
   try {
     await ensureConnection();
@@ -103,9 +104,13 @@ export async function updateOrganization(
     // Validate content
     validateOrganizationContent(content);
 
-    // Update the existing event
-    const event = originalEvent; // Use the original event
+    // Create a new event with the same identifier
+    const event = new NDKEvent(ndk);
+    event.kind = ORGANIZATION;
     event.content = JSON.stringify(content);
+    event.tags = [
+      ['d', identifier]  // This makes it a parameterized replaceable event
+    ];
 
     try {
       await event.publish(); // Publish the updated event
@@ -154,14 +159,17 @@ export async function createOrganization(
     if (!identifier?.trim()) {
       throw new ValidationError('Organization identifier is required');
     }
+    if (!/^[a-z0-9-]+$/.test(identifier)) {
+      throw new ValidationError('Organization identifier must contain only lowercase letters, numbers, and hyphens');
+    }
 
     const event = new NDKEvent(ndk);
     event.kind = ORGANIZATION;
     event.content = JSON.stringify(content);
   
-    // Add required tags
+    // Add required 'd' tag for parameterized replaceable events
     event.tags = [
-      [ORGANIZATION_TAGS.IDENTIFIER, identifier]
+      ['d', identifier]  // This makes it a parameterized replaceable event
     ];
 
     // Add optional tags
