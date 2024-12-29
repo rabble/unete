@@ -1,5 +1,6 @@
 import { writable, get } from 'svelte/store';
-import NDK, { NDKEvent } from '@nostr-dev-kit/ndk';
+import NDK, { NDKEvent, NDKNip07Signer } from '@nostr-dev-kit/ndk';
+import { browser } from '$app/environment';
 
 // Create NDK instance
 const ndk = new NDK({
@@ -10,22 +11,50 @@ const ndk = new NDK({
   ]
 });
 
-// Create a store for connection status
+// Create stores
 export const ndkConnected = writable(false);
+export const ndkSigner = writable<NDKNip07Signer | null>(null);
 
-import { get } from 'svelte/store';
+// Initialize NDK and handle signer setup
+export async function initializeNDK() {
+  if (!browser) return;
 
-// Function to ensure connection
-export async function ensureConnection() {
-  if (!get(ndkConnected)) {
-    try {
+  try {
+    // First ensure NDK is initialized
+    if (!get(ndkConnected)) {
+      console.log('Initializing NDK...');
       await ndk.connect();
       ndkConnected.set(true);
-    } catch (error) {
-      console.error('Failed to connect to relays:', error);
-      // Try to reconnect on failure
-      setTimeout(ensureConnection, 5000);
+      console.log('NDK initialized successfully');
     }
+
+    // Then check nostr login and set up signer
+    if (window.nostr) {
+      const pubkey = await window.nostr.getPublicKey();
+      if (pubkey) {
+        console.log('User already logged in via nostr-login with pubkey:', pubkey);
+        try {
+          const signer = new NDKNip07Signer();
+          ndk.signer = signer;
+          ndkSigner.set(signer);
+          await ndk.connect();
+          console.log('NDK signer connected successfully');
+        } catch (signerError) {
+          console.error('Failed to initialize NDK signer:', signerError);
+          throw signerError;
+        }
+      }
+    }
+  } catch (error) {
+    console.error('Error during NDK/nostr initialization:', error);
+    throw error;
+  }
+}
+
+// Function to ensure connection (now uses initializeNDK)
+export async function ensureConnection() {
+  if (!get(ndkConnected)) {
+    await initializeNDK();
   }
 }
 

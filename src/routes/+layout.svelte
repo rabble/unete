@@ -27,36 +27,9 @@
   onMount(async () => {
     if (browser) {
       try {
-        // First ensure NDK is initialized
-        if (!$ndk) {
-          console.log('Initializing NDK...');
-          await ensureConnection();
-          if (!$ndk) {
-            throw new Error('Failed to initialize NDK');
-          }
-          console.log('NDK initialized successfully');
-        }
-
-        // Then check nostr login and set up signer
-        if (window.nostr) {
-          const pubkey = await window.nostr.getPublicKey();
-          if (pubkey) {
-            console.log('User already logged in via nostr-login with pubkey:', pubkey);
-            try {
-              const signer = new NDKNip07Signer();
-              $ndk.signer = signer;
-              await $ndk.connect();
-              console.log('NDK signer connected successfully');
-            } catch (signerError) {
-              console.error('Failed to initialize NDK signer:', signerError);
-              throw signerError;
-            }
-          }
-        }
+        await initializeNDK();
       } catch (error) {
-        console.error('Error during NDK/nostr initialization:', error);
-        // Optionally show user-facing error
-        // alert('Failed to initialize Nostr connection. Please refresh and try again.');
+        console.error('Failed to initialize NDK:', error);
       }
     }
   });
