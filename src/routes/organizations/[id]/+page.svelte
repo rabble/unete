@@ -44,9 +44,17 @@
     }
   }
 
-  // Check ownership when NDK and organization are available
-  $: if ($ndk?.signer && organization) {
-    console.log('Checking ownership - NDK signer and organization available');
+  // Check ownership when NDK and event are available
+  $: if ($ndk?.signer && event) {
+    console.log('Checking ownership - NDK signer and event available');
+    console.log('Event details:', {
+      id: event.id,
+      pubkey: event.pubkey,
+      created_at: event.created_at,
+      kind: event.kind,
+      tags: event.tags
+    });
+    
     $ndk.signer.user()
       .then(user => {
         console.log('Current user pubkey:', user.pubkey);
@@ -61,7 +69,7 @@
   } else {
     console.log('Cannot check ownership - missing requirements:', {
       hasSigner: Boolean($ndk?.signer),
-      hasOrganization: Boolean(organization)
+      hasEvent: Boolean(event)
     });
     isOwner = false;
   }
