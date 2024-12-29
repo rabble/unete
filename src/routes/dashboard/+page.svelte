@@ -59,15 +59,18 @@
 
   onMount(async () => {
     try {
+      // Wait for NDK to be ready
+      if (!$ndk?.signer) {
+        throw new Error('Please login using the Nostr extension');
+      }
+
+      await $ndk.connect();
+
       // Initialize user and profile
       const result = await initializeUser($ndk);
       user = result.user;
       profile = result.profile;
       
-      if (!user) {
-        throw new Error('Please login using the Nostr extension');
-      }
-
       // Update the global user profile store
       userProfile.set(user);
       
