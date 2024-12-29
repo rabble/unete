@@ -296,5 +296,5 @@ export async function createTestOrganization(): Promise<NDKEvent> {
     }
   };
 
-  return createOrganization(ndk, content, "test-org-1");
+  const event = await createOrganization(content, identifier);
 }
