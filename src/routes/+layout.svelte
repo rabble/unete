@@ -14,7 +14,7 @@
   import { onMount } from 'svelte';
   import { setContext } from 'svelte';
   import { NDKNip07Signer } from '@nostr-dev-kit/ndk';
-  import { ndkState as ndk, ensureConnection, initializeNDK } from '$lib/stores/ndk';
+  import { ndkState as ndk, ensureConnection, initializeNDK, ndkConnected } from '$lib/stores/ndk';
   import '../app.css';
   import { browser } from '$app/environment';
   
@@ -229,7 +229,7 @@
         <div class="mt-4 pt-4 border-t">
           <h4 class="font-medium mb-2">NDK Connection Status:</h4>
           <div class="text-sm">
-            <p>NDK Connected: <span class="font-mono">{$ndkConnected}</span></p>
+            <p>NDK Connected: <span class="font-mono">{$ndkConnected ? 'Yes' : 'No'}</span></p>
             <p>Has Signer: <span class="font-mono">{Boolean($ndk?.signer)}</span></p>
           </div>
         </div>
