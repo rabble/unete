@@ -1,4 +1,5 @@
 import { writable, get } from 'svelte/store';
+import { isLoggedIn } from './userProfile';
 import NDK, { NDKEvent, NDKNip07Signer } from '@nostr-dev-kit/ndk';
 import { browser } from '$app/environment';
 
@@ -227,6 +228,7 @@ export async function checkExistingNostrLogin() {
       if (user?.pubkey) {
         await user.fetchProfile();
         ndkConnected.set(true);
+        isLoggedIn.set(true);
         return true;
       }
     }
@@ -258,6 +260,7 @@ export async function initNostrLogin() {
 
     await user.fetchProfile();
     ndkConnected.set(true);
+    isLoggedIn.set(true);
     return true;
   } catch (error) {
     console.error('Error initializing Nostr login:', error);
