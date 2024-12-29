@@ -237,6 +237,34 @@ export async function checkExistingNostrLogin() {
   }
 }
 
+// Function to initialize Nostr login
+export async function initNostrLogin() {
+  const ndkInstance = get(ndkStore);
+  if (!ndkInstance) {
+    throw new Error('NDK not initialized');
+  }
+
+  try {
+    if (!window.nostr) {
+      throw new Error('Nostr extension not found. Please install a Nostr extension.');
+    }
+
+    ndkInstance.signer = new NDKNip07Signer();
+    const user = await ndkInstance.signer.user();
+    
+    if (!user?.pubkey) {
+      throw new Error('Failed to get public key from Nostr extension');
+    }
+
+    await user.fetchProfile();
+    ndkConnected.set(true);
+    return true;
+  } catch (error) {
+    console.error('Error initializing Nostr login:', error);
+    throw error;
+  }
+}
+
 // Initialize NDK on import if in browser
 if (browser) {
   initializeNDK().catch(error => {

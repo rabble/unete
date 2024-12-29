@@ -49,6 +49,10 @@
   async function login() {
     try {
       if (browser) {
+        const ndkInstance = get(ndk);
+        if (!ndkInstance) {
+          throw new Error('NDK not initialized');
+        }
         await initNostrLogin();
       }
     } catch (error) {
