@@ -194,4 +194,31 @@
       </div>
     </div>
   </footer>
+
+  <!-- Debug Info -->
+  {#if $ndk?.signer}
+    <div class="bg-gray-100 border-t border-gray-200 p-4 mt-8">
+      <div class="max-w-7xl mx-auto">
+        <h3 class="text-lg font-semibold mb-2">Debug Information</h3>
+        <div class="bg-white rounded-lg shadow p-4">
+          {#await $ndk.signer.user() then user}
+            <div class="mb-4">
+              <h4 class="font-medium">User Info:</h4>
+              <pre class="bg-gray-50 p-2 rounded mt-1 text-sm overflow-x-auto">
+                {JSON.stringify(user, null, 2)}
+              </pre>
+            </div>
+            {#await user.fetchProfile() then profile}
+              <div>
+                <h4 class="font-medium">Profile Info:</h4>
+                <pre class="bg-gray-50 p-2 rounded mt-1 text-sm overflow-x-auto">
+                  {JSON.stringify(profile, null, 2)}
+                </pre>
+              </div>
+            {/await}
+          {/await}
+        </div>
+      </div>
+    </div>
+  {/if}
 </div>
