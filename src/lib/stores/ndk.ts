@@ -34,17 +34,23 @@ export async function initializeNDK() {
     if (window.nostr) {
       console.log('Found window.nostr, attempting to get public key...');
       try {
-        const pubkey = await window.nostr.getPublicKey();
-        console.log('Got public key:', pubkey);
-        if (pubkey) {
-          // Create and initialize the signer
+        // First check if we already have a nostr-login user
+        const currentUser = await window.nostrLogin?.getCurrentUser();
+        console.log('Current nostr-login user:', currentUser);
+        
+        if (currentUser) {
+          // Use the existing nostr-login NDK signer
           const signer = new NDKNip07Signer();
           await signer.blockUntilReady();
           console.log('Signer ready');
           
-          // Set the signer on NDK instance and verify it matches our pubkey
+          // Set the signer on NDK instance
           ndk.signer = signer;
           const signerUser = await signer.user();
+          console.log('NDK signer user:', signerUser);
+          
+          // Verify the pubkeys match
+          const pubkey = await window.nostr.getPublicKey();
           if (signerUser.pubkey !== pubkey) {
             console.error('Signer pubkey mismatch:', signerUser.pubkey, '!==', pubkey);
             throw new Error('Signer pubkey does not match window.nostr pubkey');
@@ -53,6 +59,8 @@ export async function initializeNDK() {
           
           ndkSigner.set(signer);
           console.log('Set NDK signer');
+        } else {
+          console.log('No current nostr-login user found');
         }
       } catch (e) {
         console.warn('Failed to get public key:', e);
