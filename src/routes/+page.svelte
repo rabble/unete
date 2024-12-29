@@ -35,7 +35,6 @@
     releaseSets: [],
     mutes: [],
     bookmarks: [],
-    communities: [],
     contacts: [],
     people: [],
     chats: [],
@@ -51,7 +50,7 @@
   let revealedSections: Set<string> = new Set();
 
   onMount(() => {
-    ndk = new NDK({
+    const ndkInstance = new NDK({
       explicitRelayUrls: [
         'wss://relay.nos.social',
         'wss://relay.damus.io',
@@ -59,7 +58,8 @@
       ],
       signer: new NDKNip07Signer()
     });
-    ndk.connect();
+    ndk.set(ndkInstance);
+    ndkInstance.connect();
   });
 
   async function login() {
@@ -137,21 +137,7 @@
     <div class="bg-white rounded-lg shadow-lg p-6">
       <h2 class="text-2xl font-bold mb-6">Latest Updates</h2>
       <div class="space-y-6">
-        {#if userLists.communities?.length > 0}
-          {#each userLists.communities.slice(0, 5) as org}
-            <div class="border-b pb-4">
-              <h3 class="font-semibold text-lg mb-2">
-                {org.tags.find(t => t[0] === 'name')?.[1] || 'Organization'}
-              </h3>
-              <p class="text-gray-600 mb-2">{org.content}</p>
-              <p class="text-sm text-gray-500">
-                {new Date(org.created_at * 1000).toLocaleDateString()}
-              </p>
-            </div>
-          {/each}
-        {:else}
-          <p class="text-gray-600">No updates available</p>
-        {/if}
+        <p class="text-gray-600">No updates available</p>
         <a href="/announcements" class="text-purple-600 hover:text-purple-800 font-medium">
           View all updates →
         </a>
@@ -162,25 +148,7 @@
     <div class="bg-white rounded-lg shadow-lg p-6">
       <h2 class="text-2xl font-bold mb-6">Recent Reports</h2>
       <div class="space-y-6">
-        {#if userLists.communities?.length > 0}
-          {#each userLists.communities.slice(0, 5) as org}
-            <div class="border-b pb-4">
-              <p class="text-sm text-gray-500 mb-1">
-                {org.tags.find(t => t[0] === 'name')?.[1] || 'Organization'} 
-                {new Date(org.created_at * 1000).toLocaleDateString()}
-              </p>
-              <h3 class="font-semibold text-lg mb-2">
-                {org.tags.find(t => t[0] === 'description')?.[1] || 'Report Title'}
-              </h3>
-              <p class="text-gray-600 mb-2">{org.content}</p>
-              <a href={`/reports/${org.id}`} class="text-purple-600 hover:text-purple-800">
-                Read full report →
-              </a>
-            </div>
-          {/each}
-        {:else}
-          <p class="text-gray-600">No reports available</p>
-        {/if}
+        <p class="text-gray-600">No reports available</p>
         <a href="/reports" class="text-purple-600 hover:text-purple-800 font-medium">
           View all reports →
         </a>
