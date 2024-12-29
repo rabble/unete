@@ -1,9 +1,12 @@
 <script lang="ts">
   import { initNostrLogin } from '$lib/nostr/login';
-  import { userProfile, isLoggedIn } from '$lib/stores/userProfile';
+  import { userProfile } from '$lib/stores/userProfile';
   import { onMount } from 'svelte';
   import { goto } from '$app/navigation';
   import NDK, { NDKNip07Signer, type NDKUser, type NDKEvent } from '@nostr-dev-kit/ndk';
+  import { writable } from 'svelte/store';
+
+  const isLoggedIn = writable(false);
 
   const images = [
     'diego_rivera_mural.jpg',
@@ -235,7 +238,7 @@
       profile = undefined;
       userPosts = [];
       userLists = {};
-      isLoggedIn = false;
+      $isLoggedIn = false;
       revealedSections = new Set();
       
       // Disconnect NDK
