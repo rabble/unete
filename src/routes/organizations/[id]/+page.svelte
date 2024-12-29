@@ -18,6 +18,7 @@
   let isOwner = false;
 
   async function deleteOrganization() {
+    const reason = prompt('Please provide a reason for deletion (optional):');
     if (!confirm('Are you sure you want to delete this organization?')) {
       return;
     }
@@ -25,8 +26,11 @@
     try {
       const deleteEvent = {
         kind: 5,
-        tags: [['e', $page.params.id]],
-        content: 'Organization deleted by owner'
+        tags: [
+          ['e', $page.params.id],
+          ['a', `30017:${organization.pubkey}:${organization.id}`]
+        ],
+        content: reason || 'Organization deleted by owner'
       };
 
       const signedEvent = await $ndk.publish(deleteEvent);
