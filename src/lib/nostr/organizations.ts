@@ -345,7 +345,9 @@ export async function deleteOrganization(
         content: deletionEvent.content
       });
       
+      // Publish and wait for confirmation
       await ndk.publish(deletionEvent);
+      console.log('Deletion event published successfully');
       return deletionEvent;
     } catch (error) {
       console.error('Delete publish error:', error);

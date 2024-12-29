@@ -639,12 +639,8 @@
                 eventId: originalEvent?.id,
                 reason: reason
               });
-              const deletionEvent = await deleteOrganization(ndk, originalEvent, reason);
-              console.log('Deletion completed:', {
-                deletionEventId: deletionEvent.id,
-                deletionEventKind: deletionEvent.kind,
-                deletionEventTags: deletionEvent.tags
-              });
+              await deleteOrganization(ndk, originalEvent, reason);
+              console.log('Organization deleted successfully');
               window.location.href = '/organizations';
             } catch (e) {
               if (e instanceof SignerRequiredError) {
