@@ -6,7 +6,7 @@
   import { onMount } from 'svelte';
   import { setContext } from 'svelte';
   import { NDKNip07Signer } from '@nostr-dev-kit/ndk';
-  import { ndkStore as ndk, ndkConnected, initializeNDK } from '$lib/stores/ndk';
+  import { ndkStore as ndk, ndkConnected, initializeNDK, initNostrLogin, checkExistingNostrLogin } from '$lib/stores/ndk';
   import '../app.css';
   import { browser } from '$app/environment';
   
@@ -22,7 +22,11 @@
       const ndkInstance = await initializeNDK();
       if (!ndkInstance) {
         console.error('Failed to initialize NDK');
+        return;
       }
+      
+      // Check for existing login
+      await checkExistingNostrLogin();
     }
   });
 
@@ -204,7 +208,7 @@
               {#if result?.error}
                 <p class="text-sm text-red-500">Error getting public key: {result.error.message}</p>
               {:else}
-                <p class="text-sm">Extension Public Key: <span class="font-mono">{result || 'None'}</span></p>
+                <p class="text-sm">: <span class="font-mono">{result || 'None'}</span></p>
               {/if}
             {/await}
           </div>
@@ -240,7 +244,13 @@
           {/await}
         {:else}
           <div class="text-gray-500 pt-4 border-t">
-            <p>No NDK signer available. User info will appear here when logged in.</p>
+            <p class="mb-4">No NDK signer available. User info will appear here when logged in.</p>
+            <button
+              on:click={login}
+              class="bg-purple-600 text-white px-4 py-2 rounded-md hover:bg-purple-700 transition-colors"
+            >
+              Connect with Nostr
+            </button>
           </div>
         {/if}
       </div>
