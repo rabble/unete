@@ -338,7 +338,8 @@ export async function deleteOrganization(
     });
 
     try {
-      await event.publish();
+      // Ensure we're using NDK's publish method
+      await ndk.publish(event);
       return event;
     } catch (error) {
       console.error('Delete publish error:', error);
