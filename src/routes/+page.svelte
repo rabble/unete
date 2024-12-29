@@ -3,6 +3,8 @@
   import { isLoggedIn } from '$lib/stores/userProfile';
   import { goto } from '$app/navigation';
   import NDK, { NDKNip07Signer, type NDKUser, type NDKEvent } from '@nostr-dev-kit/ndk';
+  import { fetchUserContent, getMediaType, getMediaUrls, initializeUser } from '$lib/nostr/ndk-utils';
+  import { ndk } from '$lib/stores/ndk';
 
   const images = [
     'diego_rivera_mural.jpg',
