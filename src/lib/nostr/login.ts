@@ -11,51 +11,35 @@ export async function initNostrLogin() {
       if (pubkey) {
         console.log('Found existing Nostr pubkey:', pubkey);
         
-        // Create and verify signer first
-        const signer = new NDKNip07Signer();
-        console.log('Created NDK NIP-07 signer');
+        // Wait for nostr-login to initialize NDK
+        await new Promise<void>((resolve) => {
+          const checkNDK = () => {
+            const ndkInstance = ndk.get();
+            if (ndkInstance?.signer) {
+              resolve();
+            } else {
+              setTimeout(checkNDK, 100);
+            }
+          };
+          checkNDK();
+        });
         
-        // Explicitly wait for signer to be ready
-        const user = await signer.user();
-        console.log('Got user from signer:', user?.pubkey);
-        
+        const ndkInstance = ndk.get();
+        if (!ndkInstance?.signer) {
+          throw new Error('NDK not properly initialized by nostr-login');
+        }
+
+        // Verify signer is working with correct pubkey
+        const user = await ndkInstance.signer.user();
         if (!user || user.pubkey !== pubkey) {
           console.error('Signer/pubkey mismatch:', {
             signerPubkey: user?.pubkey,
             windowPubkey: pubkey
           });
-          throw new Error('Failed to initialize signer with correct user');
+          throw new Error('NDK signer has incorrect pubkey');
         }
         
-        console.log('Signer verified with correct pubkey');
-        
-        // Create NDK instance with verified signer
-        const ndkInstance = new NDK({
-          explicitRelayUrls: [
-            'wss://relay.nos.social',
-            'wss://relay.damus.io',
-            'wss://relay.nostr.band',
-          ],
-          signer
-        });
-        
-        // Set user explicitly after creation
-        ndkInstance.signer = signer;
-        ndkInstance.activeUser = user;
-        console.log('NDK instance created with signer and user');
-
-        // Connect before setting the store
-        await ndkInstance.connect();
-        console.log('NDK connected successfully');
-
-        // Verify signer is working
-        const signer = await ndkInstance.signer?.user();
-        if (signer?.pubkey !== pubkey) {
-          throw new Error('Signer pubkey mismatch');
-        }
-        
-        // Set the connected instance to the store
-        ndk.set(ndkInstance);
+        console.log('Using NDK instance from nostr-login with verified signer');
         return;
       }
     } catch (e) {
@@ -75,16 +59,7 @@ export async function initNostrLogin() {
   // Listen for auth events
   document.addEventListener('nlAuth', (e) => {
     if (e.detail.type === 'login' || e.detail.type === 'signup') {
-      const ndkInstance = new NDK({
-        explicitRelayUrls: [
-          'wss://relay.nos.social',
-          'wss://relay.damus.io',
-          'wss://relay.nostr.band',
-        ],
-        signer: new NDKNip07Signer(),
-      });
-      ndk.set(ndkInstance);
-      ndkInstance.connect();
+      console.log('Nostr login successful, NDK instance should be ready');
     }
   });
 }
