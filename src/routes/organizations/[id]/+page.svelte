@@ -13,6 +13,16 @@
   let isAdminUser = false;
   let showJson = false;
 
+  // Check admin status when NDK is available
+  $: if ($ndk?.signer) {
+    $ndk.signer.user()
+      .then(user => isAdmin(user.pubkey))
+      .then(result => {
+        isAdminUser = result;
+      })
+      .catch(console.error);
+  }
+
   // Handle the promise when data changes
   $: {
     loading = true;
