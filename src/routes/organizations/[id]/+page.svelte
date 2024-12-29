@@ -305,20 +305,22 @@
       <div class="mt-8 flex flex-col items-center border-t pt-8">
         <h3 class="text-xl font-semibold mb-4">Developer Tools</h3>
         
-        <!-- Pablo's Profile -->
-        {#if $ndk}
-          {#await $ndk.getUser({
-            npub: "npub1l2vyh47mk2p0qlsku7hg0vn29faehy9hy34ygaclpn66ukqp3afqutajft"
-          }).fetchProfile() then profile}
+        <!-- Current User Profile -->
+        {#if $ndk?.signer}
+          {#await $ndk.signer.user().then(user => user.fetchProfile()) then profile}
             <div class="mb-4 w-full max-w-4xl bg-gray-100 p-4 rounded-lg">
-              <h4 class="font-semibold mb-2">Pablo's Profile:</h4>
+              <h4 class="font-semibold mb-2">Current User Profile:</h4>
               <pre class="overflow-x-auto">{JSON.stringify(profile, null, 2)}</pre>
             </div>
           {:catch error}
             <div class="text-red-500 mb-4">
-              Failed to load Pablo's profile: {error.message}
+              Failed to load current user profile: {error.message}
             </div>
           {/await}
+        {:else}
+          <div class="text-gray-500 mb-4">
+            No user logged in. Profile will appear here when logged in.
+          </div>
         {/if}
         <button
           on:click={() => showRawData = !showRawData}
