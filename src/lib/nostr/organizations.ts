@@ -330,8 +330,14 @@ export async function deleteOrganization(
       ['a', `${ORGANIZATION}:${originalEvent.tags.find(t => t[0] === 'd')?.[1]}`] // Reference the parameterized replaceable event
     ];
 
+    console.log('Creating deletion event:', {
+      kind: event.kind,
+      content: event.content,
+      tags: event.tags,
+      originalEventId: originalEvent.id
+    });
+
     try {
-      await event.sign();
       await event.publish();
       return event;
     } catch (error) {
