@@ -24,18 +24,11 @@
   // Make login function available to all pages
   setContext('login', login);
 
-  let subscription;
-
   onMount(async () => {
     if (browser) {
       // Only set up signer, connection is handled by store
       ndk.signer = new NDKNip07Signer();
     }
-    return () => {
-      if (subscription?.unsubscribe) {
-        subscription.unsubscribe();
-      }
-    };
   });
 
   async function login() {
