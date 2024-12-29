@@ -128,8 +128,20 @@ export async function createOrganization(
   identifier: string
 ): Promise<NDKEvent> {
   try {
-    if (!ndk.signer) {
+    const ndkInstance = ndk.get();
+    if (!ndkInstance?.signer) {
       throw new SignerRequiredError();
+    }
+
+    // Verify signer is working
+    try {
+      const user = await ndkInstance.signer.user();
+      if (!user?.pubkey) {
+        throw new SignerRequiredError('Signer not properly initialized');
+      }
+    } catch (e) {
+      console.error('Signer verification failed:', e);
+      throw new SignerRequiredError('Failed to verify signer');
     }
 
     // Validate content
