@@ -24,22 +24,31 @@ export async function initNostrLogin() {
           throw new Error('Signer verification failed');
         }
 
-        // Now get NDK instance and set signer
+        // First get NDK instance and ensure it's ready
         const ndkInstance = await ensureConnection();
         if (!ndkInstance) {
           throw new Error('Failed to initialize NDK');
         }
 
+        // Set up signer
         ndkInstance.signer = signer;
         ndkSigner.set(signer);
         
-        // Fetch and cache the user profile
-        await user.fetchProfile();
-        console.log('NDK signer initialized with pubkey:', user.pubkey);
+        // Wait for NDK to be fully ready
+        await new Promise(resolve => setTimeout(resolve, 100));
         
-        // Import and update user profile store
-        const { userProfile } = await import('$lib/stores/userProfile');
-        userProfile.set(user);
+        try {
+          // Now fetch and cache the user profile
+          await user.fetchProfile();
+          console.log('NDK signer initialized with pubkey:', user.pubkey);
+          
+          // Import and update user profile store
+          const { userProfile } = await import('$lib/stores/userProfile');
+          userProfile.set(user);
+        } catch (profileError) {
+          console.error('Failed to fetch profile:', profileError);
+          // Continue anyway since we have the basic user info
+        }
       }
     }
   } catch (e) {
