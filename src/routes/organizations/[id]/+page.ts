@@ -51,8 +51,8 @@ export const load: PageLoad = async ({ params }) => {
         console.error('Failed to parse organization content:', e, 'Event:', event);
         throw new Error('Invalid organization data');
       }
-      });
-  } catch (err) {
+      })
+    } catch (err) {
     console.error('Failed to load organization:', err);
     throw new Error(`Failed to load organization: ${err.message}`);
   }
