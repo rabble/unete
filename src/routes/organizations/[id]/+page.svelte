@@ -11,6 +11,7 @@
   let loading = true;
   let error: string | null = null;
   let isAdminUser = false;
+  let showJson = false;
 
   // Handle the promise when data changes
   $: {
@@ -39,7 +40,13 @@
 
 <div class="max-w-4xl mx-auto px-4 py-12">
   {#if isAdminUser}
-    <div class="flex justify-end mb-4">
+    <div class="flex justify-end mb-4 space-x-4">
+      <button
+        on:click={() => showJson = !showJson}
+        class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-lg transition-colors"
+      >
+        {showJson ? 'Hide JSON' : 'Show JSON'}
+      </button>
       <a
         href="/organizations/{$page.params.id}/edit"
         class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-lg transition-colors"
@@ -58,6 +65,16 @@
       <p class="text-red-700">{error}</p>
     </div>
   {:else if organization}
+    {#if showJson}
+      <div class="bg-white rounded-lg shadow-lg overflow-hidden mb-8">
+        <div class="p-8">
+          <h2 class="text-2xl font-bold mb-4">Raw Event Data</h2>
+          <pre class="bg-gray-100 p-4 rounded-lg overflow-x-auto">
+            {JSON.stringify(data.promise, null, 2)}
+          </pre>
+        </div>
+      </div>
+    {/if}
     <div class="bg-white rounded-lg shadow-lg overflow-hidden">
       <!-- Header Section -->
       <div class="relative h-48 bg-purple-100">
