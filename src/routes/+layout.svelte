@@ -1,12 +1,4 @@
 <script lang="ts">
-  declare global {
-    interface Window {
-      nostrLogin: {
-        getUserInfo: () => any;
-        getCurrentUser: () => any;
-      }
-    }
-  }
 
   import { i18n } from "$lib/i18n";
   import { ParaglideJS } from "@inlang/paraglide-sveltekit";
@@ -218,21 +210,6 @@
           </div>
         {/if}
 
-        <!-- Nostr Login Status -->
-        {#if browser && window.nostrLogin}
-          <div class="mb-4 pt-4 border-t">
-            <h4 class="font-medium mb-2">Nostr Login Status:</h4>
-            {#await window.nostrLogin.getCurrentUser().catch(e => ({error: e}))}
-              <p class="text-sm">Checking current user...</p>
-            {:then result}
-              {#if result?.error}
-                <p class="text-sm text-red-500">Error getting current user: {result.error.message}</p>
-              {:else}
-                <p class="text-sm">Current User: <span class="font-mono">{JSON.stringify(result)}</span></p>
-              {/if}
-            {/await}
-          </div>
-        {/if}
 
         <!-- User Profile -->
         {#if $ndk?.signer}
