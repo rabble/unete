@@ -40,6 +40,27 @@
   };
   let revealedSections: Set<string> = new Set();
 
+  async function login() {
+    try {
+      if (!$ndk) {
+        throw new Error('NDK not initialized');
+      }
+      
+      $ndk.signer = new NDKNip07Signer();
+      await $ndk.connect();
+      
+      const result = await initializeUser($ndk);
+      user = result.user;
+      profile = result.profile;
+      
+      // Reload the page to reinitialize everything
+      window.location.reload();
+    } catch (err) {
+      console.error('Login failed:', err);
+      error = err.message;
+    }
+  }
+
   function getOrgContent(event: NDKEvent): OrganizationContent {
     try {
       return JSON.parse(event.content);
@@ -101,6 +122,14 @@
   {#if error}
     <div class="bg-red-50 border-l-4 border-red-400 p-4 mb-6">
       <p class="text-red-700">{error}</p>
+      {#if error.includes('Please login')}
+        <button
+          on:click={login}
+          class="mt-4 bg-purple-600 text-white px-6 py-2 rounded-lg hover:bg-purple-700 transition-colors"
+        >
+          Login with Nostr
+        </button>
+      {/if}
     </div>
   {/if}
 
