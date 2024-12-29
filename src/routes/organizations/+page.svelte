@@ -354,10 +354,11 @@
   </div>
 
   <!-- Raw Data Display -->
-  <div class="mt-8 flex flex-col items-center">
+  <div class="mt-8 flex flex-col items-center border-t pt-8">
+    <h3 class="text-xl font-semibold mb-4">Developer Tools</h3>
     <button
       on:click={() => showRawData = !showRawData}
-      class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold py-2 px-4 rounded"
+      class="bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2 px-6 rounded-lg text-lg"
     >
       {showRawData ? 'Hide' : 'Show'} Raw Nostr Data
     </button>
