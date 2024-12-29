@@ -37,11 +37,7 @@
   async function login() {
     try {
       if (browser) {
-        // Launch nostr-login dialog with signup screen
-        const { launch } = await import('nostr-login');
-        launch({
-          startScreen: 'signup'
-        });
+        await initNostrLogin();
       }
     } catch (error) {
       console.error('Login failed:', error);
