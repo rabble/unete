@@ -3,7 +3,7 @@
   import { ORGANIZATION, type OrganizationContent, ORGANIZATION_TAGS } from '$lib/nostr/kinds';
   import NDK, { NDKEvent } from '@nostr-dev-kit/ndk';
   import { searchFilters } from '$lib/stores/searchStore';
-  import { ndk } from '$lib/stores/ndk';
+  import { ndk, ndkConnected } from '$lib/stores/ndk';
   import SearchField from '$lib/components/SearchField.svelte';
   import Select from 'svelte-select';
   import { page } from '$app/stores';
