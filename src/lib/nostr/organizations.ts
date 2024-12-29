@@ -330,16 +330,22 @@ export async function deleteOrganization(
     });
     
     try {
-      // Use NDKEvent's built-in delete method
-      console.log('Calling delete() with reason:', reason);
-      const deletionEvent = await originalEvent.delete(reason);
-      console.log('Deletion event created:', {
-        id: deletionEvent.id,
+      // Create deletion event
+      const deletionEvent = new NDKEvent(ndk);
+      deletionEvent.kind = 5; // Deletion event kind
+      deletionEvent.tags = [
+        ['e', originalEvent.id], // Reference to event being deleted
+        ['a', `${ORGANIZATION}:${originalEvent.tags.find(t => t[0] === 'd')?.[1]}`] // Reference to the replaceable event identifier
+      ];
+      deletionEvent.content = reason || 'Organization deleted by owner';
+      
+      console.log('Publishing deletion event:', {
         kind: deletionEvent.kind,
         tags: deletionEvent.tags,
-        pubkey: deletionEvent.pubkey,
         content: deletionEvent.content
       });
+      
+      await ndk.publish(deletionEvent);
       return deletionEvent;
     } catch (error) {
       console.error('Delete publish error:', error);
