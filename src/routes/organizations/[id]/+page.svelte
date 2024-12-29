@@ -43,16 +43,18 @@
     }
   }
 
-  // Check ownership when NDK is available
-  $: if ($ndk?.signer) {
+  // Check ownership when NDK and organization are available
+  $: if ($ndk?.signer && organization) {
     $ndk.signer.user()
       .then(user => {
-        // Check if current user is the organization creator
-        if (organization) {
-          isOwner = user.pubkey === organization.pubkey;
-        }
+        isOwner = user.pubkey === organization.pubkey;
       })
-      .catch(console.error);
+      .catch(error => {
+        console.error('Failed to check ownership:', error);
+        isOwner = false;
+      });
+  } else {
+    isOwner = false;
   }
 
   // Handle the promise when data changes
@@ -73,7 +75,7 @@
 </script>
 
 <div class="max-w-4xl mx-auto px-4 py-12">
-  {#if isOwner}
+  {#if organization && isOwner}
     <div class="flex justify-end mb-4 space-x-4">
       <button
         on:click={() => showJson = !showJson}
