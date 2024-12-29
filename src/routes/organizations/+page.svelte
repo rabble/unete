@@ -171,89 +171,86 @@
 
       console.log('Fetching organizations...');
       const events = await fetchOrganizations();
-        
-        // Log the result immediately
-        console.log('Race completed:', {
-          hasEvents: Boolean(events),
-          eventCount: events?.size
-        });
-        
-        if (!events) {
-          throw new Error('No events returned from fetchEvents');
-        }
-        
-        console.log('Fetch complete, received events:', events);
-        console.log('Number of events:', events.size);
-        
-        // Log first few events for debugging
-        const firstFew = Array.from(events).slice(0, 3);
-        console.log('Sample events:', firstFew.map(e => {
-          try {
-            return {
-              id: e.id,
-              kind: e.kind,
-              tags: e.tags,
-              created_at: e.created_at,
-              content: JSON.parse(e.content)
-            };
-          } catch (err) {
-            console.error('Failed to parse event content:', err, e);
-            return {
-              id: e.id,
-              kind: e.kind,
-              tags: e.tags,
-              created_at: e.created_at,
-              content: 'Failed to parse'
-            };
-          }
-        }));
-        
-        // Convert Set to Array and sort
-        allOrganizations = Array.from(events).sort((a, b) => {
-          const orgA = getOrgContent(a);
-          const orgB = getOrgContent(b);
-          return orgA.name.localeCompare(orgB.name);
-        });
-        
-        console.log('Processed organizations:', allOrganizations.length);
-        
-        // Set up subscription for real-time updates
-        console.log('Setting up real-time subscription...');
-        const subscription = $ndk.subscribe(filter, {
-          closeOnEose: false,
-          groupableDelay: 1000
-        });
-
-        subscription.on('event', (event) => {
-          console.log('Received real-time event:', {
-            id: event.id,
-            kind: event.kind,
-            pubkey: event.pubkey
-          });
-          const exists = allOrganizations.some(e => e.id === event.id);
-          if (!exists) {
-            allOrganizations = [...allOrganizations, event].sort((a, b) => {
-              const orgA = getOrgContent(a);
-              const orgB = getOrgContent(b);
-              return orgA.name.localeCompare(orgB.name);
-            });
-          }
-        });
-      } catch (err) {
-        console.error('Failed to fetch organizations:', err);
-        console.error('Error details:', {
-          name: err.name,
-          message: err.message,
-          stack: err.stack,
-          ndk: $ndk ? 'initialized' : 'null',
-          ndkPool: $ndk?.pool ? 'initialized' : 'null',
-          relayCount: $ndk?.pool?.relays?.size || 0
-        });
-        error = `Failed to fetch organizations: ${err.message}`;
+      
+      // Log the result immediately
+      console.log('Race completed:', {
+        hasEvents: Boolean(events),
+        eventCount: events?.size
+      });
+      
+      if (!events) {
+        throw new Error('No events returned from fetchEvents');
       }
-    } catch (error) {
-      console.error('Failed to initialize:', error);
-      error = `Failed to load organizations: ${error.message}`;
+      
+      console.log('Fetch complete, received events:', events);
+      console.log('Number of events:', events.size);
+      
+      // Log first few events for debugging
+      const firstFew = Array.from(events).slice(0, 3);
+      console.log('Sample events:', firstFew.map(e => {
+        try {
+          return {
+            id: e.id,
+            kind: e.kind,
+            tags: e.tags,
+            created_at: e.created_at,
+            content: JSON.parse(e.content)
+          };
+        } catch (err) {
+          console.error('Failed to parse event content:', err, e);
+          return {
+            id: e.id,
+            kind: e.kind,
+            tags: e.tags,
+            created_at: e.created_at,
+            content: 'Failed to parse'
+          };
+        }
+      }));
+      
+      // Convert Set to Array and sort
+      allOrganizations = Array.from(events).sort((a, b) => {
+        const orgA = getOrgContent(a);
+        const orgB = getOrgContent(b);
+        return orgA.name.localeCompare(orgB.name);
+      });
+      
+      console.log('Processed organizations:', allOrganizations.length);
+      
+      // Set up subscription for real-time updates
+      console.log('Setting up real-time subscription...');
+      const subscription = $ndk.subscribe({kinds: [ORGANIZATION]}, {
+        closeOnEose: false,
+        groupableDelay: 1000
+      });
+
+      subscription.on('event', (event) => {
+        console.log('Received real-time event:', {
+          id: event.id,
+          kind: event.kind,
+          pubkey: event.pubkey
+        });
+        const exists = allOrganizations.some(e => e.id === event.id);
+        if (!exists) {
+          allOrganizations = [...allOrganizations, event].sort((a, b) => {
+            const orgA = getOrgContent(a);
+            const orgB = getOrgContent(b);
+            return orgA.name.localeCompare(orgB.name);
+          });
+        }
+      });
+
+    } catch (err) {
+      console.error('Failed to load organizations:', err);
+      console.error('Error details:', {
+        name: err.name,
+        message: err.message,
+        stack: err.stack,
+        ndk: $ndk ? 'initialized' : 'null',
+        ndkPool: $ndk?.pool ? 'initialized' : 'null',
+        relayCount: $ndk?.pool?.relays?.size || 0
+      });
+      error = `Failed to load organizations: ${err.message}`;
     } finally {
       loading = false;
     }
