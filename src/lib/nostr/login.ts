@@ -1,5 +1,5 @@
 import { NDKNip07Signer } from '@nostr-dev-kit/ndk';
-import { ndk, ndkSigner } from '$lib/stores/ndk';
+import { ndk, ndkSigner, ensureConnection } from '$lib/stores/ndk';
 import { get } from 'svelte/store';
 
 export async function initNostrLogin() {
