@@ -1,6 +1,7 @@
 import { writable, get } from 'svelte/store';
 import NDK, { NDKEvent, NDKNip07Signer } from '@nostr-dev-kit/ndk';
 import { browser } from '$app/environment';
+import { init as initNostrLogin, launch as launchNostrLoginDialog } from 'nostr-login';
 import { browser } from '$app/environment';
 
 // Create NDK instance
@@ -32,8 +33,6 @@ export async function initializeNDK() {
     console.log('Initializing NDK...');
 
     if (browser) {
-      const { init: initNostrLogin } = await import('nostr-login');
-      
       // Initialize nostr-login
       initNostrLogin({
         noBanner: true, // We'll handle the UI ourselves

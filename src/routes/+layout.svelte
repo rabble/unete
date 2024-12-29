@@ -37,8 +37,10 @@
   async function login() {
     try {
       if (browser) {
-        // Launch nostr-login dialog
-        document.dispatchEvent(new CustomEvent('nlLaunch', { detail: 'welcome' }));
+        // Launch nostr-login dialog with signup screen
+        launchNostrLoginDialog({
+          startScreen: 'signup'
+        });
       }
     } catch (error) {
       console.error('Login failed:', error);
