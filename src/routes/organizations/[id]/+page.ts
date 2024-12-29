@@ -49,6 +49,20 @@ export const load: PageLoad = async ({ params }) => {
         console.error('Failed to parse organization content:', e, 'Event:', event);
         throw new Error('Invalid organization data');
       }
-    })
+      } catch (err) {
+        console.error('Failed to load organizations:', err);
+        console.error('Error details:', {
+          name: err.name,
+          message: err.message,
+          stack: err.stack,
+          ndk: $ndk ? 'initialized' : 'null',
+          ndkPool: $ndk?.pool ? 'initialized' : 'null',
+          relayCount: $ndk?.pool?.relays?.size || 0
+        });
+        error = `Failed to load organizations: ${err.message}`;
+      } finally {
+        loading = false;
+      }
+    });
   };
 };

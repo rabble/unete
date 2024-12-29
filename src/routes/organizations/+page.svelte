@@ -95,23 +95,47 @@
   // Store all fetched organizations
   let allOrganizations: NDKEvent[] = [];
 
-  async function fetchOrganizations() {
+  async function fetchEvents() {
     if (!$ndk || !$ndkConnected) {
       throw new Error('NDK not initialized or connected');
     }
 
-    // Log relay status before fetching
-    const connectedRelays = Array.from($ndk.pool.relays.values())
-      .filter(relay => relay.status === 1);
-    console.log('Connected relays before fetch:', 
-      connectedRelays.map(r => ({url: r.url, status: r.status})));
+    return new Promise((resolve, reject) => {
+      const events = new Set<NDKEvent>();
+      const sub = $ndk.subscribe(
+        { kinds: [ORGANIZATION] },
+        { closeOnEose: true, groupableDelay: 1000 }
+      );
 
-    if (connectedRelays.length === 0) {
-      throw new Error('No relays connected before fetch');
-    }
+      const timeout = setTimeout(() => {
+        sub.close();
+        if (events.size > 0) {
+          resolve(events);
+        } else {
+          reject(new Error('Fetch timeout with no events'));
+        }
+      }, 5000);
 
-    // Wait for NDK to be initialized and connected
-    const connectionPromise = new Promise((resolve, reject) => {
+      sub.on('event', (event: NDKEvent) => {
+        console.log('Received event:', event.id);
+        events.add(event);
+      });
+
+      sub.on('eose', () => {
+        console.log(`EOSE received, got ${events.size} events`);
+        clearTimeout(timeout);
+        resolve(events);
+      });
+    });
+  }
+
+  onMount(async () => {
+    try {
+      loading = true;
+      error = null;
+
+      // Wait for NDK to be initialized and connected
+      const connectionPromise = new Promise((resolve, reject) => {
         const timeout = setTimeout(() => {
           reject(new Error('Timeout waiting for NDK initialization'));
         }, 15000);
@@ -140,7 +164,7 @@
       });
 
       console.log('Fetching organizations...');
-      const events = await fetchOrganizations();
+      const events = await fetchEvents();
       
       // Log the result immediately
       console.log('Race completed:', {
