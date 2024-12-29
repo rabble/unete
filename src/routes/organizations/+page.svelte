@@ -14,6 +14,7 @@
   let ndk: NDK;
   let loading = true;
   let error: string | null = null;
+  let showRawData = false;
 
   // Filter state
   let selectedLocations: string[] = [];
@@ -349,6 +350,29 @@
           </div>
         </a>
       {/each}
+    {/if}
+  </div>
+
+  <!-- Raw Data Display -->
+  <div class="mt-8 flex flex-col items-center">
+    <button
+      on:click={() => showRawData = !showRawData}
+      class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold py-2 px-4 rounded"
+    >
+      {showRawData ? 'Hide' : 'Show'} Raw Nostr Data
+    </button>
+    
+    {#if showRawData}
+      <div class="mt-4 w-full max-w-4xl bg-gray-900 text-gray-100 p-6 rounded-lg overflow-x-auto">
+        <pre>{JSON.stringify(filteredOrganizations.map(event => ({
+          id: event.id,
+          pubkey: event.pubkey,
+          kind: event.kind,
+          tags: event.tags,
+          content: JSON.parse(event.content),
+          created_at: event.created_at
+        })), null, 2)}</pre>
+      </div>
     {/if}
   </div>
 </div>
