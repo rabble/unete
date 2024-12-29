@@ -52,9 +52,19 @@
       const result = await initializeUser($ndk);
       user = result.user;
       profile = result.profile;
+      userProfile.set(user);
       
-      // Reload the page to reinitialize everything
-      window.location.reload();
+      // Clear any previous errors
+      error = null;
+      
+      // Fetch organization events
+      if (user?.pubkey) {
+        const events = await $ndk.fetchEvents({
+          authors: [user.pubkey],
+          kinds: [ORGANIZATION]
+        });
+        userEvents = Array.from(events).sort((a, b) => b.created_at - a.created_at);
+      }
     } catch (err) {
       console.error('Login failed:', err);
       error = err.message;
@@ -80,29 +90,32 @@
 
   onMount(async () => {
     try {
-      // Wait for NDK to be ready
-      if (!$ndk?.signer) {
+      if (!$ndk) {
+        throw new Error('NDK not initialized');
+      }
+
+      // Check if we're already logged in
+      if ($isLoggedIn && $userProfile) {
+        user = $userProfile;
+        profile = await user.fetchProfile();
+      } else if ($ndk.signer) {
+        // Initialize user and profile
+        const result = await initializeUser($ndk);
+        user = result.user;
+        profile = result.profile;
+        userProfile.set(user);
+      } else {
         throw new Error('Please login using the Nostr extension');
       }
 
-      await $ndk.connect();
-
-      // Initialize user and profile
-      const result = await initializeUser($ndk);
-      user = result.user;
-      profile = result.profile;
-      
-      // Update the global user profile store
-      userProfile.set(user);
-      
-      // Fetch organization events
-      const events = await $ndk.fetchEvents({
-        authors: [user.pubkey],
-        kinds: [ORGANIZATION] // Organization kind
-      });
-      
-      userEvents = Array.from(events).sort((a, b) => b.created_at - a.created_at);
-      
+      // Only fetch events if we have a user
+      if (user?.pubkey) {
+        const events = await $ndk.fetchEvents({
+          authors: [user.pubkey],
+          kinds: [ORGANIZATION]
+        });
+        userEvents = Array.from(events).sort((a, b) => b.created_at - a.created_at);
+      }
     } catch (err) {
       console.error('Error loading dashboard:', err);
       error = err.message;
