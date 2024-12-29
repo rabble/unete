@@ -3,6 +3,7 @@
   import { ORGANIZATION, type OrganizationContent, ORGANIZATION_TAGS } from '$lib/nostr/kinds';
   import NDK, { NDKEvent } from '@nostr-dev-kit/ndk';
   import { searchFilters } from '$lib/stores/searchStore';
+  import { ndkState as ndkStore, get } from 'svelte/store';
   import SearchField from '$lib/components/SearchField.svelte';
   import Select from 'svelte-select';
   import { page } from '$app/stores';
@@ -97,16 +98,12 @@
 
   onMount(async () => {
     try {
-      // Initialize NDK
-      ndk = new NDK({
-        explicitRelayUrls: [
-          'wss://relay.nos.social',
-          'wss://relay.damus.io',
-          'wss://relay.nostr.band'
-        ]
-      });
-      await ndk.connect();
-      console.log('NDK connected successfully');
+      // Use global NDK instance
+      ndk = get(ndkStore);
+      if (!ndk) {
+        throw new Error('NDK not initialized');
+      }
+      console.log('Using global NDK instance');
 
       // Set initial filters from URL params
       const params = $page.url.searchParams;
