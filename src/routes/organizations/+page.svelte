@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import { ORGANIZATION, type OrganizationContent, ORGANIZATION_TAGS } from '$lib/nostr/kinds';
-  import { NDKEvent } from '@nostr-dev-kit/ndk';
+  import NDK, { NDKEvent } from '@nostr-dev-kit/ndk';
   import { searchFilters } from '$lib/stores/searchStore';
   import { ndk } from '$lib/stores/ndk';
   import SearchField from '$lib/components/SearchField.svelte';
@@ -12,7 +12,6 @@
 
   // Store for organizations
   let organizations: NDKEvent[] = [];
-  let ndk: NDK;
   let loading = true;
   let error: string | null = null;
   let showRawData = false;
