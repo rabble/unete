@@ -34,7 +34,10 @@ export const load: PageLoad = async ({ params }) => {
           organization: {
             ...content,
             id: event.id,
+            pubkey: event.pubkey,
             created_at: event.created_at,
+            kind: event.kind,
+            sig: event.sig,
             focusAreas: event.tags.filter(t => t[0] === 't').map(t => t[1]),
             locations: event.tags.filter(t => t[0] === 'l' && t[2] === 'location').map(t => t[1]),
             engagementTypes: event.tags.filter(t => t[0] === 'l' && t[2] === 'engagement').map(t => t[1]),
