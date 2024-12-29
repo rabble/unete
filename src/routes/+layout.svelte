@@ -189,6 +189,9 @@
           <div class="text-sm space-y-1">
             <p>Browser Environment: <span class="font-mono">{browser ? 'Yes' : 'No'}</span></p>
             <p>window.nostr exists: <span class="font-mono">{browser && window.nostr ? 'Yes' : 'No'}</span></p>
+            {#if browser && window.nostr}
+              <p>window.nostr.user: <span class="font-mono">{JSON.stringify(window.nostr.user)}</span></p>
+            {/if}
             <p>window.nostrLogin exists: <span class="font-mono">{browser && window.nostrLogin ? 'Yes' : 'No'}</span></p>
           </div>
         </div>
