@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { onMount } from 'svelte';
+  import { onMount, onDestroy } from 'svelte';
   import { ORGANIZATION, type OrganizationContent, ORGANIZATION_TAGS } from '$lib/nostr/kinds';
   import NDK, { NDKEvent } from '@nostr-dev-kit/ndk';
   import { searchFilters } from '$lib/stores/searchStore';
@@ -178,7 +178,14 @@
     });
   }
 
+  let debugInterval: number;
+
   onMount(async () => {
+    // Set up debug refresh interval
+    debugInterval = setInterval(() => {
+      // Force a reactive update
+      allOrganizations = allOrganizations;
+    }, 1000);
     try {
       loading = true;
       error = null;
@@ -309,6 +316,12 @@
       error = `Failed to load organizations: ${err.message}`;
     } finally {
       loading = false;
+    }
+  });
+
+  onDestroy(() => {
+    if (debugInterval) {
+      clearInterval(debugInterval);
     }
   });
 
@@ -581,6 +594,7 @@
     <h3 class="text-xl font-semibold mb-4">Debug: All Loaded Organizations</h3>
     <div class="bg-gray-100 p-4 rounded-lg">
       <p class="mb-2">Total organizations loaded: {allOrganizations.length}</p>
+      <p class="mb-2">Last updated: {new Date().toLocaleTimeString()}</p>
       <div class="space-y-4">
         {#each allOrganizations as event}
           {@const org = getOrgContent(event)}
