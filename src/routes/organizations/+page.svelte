@@ -117,19 +117,9 @@
       
       console.log('Creating subscription with filter:', filter);
       const sub = $ndk.subscribe(filter, { 
-        closeOnEose: false,  // Keep connection open
+        closeOnEose: true,  // Close on EOSE to ensure we get a complete set
         groupableDelay: 1000 // Increase groupable delay
       });
-
-      // Set timeout for initial data collection
-      const timeout = setTimeout(() => {
-        console.log('Initial timeout reached, events:', events.size);
-        if (events.size > 0) {
-          resolve(Array.from(events));
-        } else {
-          reject(new Error('No events received within timeout'));
-        }
-      }, 15000); // Longer timeout
 
       sub.on('event', (event: NDKEvent) => {
         console.log('Received event:', {
@@ -172,9 +162,19 @@
 
       sub.on('eose', () => {
         console.log(`EOSE received, got ${events.size} events`);
-        clearTimeout(timeout);
-        resolve(Array.from(events));
+        if (events.size > 0) {
+          resolve(Array.from(events));
+        } else {
+          reject(new Error('No events received before EOSE'));
+        }
       });
+
+      // Set timeout for entire operation
+      setTimeout(() => {
+        if (events.size === 0) {
+          reject(new Error('No events received within timeout'));
+        }
+      }, 15000);
     });
   }
 
@@ -222,14 +222,8 @@
       console.log('Fetching organizations...');
       const events = await fetchEvents();
       
-      // Log the result immediately
-      console.log('Race completed:', {
-        hasEvents: Boolean(events),
-        eventCount: events instanceof Set ? events.size : 0
-      });
-      
-      if (!events || !(events instanceof Set) || events.size === 0) {
-        console.warn('No events returned from fetchEvents or invalid response');
+      if (!events || events.length === 0) {
+        console.warn('No events returned from fetchEvents');
         allOrganizations = [];
         return;
       }
