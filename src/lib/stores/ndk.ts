@@ -112,7 +112,24 @@ export async function ensureConnection() {
       if (!ndk) {
         throw new Error('Failed to initialize NDK');
       }
-      await new Promise(resolve => setTimeout(resolve, 1000)); // Small delay to ensure connection
+      
+      // Wait for connection with timeout
+      await Promise.race([
+        new Promise((resolve) => {
+          const checkConnection = () => {
+            if (get(ndkConnected)) {
+              resolve(true);
+            } else {
+              setTimeout(checkConnection, 100);
+            }
+          };
+          checkConnection();
+        }),
+        new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('Connection timeout')), 5000)
+        )
+      ]);
+      
       return ndk;
     }
     console.log('Using existing NDK connection');
