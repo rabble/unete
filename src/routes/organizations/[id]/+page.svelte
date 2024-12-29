@@ -304,6 +304,22 @@
       <!-- Raw Data Display -->
       <div class="mt-8 flex flex-col items-center border-t pt-8">
         <h3 class="text-xl font-semibold mb-4">Developer Tools</h3>
+        
+        <!-- Pablo's Profile -->
+        {#if $ndk}
+          {#await $ndk.getUser({
+            npub: "npub1l2vyh47mk2p0qlsku7hg0vn29faehy9hy34ygaclpn66ukqp3afqutajft"
+          }).fetchProfile() then profile}
+            <div class="mb-4 w-full max-w-4xl bg-gray-100 p-4 rounded-lg">
+              <h4 class="font-semibold mb-2">Pablo's Profile:</h4>
+              <pre class="overflow-x-auto">{JSON.stringify(profile, null, 2)}</pre>
+            </div>
+          {:catch error}
+            <div class="text-red-500 mb-4">
+              Failed to load Pablo's profile: {error.message}
+            </div>
+          {/await}
+        {/if}
         <button
           on:click={() => showRawData = !showRawData}
           class="bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2 px-6 rounded-lg text-lg"
