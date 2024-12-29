@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { initNostrLogin } from '$lib/nostr/login';
+  import { userProfile, isLoggedIn } from '$lib/stores/userProfile';
   import { onMount } from 'svelte';
   import { goto } from '$app/navigation';
   import NDK, { NDKNip07Signer, type NDKUser, type NDKEvent } from '@nostr-dev-kit/ndk';
@@ -292,6 +294,25 @@
         alt="Inspirational Movement Art"
         class="w-full rounded-lg shadow-lg"
       />
+    </div>
+
+    <!-- Login/Profile Section -->
+    <div class="fixed bottom-4 right-4">
+      {#if $isLoggedIn && $userProfile}
+        <a href="/dashboard" class="text-purple-600 hover:text-purple-800 flex items-center space-x-2">
+          {#if $userProfile.profile?.picture}
+            <img src={$userProfile.profile.picture} alt="Profile" class="w-6 h-6 rounded-full">
+          {/if}
+          <span>{$userProfile.profile?.name || 'Dashboard'}</span>
+        </a>
+      {:else}
+        <button
+          on:click={() => initNostrLogin()}
+          class="text-purple-600 hover:text-purple-800 text-sm"
+        >
+          Login with Nostr
+        </button>
+      {/if}
     </div>
   </div>
 

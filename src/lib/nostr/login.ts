@@ -31,7 +31,14 @@ export async function initNostrLogin() {
 
         ndkInstance.signer = signer;
         ndkSigner.set(signer);
+        
+        // Fetch and cache the user profile
+        await user.fetchProfile();
         console.log('NDK signer initialized with pubkey:', user.pubkey);
+        
+        // Import and update user profile store
+        const { userProfile } = await import('$lib/stores/userProfile');
+        userProfile.set(user);
       }
     }
   } catch (e) {
