@@ -137,7 +137,7 @@ export async function updateOrganization(
     }
 
     try {
-      await event.publish(); // Publish the updated event
+      await ndk.publish(event); // Publish the updated event
       return event;
     } catch (error) {
       console.error('Publish error:', error);
