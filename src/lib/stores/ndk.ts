@@ -84,34 +84,7 @@ export async function initializeNDK() {
       ndkInstance.pool.on('relay:connect', onConnect);
     });
 
-    // If window.nostr exists, set up NDK signer
-    if (window.nostr) {
-      console.log('Setting up NIP-07 signer...');
-      try {
-        const signer = new NDKNip07Signer();
-        await signer.blockUntilReady();
-        
-        // Verify signer is working
-        const signerUser = await signer.user();
-        if (!signerUser?.pubkey) {
-          throw new Error('Signer not properly initialized - no pubkey');
-        }
-        
-        // Log verification
-        console.log('Initial signer verification passed');
-        if (!user?.pubkey) {
-          throw new Error('Signer not properly initialized - no pubkey');
-        }
-        console.log('Signer verified with pubkey:', user.pubkey);
-        
-        ndkInstance.signer = signer;
-        ndkSigner.set(signer);
-        console.log('Signer ready with pubkey:', user.pubkey);
-      } catch (err) {
-        console.error('Failed to initialize signer:', err);
-        throw err;
-      }
-    }
+    // Signer will be initialized by initNostrLogin when needed
 
     return ndkInstance;
   } catch (error) {
