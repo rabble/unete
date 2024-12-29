@@ -1,14 +1,44 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-  import NDK, { NDKEvent, NDKNip07Signer } from '@nostr-dev-kit/ndk';
+  import NDK, { NDKEvent, NDKNip07Signer, type NDKUser } from '@nostr-dev-kit/ndk';
   import { ndk } from '$lib/stores/ndk';
-  import { onDestroy } from 'svelte';
-  import { initNostrLogin } from '$lib/nostr/login';
+  import { isLoggedIn } from '$lib/stores/userProfile';
+  import { goto } from '$app/navigation';
   import type { OrganizationContent } from '$lib/nostr/kinds';
 
+  let user: NDKUser | undefined;
+  let profile: { name?: string; about?: string; picture?: string; } | undefined;
+  let userPosts: NDKEvent[] = [];
   let userEvents: NDKEvent[] = [];
   let loading = true;
   let error: string | null = null;
+  let userLists: { [key: string]: NDKEvent[] } = {
+    followSets: [],
+    pins: [],
+    relaySets: [],
+    bookmarkSets: [],
+    curationSets: [],
+    videoSets: [],
+    muteSets: [],
+    interestSets: [],
+    emojiSets: [],
+    releaseSets: [],
+    mutes: [],
+    bookmarks: [],
+    communities: [],
+    contacts: [],
+    people: [],
+    chats: [],
+    blockedRelays: [],
+    searchRelays: [],
+    groups: [],
+    interests: [],
+    emojis: [],
+    dmRelays: [],
+    wikiAuthors: [],
+    wikiRelays: []
+  };
+  let revealedSections: Set<string> = new Set();
 
   function getOrgContent(event: NDKEvent): OrganizationContent {
     try {
@@ -26,36 +56,56 @@
     }
   }
 
+  function getMediaType(url: string): 'image' | 'video' | 'audio' | 'unknown' {
+    const extension = url.split('.').pop()?.toLowerCase();
+    if (['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(extension || '')) return 'image';
+    if (['mp4', 'webm', 'ogg'].includes(extension || '')) return 'video';
+    if (['mp3', 'wav', 'ogg'].includes(extension || '')) return 'audio';
+    return 'unknown';
+  }
+
+  function getMediaUrls(content: string): string[] {
+    const urlRegex = /(https?:\/\/[^\s]+\.(jpg|jpeg|png|gif|webp|mp4|webm|ogg|mp3|wav))/gi;
+    return Array.from(content.matchAll(urlRegex), m => m[0]);
+  }
+
+  async function fetchUserContent() {
+    if (!user) return;
+    const postsEvents = await $ndk.fetchEvents({
+      kinds: [1], // NDKKind.Text
+      authors: [user.pubkey],
+      limit: 10
+    });
+    userPosts = Array.from(postsEvents);
+  }
+
   onMount(async () => {
+    if (!$isLoggedIn) {
+      goto('/');
+      return;
+    }
+
     try {
-      // Initialize NDK with signer
-      const ndkInstance = new NDK({
-        explicitRelayUrls: [
-          'wss://relay.nos.social',
-          'wss://relay.damus.io',
-          'wss://relay.nostr.band',
-        ],
-        signer: new NDKNip07Signer(),
-      });
-
-      await ndkInstance.connect();
-      $ndk = ndkInstance;
-
-      // Check if we have a signer
-      if (!ndkInstance.signer) {
+      if (!$ndk?.signer) {
         throw new Error('Please login using the Nostr extension');
       }
 
-      const user = await ndkInstance.signer.user();
+      user = await $ndk.signer.user();
       if (!user) {
         throw new Error('No user found');
       }
 
-      // Fetch all events published by the user
-      const events = await ndkInstance.fetchEvents({
-        authors: [user.pubkey]
-      });
+      const profileData = await user.fetchProfile();
+      profile = profileData;
 
+      // Fetch user content
+      await fetchUserContent();
+
+      // Fetch organizations
+      const events = await $ndk.fetchEvents({
+        authors: [user.pubkey],
+        kinds: [31337] // Organization kind
+      });
       userEvents = Array.from(events).sort((a, b) => b.created_at - a.created_at);
       
     } catch (err) {
@@ -76,52 +126,149 @@
     </div>
   {/if}
 
+  <!-- User Profile -->
+  {#if user && profile}
+    <div class="bg-white rounded-lg shadow-lg p-6 mb-8">
+      <div class="flex items-start gap-6">
+        {#if profile.picture}
+          <img 
+            src={profile.picture} 
+            alt="Profile" 
+            class="w-24 h-24 rounded-full"
+          />
+        {/if}
+        <div class="flex-1">
+          <h2 class="text-2xl font-semibold">
+            Welcome, {profile.name || 'Nostr User'}
+          </h2>
+          {#if profile.about}
+            <p class="text-gray-600 mt-2">{profile.about}</p>
+          {/if}
+          <p class="text-sm text-gray-500 mt-2">Public key: {user.npub}</p>
+        </div>
+      </div>
+    </div>
+  {/if}
+
   <!-- Relay Status -->
-  {#if $ndk?.pool?.relays && browser}
-    <div class="mb-8 bg-white rounded-lg shadow-lg p-4">
-      <h2 class="text-xl font-semibold mb-4">Relay Status</h2>
-      <div class="space-y-2">
+  {#if $ndk?.pool?.relays}
+    <div class="mb-8 bg-white rounded-lg shadow-lg p-6">
+      <h2 class="text-xl font-semibold mb-4">Connected Relays</h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
         {#each Object.entries($ndk.pool.relays) as [url, relay]}
-          <div class="flex items-center gap-2">
+          <div class="flex items-center gap-2 p-2 bg-gray-50 rounded">
             <div class={`w-2 h-2 rounded-full ${relay.status === 1 ? 'bg-green-500' : 'bg-red-500'}`}></div>
-            <span class="text-sm">{url}</span>
+            <span class="text-sm font-mono">{url}</span>
           </div>
         {/each}
       </div>
     </div>
   {/if}
 
-  <!-- Your Published Events -->
-  <div class="bg-white rounded-lg shadow-lg p-6">
-    <h2 class="text-2xl font-semibold mb-6">Your Published Events</h2>
-    
-    {#if loading}
-      <div class="flex justify-center py-8">
-        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"></div>
-      </div>
-    {:else if userEvents.length === 0}
-      <p class="text-gray-600 text-center py-8">You haven't published any events yet.</p>
-    {:else}
-      <div class="space-y-6">
-        {#each userEvents as event}
-          {@const org = getOrgContent(event)}
-          <div class="border rounded-lg p-4 hover:bg-gray-50">
-            <div class="flex justify-between items-start mb-4">
-              <div>
-                <h3 class="text-xl font-semibold">{org.name}</h3>
-                <p class="text-gray-600">Published {new Date(event.created_at * 1000).toLocaleString()}</p>
-              </div>
-              <a 
-                href="/organizations/{event.id}/edit" 
-                class="bg-purple-100 text-purple-700 px-4 py-2 rounded-lg hover:bg-purple-200 transition-colors"
-              >
-                Edit
-              </a>
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+    <!-- Recent Posts -->
+    <div class="bg-white rounded-lg shadow-lg p-6">
+      <h2 class="text-2xl font-semibold mb-6">Recent Posts</h2>
+      {#if loading}
+        <div class="flex justify-center py-8">
+          <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"></div>
+        </div>
+      {:else if userPosts.length === 0}
+        <p class="text-gray-600 text-center py-8">You haven't made any posts yet.</p>
+      {:else}
+        <div class="space-y-6">
+          {#each userPosts as post}
+            <div class="border rounded-lg p-4">
+              <p class="text-gray-800">{post.content}</p>
+              
+              <!-- Media Gallery -->
+              {#if getMediaUrls(post.content).length > 0}
+                <div class="mt-4 grid grid-cols-2 gap-4">
+                  {#each getMediaUrls(post.content) as mediaUrl}
+                    {#if getMediaType(mediaUrl) === 'image'}
+                      <img 
+                        src={mediaUrl} 
+                        alt="Post media" 
+                        class="w-full h-48 object-cover rounded-lg cursor-pointer hover:opacity-90"
+                        loading="lazy"
+                      />
+                    {:else if getMediaType(mediaUrl) === 'video'}
+                      <video 
+                        src={mediaUrl} 
+                        controls 
+                        class="w-full h-48 object-cover rounded-lg"
+                      >
+                        <track kind="captions">
+                      </video>
+                    {:else if getMediaType(mediaUrl) === 'audio'}
+                      <audio 
+                        src={mediaUrl} 
+                        controls 
+                        class="w-full mt-2"
+                      >
+                        <track kind="captions">
+                      </audio>
+                    {/if}
+                  {/each}
+                </div>
+              {/if}
+
+              <p class="text-sm text-gray-500 mt-2">
+                {new Date(post.created_at * 1000).toLocaleString()}
+              </p>
             </div>
-            <p class="text-gray-700">{org.description}</p>
-          </div>
-        {/each}
+          {/each}
+        </div>
+      {/if}
+    </div>
+
+    <!-- Your Organizations -->
+    <div class="bg-white rounded-lg shadow-lg p-6">
+      <div class="flex justify-between items-center mb-6">
+        <h2 class="text-2xl font-semibold">Your Organizations</h2>
+        <a 
+          href="/organizations/add" 
+          class="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors"
+        >
+          Add New
+        </a>
       </div>
-    {/if}
+      
+      {#if loading}
+        <div class="flex justify-center py-8">
+          <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"></div>
+        </div>
+      {:else if userEvents.length === 0}
+        <p class="text-gray-600 text-center py-8">You haven't created any organizations yet.</p>
+      {:else}
+        <div class="space-y-6">
+          {#each userEvents as event}
+            {@const org = getOrgContent(event)}
+            <div class="border rounded-lg p-4 hover:bg-gray-50">
+              <div class="flex justify-between items-start mb-4">
+                <div>
+                  <h3 class="text-xl font-semibold">{org.name}</h3>
+                  <p class="text-sm text-gray-600">Created {new Date(event.created_at * 1000).toLocaleString()}</p>
+                </div>
+                <a 
+                  href="/organizations/{event.id}/edit" 
+                  class="bg-purple-100 text-purple-700 px-4 py-2 rounded-lg hover:bg-purple-200 transition-colors"
+                >
+                  Edit
+                </a>
+              </div>
+              <p class="text-gray-700 line-clamp-2">{org.description}</p>
+              <div class="mt-2 flex flex-wrap gap-2">
+                {#each org.focusAreas as area}
+                  <span class="bg-purple-100 text-purple-700 text-sm px-2 py-1 rounded">
+                    {area}
+                  </span>
+                {/each}
+              </div>
+            </div>
+          {/each}
+        </div>
+      {/if}
+    </div>
   </div>
 </div>
