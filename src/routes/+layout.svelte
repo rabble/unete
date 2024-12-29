@@ -27,9 +27,24 @@
   onMount(async () => {
     if (browser) {
       try {
+        // Initialize NDK first
         await initializeNDK();
+
+        // Listen for nostr-login auth events
+        document.addEventListener('nlAuth', async (event: CustomEvent) => {
+          const { detail } = event;
+          console.log('nostr-login auth event:', detail);
+          
+          // Update NDK signer when nostr-login provides one
+          if (detail?.signer) {
+            ndk.signer = detail.signer;
+            ndkSigner.set(detail.signer);
+            console.log('NDK signer updated from nostr-login');
+          }
+        });
+
       } catch (error) {
-        console.error('Failed to initialize NDK:', error);
+        console.error('Failed to initialize:', error);
       }
     }
   });
