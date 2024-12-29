@@ -2,13 +2,22 @@ import { NDKNip07Signer } from '@nostr-dev-kit/ndk';
 import { ndk, ndkSigner, ensureConnection } from '$lib/stores/ndk';
 import { get } from 'svelte/store';
 
+// Initialize immediately if we're in the browser
+if (typeof window !== 'undefined') {
+  initNostrLogin().catch(console.error);
+}
+
 export async function initNostrLogin() {
   if (typeof window === 'undefined') return;
 
   try {
     // Check if already logged in via Nostr extension
-    if (window.nostr) {
-      await window.nostr.waitReady?.();
+    if (!window.nostr) {
+      console.log('No Nostr extension found');
+      return;
+    }
+
+    await window.nostr.waitReady?.();
       
       const pubkey = await window.nostr.getPublicKey();
       if (pubkey) {
