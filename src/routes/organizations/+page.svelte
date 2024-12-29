@@ -1,9 +1,9 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import { ORGANIZATION, type OrganizationContent, ORGANIZATION_TAGS } from '$lib/nostr/kinds';
-  import NDK, { NDKEvent } from '@nostr-dev-kit/ndk';
+  import { NDKEvent } from '@nostr-dev-kit/ndk';
   import { searchFilters } from '$lib/stores/searchStore';
-  import { ndkState as ndkStore, get } from 'svelte/store';
+  import { ndk } from '$lib/stores/ndk';
   import SearchField from '$lib/components/SearchField.svelte';
   import Select from 'svelte-select';
   import { page } from '$app/stores';
@@ -98,9 +98,7 @@
 
   onMount(async () => {
     try {
-      // Use global NDK instance
-      ndk = get(ndkStore);
-      if (!ndk) {
+      if (!$ndk) {
         throw new Error('NDK not initialized');
       }
       console.log('Using global NDK instance');
@@ -114,7 +112,7 @@
       });
 
       // Create a subscription for organizations
-      const subscription = ndk.subscribe(
+      const subscription = $ndk.subscribe(
         {
           kinds: [ORGANIZATION],
           since: 0 // Get all historical events
