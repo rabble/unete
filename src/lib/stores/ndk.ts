@@ -106,7 +106,16 @@ export async function getCachedEvents(filter: any): Promise<Set<NDKEvent>> {
   }
 
   // Otherwise fetch from network
-  const events = await ndk.fetchEvents(filter);
+  console.log('Creating fetchEvents promise...');
+  const fetchPromise = ndk.fetchEvents(filter);
+  console.log('Waiting for events...');
+  
+  const timeoutPromise = new Promise((_, reject) => {
+    setTimeout(() => reject(new Error('Fetch timeout after 30s')), 30000);
+  });
+
+  const events = await Promise.race([fetchPromise, timeoutPromise]);
+  console.log('Fetch complete, got events:', events);
   
   // Update cache with new events
   events.forEach(event => {
