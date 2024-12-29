@@ -12,6 +12,7 @@
   let error: string | null = null;
   let isAdminUser = false;
   let showJson = false;
+  let rawEvent: any = null;
 
   // Check admin status when NDK is available
   $: if ($ndk?.signer) {
@@ -29,6 +30,7 @@
     data.promise
       .then(result => {
         organization = result;
+        rawEvent = data.event;
         loading = false;
       })
       .catch(e => {
@@ -85,6 +87,26 @@
         </div>
       </div>
     {/if}
+    <div class="flex justify-end mb-4">
+      <button
+        on:click={() => showJson = !showJson}
+        class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-lg transition-colors"
+      >
+        {showJson ? 'Hide Raw Data' : 'Show Raw Data'}
+      </button>
+    </div>
+
+    {#if showJson}
+      <div class="bg-white rounded-lg shadow-lg overflow-hidden mb-8">
+        <div class="p-8">
+          <h2 class="text-2xl font-bold mb-4">Raw Event Data</h2>
+          <pre class="bg-gray-100 p-4 rounded-lg overflow-x-auto whitespace-pre-wrap">
+            {JSON.stringify(rawEvent, null, 2)}
+          </pre>
+        </div>
+      </div>
+    {/if}
+
     <div class="bg-white rounded-lg shadow-lg overflow-hidden">
       <!-- Header Section -->
       <div class="relative h-48 bg-purple-100">
