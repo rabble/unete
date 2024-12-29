@@ -20,10 +20,11 @@ if (typeof localStorage !== 'undefined') {
   });
 }
 
+export const loginState = writable(false);
 export const isLoggedIn = derived(
-  [ndk, userProfile],
-  ([$ndk, $userProfile]) => {
-    return !!($ndk?.signer && $userProfile?.pubkey);
+  [ndk, userProfile, loginState],
+  ([$ndk, $userProfile, $loginState]) => {
+    return $loginState && !!($ndk?.signer && $userProfile?.pubkey);
   }
 );
 

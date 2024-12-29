@@ -20,7 +20,7 @@
       if ($ndk) {
         $ndk.signer = undefined;
         await $ndk.disconnect();
-        isLoggedIn.set(false);
+        loginState.set(false);
       }
     } catch (error) {
       console.error('Logout failed:', error);
