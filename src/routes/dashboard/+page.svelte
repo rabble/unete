@@ -181,6 +181,22 @@
     </div>
   {/if}
 
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+    <!-- Community Admin -->
+    {#if user}
+      <div class="bg-white rounded-lg shadow-lg p-6">
+        <h2 class="text-2xl font-semibold mb-4">Community Administration</h2>
+        <p class="text-gray-600 mb-4">Manage community memberships and moderate organization listings.</p>
+        <a 
+          href="/dashboard/community" 
+          class="inline-block bg-purple-600 text-white px-6 py-2 rounded-lg hover:bg-purple-700 transition-colors"
+        >
+          Manage Communities
+        </a>
+      </div>
+    {/if}
+  </div>
+
   <div class="grid grid-cols-1 gap-8">
 
     <!-- Your Organizations -->
