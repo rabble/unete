@@ -4,6 +4,7 @@
   import { ndk } from '$lib/stores/ndk';
   import type { OrganizationContent } from '$lib/nostr/kinds';
   import { isAdmin } from '$lib/nostr/admin';
+  import { goto } from '$app/navigation';
 
   export let data;
   
@@ -14,13 +15,42 @@
   let showJson = false;
   let rawEvent: any = null;
   let showRawData = false;
+  let isOwner = false;
 
-  // Check admin status when NDK is available
+  async function deleteOrganization() {
+    if (!confirm('Are you sure you want to delete this organization?')) {
+      return;
+    }
+
+    try {
+      const deleteEvent = {
+        kind: 5,
+        tags: [['e', $page.params.id]],
+        content: 'Organization deleted by owner'
+      };
+
+      const signedEvent = await $ndk.publish(deleteEvent);
+      if (signedEvent) {
+        alert('Organization deleted successfully');
+        goto('/organizations');
+      }
+    } catch (err) {
+      console.error('Failed to delete organization:', err);
+      alert('Failed to delete organization: ' + err.message);
+    }
+  }
+
+  // Check admin status and ownership when NDK is available
   $: if ($ndk?.signer) {
     $ndk.signer.user()
-      .then(user => isAdmin(user.pubkey))
-      .then(result => {
-        isAdminUser = result;
+      .then(user => {
+        isAdmin(user.pubkey).then(result => {
+          isAdminUser = result;
+        });
+        // Check if current user is the organization creator
+        if (organization) {
+          isOwner = user.pubkey === organization.pubkey;
+        }
       })
       .catch(console.error);
   }
@@ -52,7 +82,7 @@
 </script>
 
 <div class="max-w-4xl mx-auto px-4 py-12">
-  {#if isAdminUser}
+  {#if isAdminUser || isOwner}
     <div class="flex justify-end mb-4 space-x-4">
       <button
         on:click={() => showJson = !showJson}
@@ -66,6 +96,14 @@
       >
         Edit Organization
       </a>
+      {#if isOwner}
+        <button
+          on:click={deleteOrganization}
+          class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg transition-colors"
+        >
+          Delete Organization
+        </button>
+      {/if}
     </div>
   {/if}
   {#if loading}
