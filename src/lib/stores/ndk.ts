@@ -1,7 +1,7 @@
 import { writable, get } from 'svelte/store';
 import NDK, { NDKEvent, NDKNip07Signer } from '@nostr-dev-kit/ndk';
 import { browser } from '$app/environment';
-import { init as initNostrLogin } from 'nostr-login';
+import { browser } from '$app/environment';
 
 // Create NDK instance
 const ndk = new NDK({
@@ -31,39 +31,43 @@ export async function initializeNDK() {
   try {
     console.log('Initializing NDK...');
 
-    // Initialize nostr-login first
-    initNostrLogin({
-      noBanner: true, // We'll handle the UI ourselves
-      onAuth: async (npub, options) => {
-        console.log('nostr-login auth:', npub, options);
-        
-        try {
-          // Create and initialize NDK signer
-          const signer = new NDKNip07Signer();
-          await signer.blockUntilReady();
-          console.log('NDK signer ready');
+    if (browser) {
+      const { init: initNostrLogin } = await import('nostr-login');
+      
+      // Initialize nostr-login
+      initNostrLogin({
+        noBanner: true, // We'll handle the UI ourselves
+        onAuth: async (npub, options) => {
+          console.log('nostr-login auth:', npub, options);
+          
+          try {
+            // Create and initialize NDK signer
+            const signer = new NDKNip07Signer();
+            await signer.blockUntilReady();
+            console.log('NDK signer ready');
 
-          // Set signer on NDK instance
-          ndk.signer = signer;
-          const signerUser = await signer.user();
-          console.log('NDK signer user:', signerUser);
+            // Set signer on NDK instance
+            ndk.signer = signer;
+            const signerUser = await signer.user();
+            console.log('NDK signer user:', signerUser);
 
-          // Verify the pubkeys match
-          const pubkey = await window.nostr.getPublicKey();
-          if (signerUser.pubkey !== pubkey) {
-            console.error('Signer pubkey mismatch:', signerUser.pubkey, '!==', pubkey);
-            throw new Error('Signer pubkey does not match window.nostr pubkey');
+            // Verify the pubkeys match
+            const pubkey = await window.nostr.getPublicKey();
+            if (signerUser.pubkey !== pubkey) {
+              console.error('Signer pubkey mismatch:', signerUser.pubkey, '!==', pubkey);
+              throw new Error('Signer pubkey does not match window.nostr pubkey');
+            }
+            console.log('Verified signer pubkey matches window.nostr');
+
+            ndkSigner.set(signer);
+            console.log('Set NDK signer');
+          } catch (error) {
+            console.error('Failed to initialize NDK signer:', error);
+            throw error;
           }
-          console.log('Verified signer pubkey matches window.nostr');
-
-          ndkSigner.set(signer);
-          console.log('Set NDK signer');
-        } catch (error) {
-          console.error('Failed to initialize NDK signer:', error);
-          throw error;
         }
-      }
-    });
+      });
+    }
 
     // Check if we already have a logged in user
     if (window.nostr) {
