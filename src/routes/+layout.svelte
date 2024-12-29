@@ -32,10 +32,19 @@
           const pubkey = await window.nostr.getPublicKey();
           if (pubkey) {
             console.log('User already logged in via nostr-login with pubkey:', pubkey);
+            // Initialize NDK if not already done
+            if (!$ndk) {
+              console.log('Initializing NDK...');
+              await ensureConnection();
+            }
             // Set up NDK signer
-            $ndk.signer = new NDKNip07Signer();
-            await $ndk.connect();
-            console.log('NDK signer connected');
+            if ($ndk) {
+              $ndk.signer = new NDKNip07Signer();
+              await $ndk.connect();
+              console.log('NDK signer connected');
+            } else {
+              console.error('NDK not initialized');
+            }
           }
         }
       } catch (error) {
