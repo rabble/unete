@@ -98,7 +98,7 @@
       // Fetch organization events
       const events = await $ndk.fetchEvents({
         authors: [user.pubkey],
-        kinds: [31337] // Organization kind
+        kinds: [31312] // Organization kind
       });
       
       userEvents = Array.from(events).sort((a, b) => b.created_at - a.created_at);
