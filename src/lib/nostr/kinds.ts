@@ -1,5 +1,5 @@
 // Organization event kind (30000-39999 range for parameterized replaceable events)
-export const ORGANIZATION = 31337; // Custom kind for organization directory listings
+export const ORGANIZATION = 31312; // Custom kind for organization directory listings
 export const TOPICS = 31313;
 
 // Topics event content schema
