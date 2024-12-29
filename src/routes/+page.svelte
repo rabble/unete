@@ -206,66 +206,6 @@
       <p class="text-gray-600">You are logged in with public key:</p>
       <p class="font-mono bg-gray-100 p-2 rounded mt-2 mb-8 break-all">{user.npub}</p>
 
-      <!-- Recent Posts -->
-      <div class="mb-8">
-        <button 
-          class="flex items-center gap-2 text-xl font-semibold mb-4 hover:text-purple-600"
-          on:click={() => revealedSections.has('posts') ? revealedSections.delete('posts') : revealedSections.add('posts')}
-        >
-          <span class="transform transition-transform {revealedSections.has('posts') ? 'rotate-90' : ''} inline-block">
-            ›
-          </span>
-          Recent Posts
-        </button>
-        
-        {#if revealedSections.has('posts') && userPosts.length > 0}
-          <div class="space-y-4">
-            {#each userPosts as post}
-              <div class="bg-gray-50 p-4 rounded-lg text-left">
-                <p class="text-gray-800">{post.content}</p>
-                
-                <!-- Media Gallery -->
-                {#if getMediaUrls(post.content).length > 0}
-                  <div class="mt-4 grid grid-cols-2 gap-4">
-                    {#each getMediaUrls(post.content) as mediaUrl}
-                      {#if getMediaType(mediaUrl) === 'image'}
-                        <img 
-                          src={mediaUrl} 
-                          alt="Post media" 
-                          class="w-full h-48 object-cover rounded-lg cursor-pointer hover:opacity-90"
-                          loading="lazy"
-                        />
-                      {:else if getMediaType(mediaUrl) === 'video'}
-                        <video 
-                          src={mediaUrl} 
-                          controls 
-                          class="w-full h-48 object-cover rounded-lg"
-                        >
-                          <track kind="captions">
-                        </video>
-                      {:else if getMediaType(mediaUrl) === 'audio'}
-                        <audio 
-                          src={mediaUrl} 
-                          controls 
-                          class="w-full mt-2"
-                        >
-                          <track kind="captions">
-                        </audio>
-                      {/if}
-                    {/each}
-                  </div>
-                {/if}
-
-                <p class="text-sm text-gray-500 mt-2">
-                  {new Date(post.created_at * 1000).toLocaleString()}
-                </p>
-              </div>
-            {/each}
-          </div>
-        {:else}
-          <p class="text-gray-500">No recent posts found</p>
-        {/if}
-      </div>
     </div>
   {/if}
 </main>
