@@ -33,6 +33,19 @@ export async function initializeNDK() {
     console.log('Initializing NDK...');
 
     if (browser) {
+      // First check if window.nostr is available and set up NDK signer
+      if (window.nostr) {
+        try {
+          const signer = new NDKNip07Signer();
+          await signer.blockUntilReady();
+          ndk.signer = signer;
+          ndkSigner.set(signer);
+          console.log('NDK signer initialized from window.nostr');
+        } catch (error) {
+          console.error('Failed to initialize NDK signer:', error);
+        }
+      }
+
       // Dynamically import nostr-login only in browser
       const { init, launch } = await import('nostr-login');
       nostrLogin = { init, launch };
