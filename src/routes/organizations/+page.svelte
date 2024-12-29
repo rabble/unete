@@ -150,16 +150,25 @@
       error = null;
 
       // Wait for NDK to be initialized and connected
-      const startTime = Date.now();
-      const timeout = 15000; // 15 seconds total timeout
-      
-      while (!$ndk || !$ndkConnected) {
-        if (Date.now() - startTime > timeout) {
-          throw new Error('Timeout waiting for NDK initialization');
-        }
-        await new Promise(resolve => setTimeout(resolve, 100));
-      }
-      console.log('Using connected NDK instance:', $ndk);
+      const connectionPromise = new Promise((resolve, reject) => {
+        const timeout = setTimeout(() => {
+          reject(new Error('Timeout waiting for NDK initialization'));
+        }, 15000);
+
+        const checkConnection = () => {
+          if ($ndk && $ndkConnected) {
+            clearTimeout(timeout);
+            resolve($ndk);
+            return;
+          }
+          setTimeout(checkConnection, 100);
+        };
+
+        checkConnection();
+      });
+
+      const ndkInstance = await connectionPromise;
+      console.log('Using connected NDK instance:', ndkInstance);
 
       // Set initial filters from URL params
       const params = $page.url.searchParams;
