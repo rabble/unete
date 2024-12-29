@@ -42,8 +42,15 @@ export async function initializeNDK() {
           await signer.blockUntilReady();
           console.log('Signer ready');
           
-          // Set the signer on NDK instance
+          // Set the signer on NDK instance and verify it matches our pubkey
           ndk.signer = signer;
+          const signerUser = await signer.user();
+          if (signerUser.pubkey !== pubkey) {
+            console.error('Signer pubkey mismatch:', signerUser.pubkey, '!==', pubkey);
+            throw new Error('Signer pubkey does not match window.nostr pubkey');
+          }
+          console.log('Verified signer pubkey matches window.nostr');
+          
           ndkSigner.set(signer);
           console.log('Set NDK signer');
         }
