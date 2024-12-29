@@ -17,32 +17,6 @@
   let showRawData = false;
   let isOwner = false;
 
-  async function deleteOrganization() {
-    const reason = prompt('Please provide a reason for deletion (optional):');
-    if (!confirm('Are you sure you want to delete this organization?')) {
-      return;
-    }
-
-    try {
-      const deleteEvent = {
-        kind: 5,
-        tags: [
-          ['e', $page.params.id],
-          ['a', `31312:${organization.pubkey}:${organization.id}`]
-        ],
-        content: reason || 'Organization deleted by owner'
-      };
-
-      const signedEvent = await $ndk.publish(deleteEvent);
-      if (signedEvent) {
-        alert('Organization deleted successfully');
-        goto('/organizations');
-      }
-    } catch (err) {
-      console.error('Failed to delete organization:', err);
-      alert('Failed to delete organization: ' + err.message);
-    }
-  }
 
   // Check ownership when NDK signer and event are available
   $: if ($ndk?.signer && event) {
@@ -103,14 +77,6 @@
       >
         Edit Organization
       </a>
-      {#if isOwner}
-        <button
-          on:click={deleteOrganization}
-          class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg transition-colors"
-        >
-          Delete Organization
-        </button>
-      {/if}
     </div>
   {/if}
   {#if loading}
