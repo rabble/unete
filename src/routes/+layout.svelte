@@ -14,7 +14,7 @@
   import { onMount } from 'svelte';
   import { setContext } from 'svelte';
   import { NDKNip07Signer } from '@nostr-dev-kit/ndk';
-  import { ndk, ensureConnection } from '$lib/stores/ndk';
+  import { ndk, ensureConnection, initializeNDK } from '$lib/stores/ndk';
   import '../app.css';
   import { browser } from '$app/environment';
   
