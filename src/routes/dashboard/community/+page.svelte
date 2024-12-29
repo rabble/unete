@@ -3,7 +3,7 @@
   import { ndk } from '$lib/stores/ndk';
   import { userProfile } from '$lib/stores/userProfile';
   import { COMMUNITY, ORGANIZATION } from '$lib/nostr/kinds';
-  import { fetchCommunityOrganizations, isCommunityModerator, approveOrganization } from '$lib/nostr/community';
+  import { fetchCommunityOrganizations, isCommunityModerator, approveOrganization, INITIAL_ADMIN } from '$lib/nostr/community';
   import type { NDKEvent } from '@nostr-dev-kit/ndk';
 
   let loading = true;

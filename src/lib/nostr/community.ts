@@ -3,7 +3,7 @@ import type { NDKEvent } from '@nostr-dev-kit/ndk';
 import { COMMUNITY, COMMUNITY_POST_APPROVAL, type CommunityContent } from './kinds';
 
 // Initial admin pubkey
-const INITIAL_ADMIN = 'npub1wmr34t36fy03m8hvgl96zl3znndyzyaqhwmwdtshwmtkg03fetaqhjg240';
+export const INITIAL_ADMIN = 'npub1wmr34t36fy03m8hvgl96zl3znndyzyaqhwmwdtshwmtkg03fetaqhjg240';
 
 export async function createCommunity(
   ndk: NDK, 
