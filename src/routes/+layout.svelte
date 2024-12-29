@@ -195,12 +195,19 @@
         {#if browser && window.nostr}
           <div class="mb-4 pt-4 border-t">
             <h4 class="font-medium mb-2">Nostr Extension:</h4>
-            {#await window.nostr.getPublicKey().catch(e => null)}
+            {#await Promise.race([
+              window.nostr.getPublicKey(),
+              new Promise((_, reject) => 
+                setTimeout(() => reject(new Error('Timeout getting public key')), 5000)
+              )
+            ]).catch(e => ({error: e}))}
               <p class="text-sm">Checking public key...</p>
-            {:then pubkey}
-              <p class="text-sm">Public Key: <span class="font-mono">{pubkey || 'None'}</span></p>
-            {:catch error}
-              <p class="text-sm text-red-500">Error getting public key: {error.message}</p>
+            {:then result}
+              {#if result?.error}
+                <p class="text-sm text-red-500">Error getting public key: {result.error.message}</p>
+              {:else}
+                <p class="text-sm">Public Key: <span class="font-mono">{result || 'None'}</span></p>
+              {/if}
             {/await}
           </div>
         {/if}
