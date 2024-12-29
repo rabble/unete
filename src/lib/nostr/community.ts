@@ -7,24 +7,49 @@ const INITIAL_ADMIN = 'npub1wmr34t36fy03m8hvgl96zl3znndyzyaqhwmwdtshwmtkg03fetaq
 
 export async function createCommunity(
   ndk: NDK, 
-  content: CommunityContent, 
-  moderators: string[]
+  content: CommunityContent & {
+    image?: string;
+    imageWidth?: string;
+    imageHeight?: string;
+  },
+  moderators: string[],
+  identifier: string = 'allofus.directory'
 ) {
   if (!ndk?.signer) {
     throw new Error('NDK signer required to create community');
   }
 
+  const tags = [
+    ['d', identifier],
+    ['name', content.name],
+    ['description', content.description]
+  ];
+
+  // Add image tag if provided
+  if (content.image) {
+    const dimensions = content.imageWidth && content.imageHeight 
+      ? `${content.imageWidth}x${content.imageHeight}`
+      : '';
+    tags.push(['image', content.image, dimensions]);
+  }
+
+  // Add moderators
+  moderators.forEach(pubkey => {
+    if (pubkey.trim()) {
+      tags.push(['p', pubkey, '', 'moderator']);
+    }
+  });
+
+  // Add default relays
+  tags.push(
+    ['relay', 'wss://relay.nostr.band', 'requests'],
+    ['relay', 'wss://relay.damus.io', 'approvals']
+  );
+
   const event = new ndk.NDKEvent(ndk, {
     kind: COMMUNITY,
     content: JSON.stringify(content),
-    tags: [
-      ['d', 'allofus.directory'],
-      ['name', content.name],
-      ['description', content.description],
-      ...moderators.map(pubkey => ['p', pubkey, '', 'moderator']),
-      ['relay', 'wss://relay.nostr.band', 'requests'],
-      ['relay', 'wss://relay.damus.io', 'approvals']
-    ]
+    tags
   });
 
   await event.publish();

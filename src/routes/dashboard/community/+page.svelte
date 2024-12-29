@@ -75,7 +75,17 @@
 </script>
 
 <div class="max-w-7xl mx-auto px-4 py-12">
-  <h1 class="text-4xl font-bold mb-8">Community Administration</h1>
+  <div class="flex justify-between items-center mb-8">
+    <h1 class="text-4xl font-bold">Community Administration</h1>
+    {#if $userProfile?.pubkey === INITIAL_ADMIN}
+      <a 
+        href="/dashboard/community/create" 
+        class="bg-purple-600 text-white px-6 py-2 rounded-lg hover:bg-purple-700 transition-colors"
+      >
+        Create Community
+      </a>
+    {/if}
+  </div>
 
   {#if error}
     <div class="bg-red-50 border-l-4 border-red-400 p-4 mb-6">
