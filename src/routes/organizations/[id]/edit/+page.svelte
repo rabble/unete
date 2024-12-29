@@ -3,7 +3,7 @@
   import { page } from '$app/stores';
   import { initNostrLogin } from '$lib/nostr/login';
   import type { OrganizationContent, OrganizationCategory } from '$lib/nostr/kinds';
-  import { updateOrganization } from '$lib/nostr/organizations';
+  import { updateOrganization, deleteOrganization } from '$lib/nostr/organizations';
   import { getTopics } from '$lib/topics';
   import NDK, { NDKNip07Signer, NDKEvent } from '@nostr-dev-kit/ndk';
   import {
@@ -609,14 +609,47 @@
       </div>
     </div>
 
-    <!-- Submit Button -->
-    <div class="flex justify-center">
+    <!-- Submit and Delete Buttons -->
+    <div class="flex justify-center gap-4">
       <button
         type="submit"
         disabled={loading}
         class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-8 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
       >
         {loading ? 'Updating Organization...' : 'Update Organization'}
+      </button>
+      <button
+        type="button"
+        disabled={loading}
+        on:click={async () => {
+          if (confirm('Are you sure you want to delete this organization? This action cannot be undone.')) {
+            error = null;
+            loading = true;
+            try {
+              if (!ndk?.signer) {
+                throw new SignerRequiredError();
+              }
+              if (!originalEvent) {
+                throw new Error('Original event not found');
+              }
+              await deleteOrganization(ndk, originalEvent);
+              window.location.href = '/organizations';
+            } catch (e) {
+              if (e instanceof SignerRequiredError) {
+                error = 'Please login with a Nostr extension first';
+              } else if (e instanceof PublishError) {
+                error = 'Failed to delete organization. Please try again.';
+              } else {
+                error = 'An unexpected error occurred';
+                console.error(e);
+              }
+              loading = false;
+            }
+          }
+        }}
+        class="bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-8 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+      >
+        Delete Organization
       </button>
     </div>
   </form>
