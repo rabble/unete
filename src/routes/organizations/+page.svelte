@@ -97,45 +97,59 @@
 
   async function fetchEvents() {
     if (!$ndk || !$ndkConnected) {
+      console.error('NDK status:', { ndk: Boolean($ndk), connected: $ndkConnected });
       throw new Error('NDK not initialized or connected');
     }
 
+    console.log('Starting fetchEvents with NDK:', {
+      hasPool: Boolean($ndk.pool),
+      relayCount: $ndk.pool?.relays?.size || 0,
+      relayUrls: Array.from($ndk.pool?.relays?.keys() || [])
+    });
+
     return new Promise((resolve, reject) => {
       const events = new Set<NDKEvent>();
-      const sub = $ndk.subscribe(
-        {
-          kinds: [ORGANIZATION],
-          since: 0, // Include all events from the beginning
-          limit: 100 // Reasonable limit to prevent overwhelming
-        },
-        { closeOnEose: true, groupableDelay: 500 }
-      );
+      const filter = {
+        kinds: [ORGANIZATION],
+        since: 0,
+        limit: 100
+      };
+      
+      console.log('Creating subscription with filter:', filter);
+      const sub = $ndk.subscribe(filter, { 
+        closeOnEose: false,  // Keep connection open
+        groupableDelay: 1000 // Increase groupable delay
+      });
 
-      // Set a longer timeout but resolve early if we get events
+      // Set timeout for initial data collection
       const timeout = setTimeout(() => {
-        sub.stop();
-        console.log('Fetch timeout reached, events collected:', events.size);
-        resolve(Array.from(events));
-      }, 10000);
-
-      // Add an early resolution if we get enough events
-      const checkEvents = setInterval(() => {
-        if (events.size >= 5) {
-          clearTimeout(timeout);
-          clearInterval(checkEvents);
-          sub.stop();
-          console.log('Got sufficient events early:', events.size);
+        console.log('Initial timeout reached, events:', events.size);
+        if (events.size > 0) {
           resolve(Array.from(events));
+        } else {
+          reject(new Error('No events received within timeout'));
         }
-      }, 1000);
+      }, 15000); // Longer timeout
 
       sub.on('event', (event: NDKEvent) => {
         console.log('Received event:', {
           id: event.id,
-          content: getOrgContent(event),
-          currentStoreSize: allOrganizations.length
+          kind: event.kind,
+          pubkey: event.pubkey,
+          content: event.content ? event.content.substring(0, 100) + '...' : 'No content',
+          tags: event.tags
         });
-        events.add(event);
+        
+        try {
+          const content = getOrgContent(event);
+          console.log('Parsed organization:', {
+            name: content.name,
+            category: content.category
+          });
+          events.add(event);
+        } catch (e) {
+          console.error('Failed to parse event:', e);
+        }
         
         // Log before and after updating allOrganizations
         console.log('Before update:', {
@@ -252,11 +266,18 @@
       console.log('Setting up real-time subscription...');
       const subscription = $ndk.subscribe({
         kinds: [ORGANIZATION],
-        since: Math.floor(Date.now() / 1000) - 60, // Last minute only for real-time
-        limit: 10
+        since: Math.floor(Date.now() / 1000) - 3600, // Last hour for real-time
+        limit: 50
       }, {
         closeOnEose: false,
-        groupableDelay: 1000
+        groupableDelay: 2000
+      });
+
+      // Log subscription details
+      console.log('Real-time subscription created:', {
+        filter: subscription.filter,
+        opts: subscription.opts,
+        relayCount: $ndk.pool?.relays?.size || 0
       });
 
       subscription.on('event', (event) => {
