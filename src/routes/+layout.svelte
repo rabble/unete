@@ -11,7 +11,7 @@
   import '../app.css';
   import { browser } from '$app/environment';
   
-  let isLoggedIn = false;
+  let localLoginState = false;
   let profile;
   
   // Make login function available to all pages
