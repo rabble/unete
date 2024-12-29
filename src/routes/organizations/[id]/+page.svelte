@@ -47,25 +47,29 @@
   // Check ownership when NDK and event are available
   $: if ($ndk?.signer && event) {
     console.log('Checking ownership - NDK signer and event available');
-    console.log('Event details:', {
-      id: event.id,
-      pubkey: event.pubkey,
-      created_at: event.created_at,
-      kind: event.kind,
-      tags: event.tags
-    });
     
-    $ndk.signer.user()
-      .then(user => {
-        console.log('Current user pubkey:', user.pubkey);
-        console.log('Event pubkey:', event.pubkey);
+    // Try window.nostr first
+    if (window.nostr) {
+      window.nostr.getPublicKey()
+        .then(pubkey => {
+          console.log('Current user pubkey:', pubkey);
+          console.log('Event pubkey:', event.pubkey);
+          isOwner = pubkey === event.pubkey;
+          console.log('Is owner?', isOwner);
+        })
+        .catch(error => {
+          console.error('Failed to get pubkey:', error);
+          isOwner = false;
+        });
+    } else {
+      // Fallback to NDK if window.nostr isn't available
+      const user = $ndk.activeUser;
+      if (user) {
         isOwner = user.pubkey === event.pubkey;
-        console.log('Is owner?', isOwner);
-      })
-      .catch(error => {
-        console.error('Failed to check ownership:', error);
+      } else {
         isOwner = false;
-      });
+      }
+    }
   } else {
     console.log('Cannot check ownership - missing requirements:', {
       hasSigner: Boolean($ndk?.signer),
