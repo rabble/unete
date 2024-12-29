@@ -13,6 +13,7 @@
   let isAdminUser = false;
   let showJson = false;
   let rawEvent: any = null;
+  let showRawData = false;
 
   // Check admin status when NDK is available
   $: if ($ndk?.signer) {
@@ -251,6 +252,30 @@
                 </a>
               {/if}
             </div>
+          </div>
+        {/if}
+      </div>
+
+      <!-- Raw Data Display -->
+      <div class="mt-8 flex flex-col items-center border-t pt-8">
+        <h3 class="text-xl font-semibold mb-4">Developer Tools</h3>
+        <button
+          on:click={() => showRawData = !showRawData}
+          class="bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2 px-6 rounded-lg text-lg"
+        >
+          {showRawData ? 'Hide' : 'Show'} Raw Nostr Data
+        </button>
+        
+        {#if showRawData}
+          <div class="mt-4 w-full max-w-4xl bg-gray-900 text-gray-100 p-6 rounded-lg overflow-x-auto">
+            <pre>{JSON.stringify({
+              id: data.promise.id,
+              pubkey: data.promise.pubkey,
+              kind: data.promise.kind,
+              tags: data.promise.tags,
+              content: organization,
+              created_at: data.promise.created_at
+            }, null, 2)}</pre>
           </div>
         {/if}
       </div>
