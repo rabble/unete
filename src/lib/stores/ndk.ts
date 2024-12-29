@@ -12,8 +12,9 @@ const ndk = new NDK({
 });
 
 // Create stores
-export const ndkConnected = writable(false);
+export const ndkConnected = writable<boolean>(false);
 export const ndkSigner = writable<NDKNip07Signer | null>(null);
+export const ndkStore = writable<NDK | null>(null);
 
 // Initialize NDK and handle signer setup
 export async function initializeNDK() {

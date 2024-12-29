@@ -14,7 +14,7 @@
   import { onMount } from 'svelte';
   import { setContext } from 'svelte';
   import { NDKNip07Signer } from '@nostr-dev-kit/ndk';
-  import { ndk, ensureConnection, initializeNDK, ndkStore } from '$lib/stores/ndk';
+  import { ndk, ensureConnection, initializeNDK } from '$lib/stores/ndk';
   import '../app.css';
   import { browser } from '$app/environment';
   
@@ -28,7 +28,6 @@
     if (browser) {
       try {
         await initializeNDK();
-        ndkStore.set($ndk);
       } catch (error) {
         console.error('Failed to initialize NDK:', error);
       }
