@@ -87,11 +87,28 @@ export async function initializeNDK() {
     // If window.nostr exists, set up NDK signer
     if (window.nostr) {
       console.log('Setting up NIP-07 signer...');
-      const signer = new NDKNip07Signer();
-      await signer.blockUntilReady();
-      ndkInstance.signer = signer;
-      ndkSigner.set(signer);
-      console.log('Signer ready');
+      try {
+        const signer = new NDKNip07Signer();
+        await signer.blockUntilReady();
+        
+        // Verify signer is working
+        const user = await signer.user();
+        if (!user?.pubkey) {
+          throw new Error('Signer not properly initialized - no pubkey');
+        }
+        
+        // Verify NIP-04 capability
+        if (!signer.nip04) {
+          throw new Error('Signer missing NIP-04 support');
+        }
+        
+        ndkInstance.signer = signer;
+        ndkSigner.set(signer);
+        console.log('Signer ready with pubkey:', user.pubkey);
+      } catch (err) {
+        console.error('Failed to initialize signer:', err);
+        throw err;
+      }
     }
 
     return ndkInstance;
@@ -189,26 +206,12 @@ export async function getCachedEvents(filter: any): Promise<Set<NDKEvent>> {
     });
   });
 }
-// Initialize NDK store
-export const ndk = writable<NDK | null>(null);
+// Export the NDK store from the existing ndkStore
+export const ndk = ndkStore;
 
-// Initialize NDK on import
+// Initialize NDK on import if in browser
 if (browser) {
-  const ndkInstance = new NDK({
-    explicitRelayUrls: [
-      'wss://relay.nos.social',
-      'wss://relay.damus.io',
-      'wss://relay.nostr.band',
-      'wss://relay.snort.social',
-      'wss://nostr.mom',
-      'wss://relay.current.fyi'
-    ]
-  });
-  
-  ndkInstance.connect().then(() => {
-    ndk.set(ndkInstance);
-    ndkConnected.set(true);
-  }).catch(error => {
+  initializeNDK().catch(error => {
     console.error('Failed to initialize NDK:', error);
   });
 }
