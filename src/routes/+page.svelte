@@ -208,8 +208,17 @@
 
       <!-- Recent Posts -->
       <div class="mb-8">
-        <h3 class="text-xl font-semibold mb-4">Recent Posts</h3>
-        {#if userPosts.length > 0}
+        <button 
+          class="flex items-center gap-2 text-xl font-semibold mb-4 hover:text-purple-600"
+          on:click={() => revealedSections.has('posts') ? revealedSections.delete('posts') : revealedSections.add('posts')}
+        >
+          <span class="transform transition-transform {revealedSections.has('posts') ? 'rotate-90' : ''} inline-block">
+            ›
+          </span>
+          Recent Posts
+        </button>
+        
+        {#if revealedSections.has('posts') && userPosts.length > 0}
           <div class="space-y-4">
             {#each userPosts as post}
               <div class="bg-gray-50 p-4 rounded-lg text-left">
