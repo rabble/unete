@@ -311,7 +311,8 @@ export async function createOrganization(
 // Helper function to test organization creation
 export async function deleteOrganization(
   ndk: NDK,
-  originalEvent: NDKEvent
+  originalEvent: NDKEvent,
+  reason?: string
 ): Promise<NDKEvent> {
   try {
     await ensureConnection();
@@ -320,23 +321,17 @@ export async function deleteOrganization(
       throw new SignerRequiredError();
     }
 
-    // Get the d tag from the original event
-    const dTag = originalEvent.tags.find(t => t[0] === 'd');
-    if (!dTag) {
-      throw new ValidationError('Original event missing d tag');
-    }
-
-    // Create a deletion event
+    // Create a deletion event (kind 5)
     const event = new NDKEvent(ndk);
-    event.kind = ORGANIZATION;
-    event.content = ''; // Empty content for deletion
+    event.kind = 5; // Standard Nostr deletion event kind
+    event.content = reason || ''; // Optional reason for deletion
     event.tags = [
-      ['d', dTag[1]], // Use the same d tag
-      ['e', originalEvent.id, '', 'delete'] // Reference the original event
+      ['e', originalEvent.id], // Reference the event to delete
+      ['a', `${ORGANIZATION}:${originalEvent.tags.find(t => t[0] === 'd')?.[1]}`] // Reference the parameterized replaceable event
     ];
 
     try {
-      await event.sign();  // Sign the event before publishing
+      await event.sign();
       await event.publish();
       return event;
     } catch (error) {
