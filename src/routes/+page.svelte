@@ -19,7 +19,6 @@
   ];
   const randomImage = images[Math.floor(Math.random() * images.length)];
 
-  let ndk: NDK;
   let user: NDKUser | undefined;
   let profile: { name?: string; about?: string; picture?: string; } | undefined;
   let userPosts: NDKEvent[] = [];
