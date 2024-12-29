@@ -28,7 +28,7 @@
         kind: 5,
         tags: [
           ['e', $page.params.id],
-          ['a', `30017:${organization.pubkey}:${organization.id}`]
+          ['a', `31312:${organization.pubkey}:${organization.id}`]
         ],
         content: reason || 'Organization deleted by owner'
       };
