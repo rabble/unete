@@ -28,9 +28,6 @@ export const TIMESTAMP = 1040;          // OpenTimestamps - NIP-03
 export const REPORTING = 1984;          // Report - NIP-56
 export const LABEL = 1985;              // Label - NIP-32
 
-// Community events (4000+)
-export const COMMUNITY_POST_APPROVAL = 4550; // Community post approval - NIP-72
-
 // Zap events (9000+)
 export const ZAP_GOAL = 9041;          // Zap goal - NIP-75
 export const ZAP_REQUEST = 9734;        // Zap request - NIP-57
@@ -73,45 +70,6 @@ export const CALENDAR_RSVP = 31925;     // Calendar event RSVP - NIP-52
 // Handler events (31900+)
 export const HANDLER_RECOMMEND = 31989; // Handler recommendation - NIP-89
 export const HANDLER_INFO = 31990;      // Handler information - NIP-89
-
-// Community events (34000+)
-export const COMMUNITY = 34550;         // Community definition - NIP-72
-
-// Community interfaces
-export interface CommunityContent {
-  name: string;
-  description: string;
-  image?: string;
-  rules?: string[];
-  guidelines?: string[];
-  lastUpdated: number;
-}
-
-export interface CommunityTags {
-  IDENTIFIER: 'd';           // Required unique identifier
-  NAME: 'name';             // Community name
-  DESCRIPTION: 'description'; // Community description
-  IMAGE: 'image';           // Community image URL
-  MODERATOR: 'p';          // Moderator pubkey
-  RELAY: 'relay';          // Community relay
-  APPROVAL: 'a';           // Approval reference
-  POST: 'e';               // Post reference
-  AUTHOR: 'p';             // Post author
-  KIND: 'k';               // Post kind
-}
-
-export const COMMUNITY_TAGS: CommunityTags = {
-  IDENTIFIER: 'd',
-  NAME: 'name', 
-  DESCRIPTION: 'description',
-  IMAGE: 'image',
-  MODERATOR: 'p',
-  RELAY: 'relay',
-  APPROVAL: 'a',
-  POST: 'e',
-  AUTHOR: 'p',
-  KIND: 'k'
-};
 
 // Custom organization events
 export const ORGANIZATION = 31312;      // Custom kind for organization directory listings
