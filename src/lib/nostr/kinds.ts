@@ -1,5 +1,5 @@
-// Organization event kind (30000-40000 range for parameterized replaceable events)
-export const ORGANIZATION = 30312;
+// Organization event kind (30000-39999 range for parameterized replaceable events)
+export const ORGANIZATION = 30000; // Using the base kind for categorized lists
 export const TOPICS = 31313;
 
 // Topics event content schema

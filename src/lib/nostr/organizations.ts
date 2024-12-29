@@ -94,6 +94,13 @@ export async function updateOrganization(
   identifier: string,
   ndk: NDK
 ): Promise<NDKEvent> {
+  // Validate identifier format
+  if (!identifier?.trim()) {
+    throw new ValidationError('Organization identifier is required');
+  }
+  if (!/^[a-z0-9-]+$/.test(identifier)) {
+    throw new ValidationError('Organization identifier must contain only lowercase letters, numbers, and hyphens');
+  }
   try {
     await ensureConnection();
     const ndkInstance = ndk;
@@ -108,9 +115,31 @@ export async function updateOrganization(
     const event = new NDKEvent(ndk);
     event.kind = ORGANIZATION;
     event.content = JSON.stringify(content);
+    
+    // Use consistent d-tag format
+    const dTag = `org:${identifier}`;
     event.tags = [
-      ['d', identifier]  // This makes it a parameterized replaceable event
+      ['d', dTag]  // This makes it a parameterized replaceable event
     ];
+
+    // Add other tags
+    if (content.focusAreas?.length) {
+      content.focusAreas.forEach(area => {
+        event.tags.push([ORGANIZATION_TAGS.FOCUS_AREA, area]);
+      });
+    }
+
+    if (content.locations?.length) {
+      content.locations.forEach(location => {
+        event.tags.push([ORGANIZATION_TAGS.LOCATION, location]);
+      });
+    }
+
+    if (content.engagementTypes?.length) {
+      content.engagementTypes.forEach(type => {
+        event.tags.push([ORGANIZATION_TAGS.ENGAGEMENT, type]);
+      });
+    }
 
     try {
       await event.publish(); // Publish the updated event
@@ -168,8 +197,10 @@ export async function createOrganization(
     event.content = JSON.stringify(content);
   
     // Add required 'd' tag for parameterized replaceable events
+    // Use a consistent format for the identifier to ensure replaceability
+    const dTag = `org:${identifier}`; // Namespace the identifier
     event.tags = [
-      ['d', identifier]  // This makes it a parameterized replaceable event
+      ['d', dTag]  // This makes it a parameterized replaceable event
     ];
 
     // Add optional tags
