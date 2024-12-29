@@ -38,6 +38,14 @@ export async function initializeNDK() {
           ndk.signer = signer;
           ndkSigner.set(signer);
           await ndk.connect();
+      
+          // Set the active user when we have a signer
+          const user = await signer.user();
+          if (user) {
+            ndk.activeUser = user;
+            console.log('NDK active user set:', user.npub);
+          }
+      
           console.log('NDK signer connected successfully');
         } catch (signerError) {
           console.error('Failed to initialize NDK signer:', signerError);
