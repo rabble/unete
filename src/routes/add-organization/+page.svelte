@@ -14,7 +14,24 @@
   } from '$lib/nostr/errors';
 
   // --- Reactive Variables ---
-  let focusAreas: string[] = [];
+  let focusAreas: string[] = [
+    'Climate Justice',
+    'Community Organizing',
+    'Economic Justice',
+    'Education',
+    'Electoral Politics',
+    'Feminism',
+    'Housing Justice',
+    'Immigration',
+    'Indigenous Rights',
+    'International Solidarity',
+    'LGBTQIA+ Rights',
+    'Palestine Solidarity',
+    'Racial Justice',
+    'Reproductive Rights',
+    'Workplace Organizing',
+    'Youth Organizing'
+  ];
   let error: string | null = null;
   let success = false;
   let loading = false;
