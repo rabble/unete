@@ -5,11 +5,10 @@
   import { ndk } from '$lib/stores/ndk';
   import { isLoggedIn, userProfile } from '$lib/stores/userProfile';
   import type { OrganizationContent } from '$lib/nostr/kinds';
-  import { fetchUserContent, getMediaType, getMediaUrls, initializeUser } from '$lib/nostr/ndk-utils';
+  import { initializeUser } from '$lib/nostr/ndk-utils';
 
   let user: NDKUser | undefined;
   let profile: { name?: string; about?: string; picture?: string; } | undefined;
-  let userPosts: NDKEvent[] = [];
   let userEvents: NDKEvent[] = [];
   let loading = true;
   let error: string | null = null;
@@ -96,16 +95,12 @@
       // Update the global user profile store
       userProfile.set(user);
       
-      // Fetch user content in parallel
-      const [posts, events] = await Promise.all([
-        fetchUserContent($ndk, user),
-        $ndk.fetchEvents({
-          authors: [user.pubkey],
-          kinds: [31337] // Organization kind
-        })
-      ]);
+      // Fetch organization events
+      const events = await $ndk.fetchEvents({
+        authors: [user.pubkey],
+        kinds: [31337] // Organization kind
+      });
       
-      userPosts = posts;
       userEvents = Array.from(events).sort((a, b) => b.created_at - a.created_at);
       
     } catch (err) {
@@ -173,62 +168,7 @@
     </div>
   {/if}
 
-  <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-    <!-- Recent Posts -->
-    <div class="bg-white rounded-lg shadow-lg p-6">
-      <h2 class="text-2xl font-semibold mb-6">Recent Posts</h2>
-      {#if loading}
-        <div class="flex justify-center py-8">
-          <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"></div>
-        </div>
-      {:else if userPosts.length === 0}
-        <p class="text-gray-600 text-center py-8">You haven't made any posts yet.</p>
-      {:else}
-        <div class="space-y-6">
-          {#each userPosts as post}
-            <div class="border rounded-lg p-4">
-              <p class="text-gray-800">{post.content}</p>
-              
-              <!-- Media Gallery -->
-              {#if getMediaUrls(post.content).length > 0}
-                <div class="mt-4 grid grid-cols-2 gap-4">
-                  {#each getMediaUrls(post.content) as mediaUrl}
-                    {#if getMediaType(mediaUrl) === 'image'}
-                      <img 
-                        src={mediaUrl} 
-                        alt="Post media" 
-                        class="w-full h-48 object-cover rounded-lg cursor-pointer hover:opacity-90"
-                        loading="lazy"
-                      />
-                    {:else if getMediaType(mediaUrl) === 'video'}
-                      <video 
-                        src={mediaUrl} 
-                        controls 
-                        class="w-full h-48 object-cover rounded-lg"
-                      >
-                        <track kind="captions">
-                      </video>
-                    {:else if getMediaType(mediaUrl) === 'audio'}
-                      <audio 
-                        src={mediaUrl} 
-                        controls 
-                        class="w-full mt-2"
-                      >
-                        <track kind="captions">
-                      </audio>
-                    {/if}
-                  {/each}
-                </div>
-              {/if}
-
-              <p class="text-sm text-gray-500 mt-2">
-                {new Date(post.created_at * 1000).toLocaleString()}
-              </p>
-            </div>
-          {/each}
-        </div>
-      {/if}
-    </div>
+  <div class="grid grid-cols-1 gap-8">
 
     <!-- Your Organizations -->
     <div class="bg-white rounded-lg shadow-lg p-6">
