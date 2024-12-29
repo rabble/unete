@@ -639,9 +639,12 @@
                 eventId: originalEvent?.id,
                 reason: reason
               });
-              await deleteOrganization(ndk, originalEvent, reason);
-              console.log('Organization deleted successfully');
-              window.location.href = '/organizations';
+              const deletionEvent = await deleteOrganization(ndk, originalEvent, reason);
+              console.log('Organization deleted successfully:', deletionEvent.id);
+              // Wait briefly to allow deletion event to propagate
+              setTimeout(() => {
+                window.location.href = '/organizations';
+              }, 1000);
             } catch (e) {
               if (e instanceof SignerRequiredError) {
                 error = 'Please login with a Nostr extension first';
