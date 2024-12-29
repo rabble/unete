@@ -25,22 +25,11 @@ export async function initNostrLogin() {
             
             if (ndkInstance?.signer) {
               try {
-                // Wait for NIP-04 capability
-                const nip04Promise = new Promise<void>((resolveNip04, rejectNip04) => {
-                  const checkNip04 = () => {
-                    if (ndkInstance.signer?.nip04) {
-                      console.log('NIP-04 support verified');
-                      resolveNip04();
-                    } else if (attempts >= maxAttempts) {
-                      rejectNip04(new Error('Timeout waiting for NIP-04 support'));
-                    } else {
-                      setTimeout(checkNip04, 100);
-                    }
-                  };
-                  checkNip04();
-                });
-                
-                await nip04Promise;
+                // Verify signer has pubkey
+                const user = await ndkInstance.signer.user();
+                if (!user?.pubkey) {
+                  throw new Error('Signer not properly initialized');
+                }
                 
                 // Verify pubkey matches
                 const user = await ndkInstance.signer.user();

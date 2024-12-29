@@ -97,25 +97,12 @@ export async function initializeNDK() {
           throw new Error('Signer not properly initialized - no pubkey');
         }
         
-        // Wait for NIP-04 capability with timeout
-        await new Promise<void>((resolve, reject) => {
-          const maxAttempts = 50; // 5 seconds total
-          let attempts = 0;
-          
-          const checkNip04 = () => {
-            attempts++;
-            if (signer.nip04) {
-              console.log('NIP-04 support verified');
-              resolve();
-            } else if (attempts >= maxAttempts) {
-              reject(new Error('Timeout waiting for NIP-04 support'));
-            } else {
-              setTimeout(checkNip04, 100);
-            }
-          };
-          
-          checkNip04();
-        });
+        // Verify signer is working
+        const user = await signer.user();
+        if (!user?.pubkey) {
+          throw new Error('Signer not properly initialized - no pubkey');
+        }
+        console.log('Signer verified with pubkey:', user.pubkey);
         
         ndkInstance.signer = signer;
         ndkSigner.set(signer);
