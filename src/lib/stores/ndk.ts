@@ -2,10 +2,17 @@ import { writable, get } from 'svelte/store';
 import NDK, { NDKEvent, NDKNip07Signer } from '@nostr-dev-kit/ndk';
 import { browser } from '$app/environment';
 
-// Create stores
+// Create stores with explicit typing and initial values
 export const ndkStore = writable<NDK | null>(null);
 export const ndkConnected = writable<boolean>(false);
 export const ndkSigner = writable<NDKNip07Signer | null>(null);
+
+// Create derived store for subscription management
+export const ndkState = {
+  subscribe: ndkStore.subscribe,
+  set: ndkStore.set,
+  update: ndkStore.update
+};
 
 // Initialize NDK with relays
 export async function initializeNDK() {
@@ -58,20 +65,6 @@ export async function ensureNDKConnection() {
   return currentNDK;
 }
 
-// Create stores with explicit typing and initial values
-export const ndkConnected = writable<boolean>(false);
-export const ndkSigner = writable<NDKNip07Signer | null>(null);
-export const ndkStore = writable<NDK | null>(null);
-
-// Create derived store for subscription management
-export const ndkState = {
-  subscribe: ndkStore.subscribe,
-  set: ndkStore.set,
-  update: ndkStore.update
-};
-
-// Initialize NDK and handle signer setup
-export async function initializeNDK() {
   if (!browser) return;
 
   try {
