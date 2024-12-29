@@ -16,7 +16,7 @@ export async function initNostrLogin() {
         
         // Wait for nostr-login to initialize NDK with timeout
         await new Promise<void>((resolve, reject) => {
-          const maxAttempts = 100; // 10 seconds total
+          const maxAttempts = 150; // 15 seconds total
           let attempts = 0;
           
           const checkNDK = async () => {
@@ -25,11 +25,22 @@ export async function initNostrLogin() {
             
             if (ndkInstance?.signer) {
               try {
-                // Verify signer has required NIP-04 capabilities
-                if (!ndkInstance.signer.nip04) {
-                  console.warn('NDK signer missing NIP-04 support');
-                  throw new Error('Signer missing NIP-04 support');
-                }
+                // Wait for NIP-04 capability
+                const nip04Promise = new Promise<void>((resolveNip04, rejectNip04) => {
+                  const checkNip04 = () => {
+                    if (ndkInstance.signer?.nip04) {
+                      console.log('NIP-04 support verified');
+                      resolveNip04();
+                    } else if (attempts >= maxAttempts) {
+                      rejectNip04(new Error('Timeout waiting for NIP-04 support'));
+                    } else {
+                      setTimeout(checkNip04, 100);
+                    }
+                  };
+                  checkNip04();
+                });
+                
+                await nip04Promise;
                 
                 // Verify pubkey matches
                 const user = await ndkInstance.signer.user();
