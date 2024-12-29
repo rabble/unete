@@ -112,16 +112,29 @@
       });
 
       // Fetch organizations directly
-      console.log('Fetching organizations...');
+      console.log('Fetching organizations with NDK instance:', $ndk);
+      console.log('Connected relays:', Array.from($ndk.pool.relays.keys()));
+      
       const filter = {
         kinds: [ORGANIZATION],
         since: 0 // Get all historical events
       };
+      console.log('Using filter:', filter);
 
       try {
-        // Use NDK's fetchEvents method
+        console.log('Starting fetchEvents...');
         const events = await $ndk.fetchEvents(filter);
         console.log('Fetched events:', events);
+        console.log('Number of events:', events.size);
+        
+        // Log first few events for debugging
+        const firstFew = Array.from(events).slice(0, 3);
+        console.log('Sample events:', firstFew.map(e => ({
+          id: e.id,
+          kind: e.kind,
+          tags: e.tags,
+          content: e.content.substring(0, 100) + '...' // First 100 chars
+        })));
         
         // Convert Set to Array and sort
         allOrganizations = Array.from(events).sort((a, b) => {
@@ -133,12 +146,18 @@
         console.log('Processed organizations:', allOrganizations.length);
         
         // Set up subscription for real-time updates
+        console.log('Setting up real-time subscription...');
         const subscription = $ndk.subscribe(filter, {
           closeOnEose: false,
           groupableDelay: 1000
         });
 
         subscription.on('event', (event) => {
+          console.log('Received real-time event:', {
+            id: event.id,
+            kind: event.kind,
+            pubkey: event.pubkey
+          });
           const exists = allOrganizations.some(e => e.id === event.id);
           if (!exists) {
             allOrganizations = [...allOrganizations, event].sort((a, b) => {
@@ -150,6 +169,14 @@
         });
       } catch (err) {
         console.error('Failed to fetch organizations:', err);
+        console.error('Error details:', {
+          name: err.name,
+          message: err.message,
+          stack: err.stack,
+          ndk: $ndk ? 'initialized' : 'null',
+          ndkPool: $ndk?.pool ? 'initialized' : 'null',
+          relayCount: $ndk?.pool?.relays?.size || 0
+        });
         error = `Failed to fetch organizations: ${err.message}`;
       }
     } catch (error) {
