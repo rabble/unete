@@ -199,11 +199,11 @@
   </footer>
 
   <!-- Debug Info -->
-  {#if $ndk?.signer}
-    <div class="bg-gray-100 border-t border-gray-200 p-4 mt-8">
-      <div class="max-w-7xl mx-auto">
-        <h3 class="text-lg font-semibold mb-2">Debug Information</h3>
-        <div class="bg-white rounded-lg shadow p-4">
+  <div class="bg-gray-100 border-t border-gray-200 p-4 mt-8">
+    <div class="max-w-7xl mx-auto">
+      <h3 class="text-lg font-semibold mb-2">Debug Information</h3>
+      <div class="bg-white rounded-lg shadow p-4">
+        {#if $ndk?.signer}
           {#await $ndk.signer.user() then user}
             <div class="mb-4">
               <h4 class="font-medium">User Info:</h4>
@@ -220,8 +220,20 @@
               </div>
             {/await}
           {/await}
+        {:else}
+          <div class="text-gray-500">
+            No user signed in. Debug information will appear here when logged in.
+          </div>
+        {/if}
+
+        <div class="mt-4 pt-4 border-t">
+          <h4 class="font-medium mb-2">NDK Connection Status:</h4>
+          <div class="text-sm">
+            <p>NDK Connected: <span class="font-mono">{$ndkConnected}</span></p>
+            <p>Has Signer: <span class="font-mono">{Boolean($ndk?.signer)}</span></p>
+          </div>
         </div>
       </div>
     </div>
-  {/if}
+  </div>
 </div>
