@@ -116,8 +116,7 @@
       console.log('Connected relays:', Array.from($ndk.pool.relays.keys()));
       
       const filter = {
-        kinds: [ORGANIZATION],
-        since: 0 // Get all historical events
+        kinds: [ORGANIZATION]
       };
       console.log('Using filter:', filter);
 
