@@ -127,6 +127,19 @@
 
       sub.on('event', (event: NDKEvent) => {
         console.log('Received event:', event.id);
+        try {
+          console.log('Event details:', {
+            id: event.id,
+            kind: event.kind,
+            pubkey: event.pubkey,
+            created_at: event.created_at,
+            tags: event.tags,
+            content: JSON.parse(event.content),
+            sig: event.sig
+          });
+        } catch (e) {
+          console.error('Failed to parse event content:', e, 'Raw event:', event);
+        }
         events.add(event);
       });
 
