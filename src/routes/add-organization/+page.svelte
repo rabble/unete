@@ -4,7 +4,7 @@
   import { initNostrLogin } from '$lib/nostr/login';
   import { createOrganization } from '$lib/nostr/organizations';
   import { getTopics } from '$lib/topics';
-  import { ndk } from '$lib/stores/ndk';
+  import { ndk, ensureConnection } from '$lib/stores/ndk';
   import { get } from 'svelte/store';
   import { goto } from '$app/navigation';
   import {

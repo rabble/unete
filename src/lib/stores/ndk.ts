@@ -104,15 +104,23 @@ export async function ensureNDKConnection() {
 
 // Function to ensure connection (now uses initializeNDK)
 export async function ensureConnection() {
-  const currentNDK = get(ndkStore);
-  if (!currentNDK || !get(ndkConnected)) {
-    const ndk = await initializeNDK();
-    if (!ndk) {
-      throw new Error('Failed to initialize NDK');
+  try {
+    const currentNDK = get(ndkStore);
+    if (!currentNDK || !get(ndkConnected)) {
+      console.log('Initializing new NDK connection...');
+      const ndk = await initializeNDK();
+      if (!ndk) {
+        throw new Error('Failed to initialize NDK');
+      }
+      await new Promise(resolve => setTimeout(resolve, 1000)); // Small delay to ensure connection
+      return ndk;
     }
-    return ndk;
+    console.log('Using existing NDK connection');
+    return currentNDK;
+  } catch (error) {
+    console.error('Error in ensureConnection:', error);
+    throw error;
   }
-  return currentNDK;
 }
 
 // Create event cache store
