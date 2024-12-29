@@ -1,6 +1,8 @@
-import { writable, derived } from 'svelte/store';
-import { ndk } from './ndk';
+import { writable, derived, type Writable } from 'svelte/store';
 import type { NDKUser } from '@nostr-dev-kit/ndk';
+
+// Create a writable store for NDK instance
+export const ndkStore = writable<any>(null);
 
 // Initialize from localStorage if available
 const storedProfile = typeof localStorage !== 'undefined' 
@@ -22,7 +24,7 @@ if (typeof localStorage !== 'undefined') {
 
 export const loginState = writable(false);
 export const isLoggedIn = derived(
-  [ndk, userProfile, loginState],
+  [ndkStore, userProfile, loginState],
   ([$ndk, $userProfile, $loginState]) => {
     return $loginState && !!($ndk?.signer && $userProfile?.pubkey);
   }

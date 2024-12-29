@@ -1,10 +1,14 @@
 import { writable, get } from 'svelte/store';
-import { loginState } from './userProfile';
+import { loginState, ndkStore as userNdkStore } from './userProfile';
 import NDK, { NDKEvent, NDKNip07Signer } from '@nostr-dev-kit/ndk';
 import { browser } from '$app/environment';
 
 // Create stores with explicit typing and initial values
-export const ndkStore = writable<NDK | null>(null);
+// Sync our NDK store with the user profile store
+export const ndkStore = {
+  ...userNdkStore,
+  subscribe: userNdkStore.subscribe
+};
 export const ndkConnected = writable<boolean>(false);
 export const ndkSigner = writable<NDKNip07Signer | null>(null);
 

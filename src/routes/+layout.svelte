@@ -8,7 +8,7 @@
   import { setContext } from 'svelte';
   import { NDKNip07Signer } from '@nostr-dev-kit/ndk';
   import { ndkStore as ndk, ndkConnected, initializeNDK, initNostrLogin } from '$lib/stores/ndk';
-  import { isLoggedIn } from '$lib/stores/userProfile';
+  import { isLoggedIn, loginState } from '$lib/stores/userProfile';
   import '../app.css';
   import { browser } from '$app/environment';
   
