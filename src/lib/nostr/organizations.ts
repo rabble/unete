@@ -309,6 +309,51 @@ export async function createOrganization(
 }
 
 // Helper function to test organization creation
+export async function deleteOrganization(
+  ndk: NDK,
+  originalEvent: NDKEvent
+): Promise<NDKEvent> {
+  try {
+    await ensureConnection();
+    const ndkInstance = ndk;
+    if (!ndkInstance?.signer) {
+      throw new SignerRequiredError();
+    }
+
+    // Get the d tag from the original event
+    const dTag = originalEvent.tags.find(t => t[0] === 'd');
+    if (!dTag) {
+      throw new ValidationError('Original event missing d tag');
+    }
+
+    // Create a deletion event
+    const event = new NDKEvent(ndk);
+    event.kind = ORGANIZATION;
+    event.content = ''; // Empty content for deletion
+    event.tags = [
+      ['d', dTag[1]], // Use the same d tag
+      ['e', originalEvent.id, '', 'delete'] // Reference the original event
+    ];
+
+    try {
+      await event.sign();  // Sign the event before publishing
+      await event.publish();
+      return event;
+    } catch (error) {
+      console.error('Delete publish error:', error);
+      throw new PublishError(
+        `Failed to delete organization: ${error instanceof Error ? error.message : 'Unknown error'}`
+      );
+    }
+  } catch (error) {
+    console.error('Organization deletion error:', error);
+    if (error instanceof ValidationError || error instanceof SignerRequiredError || error instanceof PublishError) {
+      throw error;
+    }
+    throw new PublishError(`Unexpected error deleting organization: ${error instanceof Error ? error.message : 'Unknown error'}`);
+  }
+}
+
 export async function createTestOrganization(): Promise<NDKEvent> {
   await ensureConnection();
   const content: OrganizationContent = {
@@ -333,5 +378,6 @@ export async function createTestOrganization(): Promise<NDKEvent> {
     }
   };
 
-  const event = await createOrganization(content, identifier);
+  const event = await createOrganization(ndk, content, "test-org");
+  return event;
 }
