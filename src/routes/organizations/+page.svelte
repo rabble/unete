@@ -104,17 +104,26 @@
       const events = new Set<NDKEvent>();
       const sub = $ndk.subscribe(
         { kinds: [ORGANIZATION] },
-        { closeOnEose: true, groupableDelay: 1000 }
+        { closeOnEose: true, groupableDelay: 500 }
       );
 
+      // Set a longer timeout but resolve early if we get events
       const timeout = setTimeout(() => {
         sub.close();
-        if (events.size > 0) {
+        console.log('Fetch timeout reached, events collected:', events.size);
+        resolve(events); // Resolve with whatever we have instead of rejecting
+      }, 10000);
+
+      // Add an early resolution if we get enough events
+      const checkEvents = setInterval(() => {
+        if (events.size >= 5) {
+          clearTimeout(timeout);
+          clearInterval(checkEvents);
+          sub.close();
+          console.log('Got sufficient events early:', events.size);
           resolve(events);
-        } else {
-          reject(new Error('Fetch timeout with no events'));
         }
-      }, 5000);
+      }, 1000);
 
       sub.on('event', (event: NDKEvent) => {
         console.log('Received event:', event.id);
@@ -169,11 +178,13 @@
       // Log the result immediately
       console.log('Race completed:', {
         hasEvents: Boolean(events),
-        eventCount: events?.size
+        eventCount: events instanceof Set ? events.size : 0
       });
       
-      if (!events) {
-        throw new Error('No events returned from fetchEvents');
+      if (!events || !(events instanceof Set) || events.size === 0) {
+        console.warn('No events returned from fetchEvents or invalid response');
+        allOrganizations = [];
+        return;
       }
       
       console.log('Fetch complete, received events:', events);
@@ -252,16 +263,23 @@
 
   function getOrgContent(event: NDKEvent): OrganizationContent {
     try {
-      return JSON.parse(event.content);
+      if (!event?.content) {
+        throw new Error('Event has no content');
+      }
+      const content = JSON.parse(event.content);
+      if (!content.name || !content.category || !content.description) {
+        throw new Error('Missing required organization fields');
+      }
+      return content;
     } catch (e) {
-      console.error('Failed to parse organization content:', e);
+      console.error('Failed to parse organization content:', e, 'Event:', event);
       return {
         name: 'Unknown Organization',
         category: 'Unknown',
         description: 'Invalid organization data',
-        focusAreas: [],
-        locations: [],
-        engagementTypes: []
+        focusAreas: event?.tags?.filter(t => t[0] === 't').map(t => t[1]) || [],
+        locations: event?.tags?.filter(t => t[0] === 'l' && t[2] === 'location').map(t => t[1]) || [],
+        engagementTypes: event?.tags?.filter(t => t[0] === 'l' && t[2] === 'engagement').map(t => t[1]) || []
       };
     }
   }
