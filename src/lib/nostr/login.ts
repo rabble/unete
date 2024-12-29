@@ -7,6 +7,9 @@ export async function initNostrLogin() {
   // Check if already logged in via Nostr extension
   if (window.nostr) {
     try {
+      // First ensure nostr object is ready
+      await window.nostr.waitReady?.();
+      
       const pubkey = await window.nostr.getPublicKey();
       if (pubkey) {
         console.log('Found existing Nostr pubkey:', pubkey);
@@ -16,32 +19,35 @@ export async function initNostrLogin() {
           const maxAttempts = 100; // 10 seconds total
           let attempts = 0;
           
-          const checkNDK = () => {
+          const checkNDK = async () => {
             const ndkInstance = ndk.get();
             attempts++;
             
             if (ndkInstance?.signer) {
-              // Additional verification of NDK instance
-              ndkInstance.signer.user().then(user => {
+              try {
+                // Verify signer has required NIP-04 capabilities
+                if (!ndkInstance.signer.nip04) {
+                  console.warn('NDK signer missing NIP-04 support');
+                  throw new Error('Signer missing NIP-04 support');
+                }
+                
+                // Verify pubkey matches
+                const user = await ndkInstance.signer.user();
                 if (user?.pubkey === pubkey) {
                   console.log('NDK initialized with verified signer');
                   resolve();
-                } else {
-                  console.warn('NDK signer mismatch, retrying...');
-                  if (attempts >= maxAttempts) {
-                    reject(new Error('NDK signer verification failed'));
-                  } else {
-                    setTimeout(checkNDK, 100);
-                  }
+                  return;
                 }
-              }).catch(err => {
+                console.warn('NDK signer pubkey mismatch');
+              } catch (err) {
                 console.error('NDK signer verification error:', err);
-                if (attempts >= maxAttempts) {
-                  reject(new Error('NDK signer verification failed'));
-                } else {
-                  setTimeout(checkNDK, 100);
-                }
-              });
+              }
+              
+              if (attempts >= maxAttempts) {
+                reject(new Error('NDK signer verification failed'));
+              } else {
+                setTimeout(checkNDK, 100);
+              }
             } else if (attempts >= maxAttempts) {
               reject(new Error('NDK initialization timeout'));
             } else {
