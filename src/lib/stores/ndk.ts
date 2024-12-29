@@ -104,9 +104,15 @@ export async function ensureNDKConnection() {
 
 // Function to ensure connection (now uses initializeNDK)
 export async function ensureConnection() {
-  if (!get(ndkConnected)) {
-    await initializeNDK();
+  const currentNDK = get(ndkStore);
+  if (!currentNDK || !get(ndkConnected)) {
+    const ndk = await initializeNDK();
+    if (!ndk) {
+      throw new Error('Failed to initialize NDK');
+    }
+    return ndk;
   }
+  return currentNDK;
 }
 
 // Create event cache store

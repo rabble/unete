@@ -139,13 +139,13 @@
   // --- onMount: Initialize NDK and load data
   onMount(async () => {
     try {
-      // Initialize Nostr login which will set up NDK
-      await initNostrLogin();
-      
-      const ndkInstance = get(ndk);
+      const ndkInstance = await ensureConnection();
       if (!ndkInstance) {
-        throw new Error('NDK not initialized');
+        throw new Error('Failed to initialize NDK');
       }
+      
+      // Initialize Nostr login after NDK is ready
+      await initNostrLogin();
 
       // Check login status
       isLoggedIn = !!ndkInstance.signer;

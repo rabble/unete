@@ -14,9 +14,9 @@ export async function initNostrLogin() {
       if (pubkey) {
         console.log('Found existing Nostr pubkey:', pubkey);
         
-        const ndkInstance = get(ndk);
+        const ndkInstance = await ensureConnection();
         if (!ndkInstance) {
-          throw new Error('NDK not initialized');
+          throw new Error('Failed to initialize NDK');
         }
 
         // Set up NIP-07 signer
