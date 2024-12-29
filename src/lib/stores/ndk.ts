@@ -1,8 +1,8 @@
 import { writable, get } from 'svelte/store';
 import NDK, { NDKEvent, NDKNip07Signer } from '@nostr-dev-kit/ndk';
 import { browser } from '$app/environment';
-import { init as initNostrLogin, launch as launchNostrLoginDialog } from 'nostr-login';
 import { browser } from '$app/environment';
+let nostrLogin: any;
 
 // Create NDK instance
 const ndk = new NDK({
@@ -33,10 +33,14 @@ export async function initializeNDK() {
     console.log('Initializing NDK...');
 
     if (browser) {
+      // Dynamically import nostr-login only in browser
+      const { init, launch } = await import('nostr-login');
+      nostrLogin = { init, launch };
+      
       // Initialize nostr-login
-      initNostrLogin({
+      nostrLogin.init({
         noBanner: true, // We'll handle the UI ourselves
-        onAuth: async (npub, options) => {
+        onAuth: async (npub: string, options: any) => {
           console.log('nostr-login auth:', npub, options);
           
           try {

@@ -38,7 +38,8 @@
     try {
       if (browser) {
         // Launch nostr-login dialog with signup screen
-        launchNostrLoginDialog({
+        const { launch } = await import('nostr-login');
+        launch({
           startScreen: 'signup'
         });
       }
