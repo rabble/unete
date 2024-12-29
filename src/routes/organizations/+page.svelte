@@ -103,7 +103,11 @@
     return new Promise((resolve, reject) => {
       const events = new Set<NDKEvent>();
       const sub = $ndk.subscribe(
-        { kinds: [ORGANIZATION] },
+        {
+          kinds: [ORGANIZATION],
+          since: 0, // Include all events from the beginning
+          limit: 100 // Reasonable limit to prevent overwhelming
+        },
         { closeOnEose: true, groupableDelay: 500 }
       );
 
@@ -246,7 +250,11 @@
       
       // Set up subscription for real-time updates
       console.log('Setting up real-time subscription...');
-      const subscription = $ndk.subscribe({kinds: [ORGANIZATION]}, {
+      const subscription = $ndk.subscribe({
+        kinds: [ORGANIZATION],
+        since: Math.floor(Date.now() / 1000) - 60, // Last minute only for real-time
+        limit: 10
+      }, {
         closeOnEose: false,
         groupableDelay: 1000
       });

@@ -14,8 +14,10 @@ export const load: PageLoad = async ({ params }) => {
   // Return initial data and promise
   return {
     promise: getCachedEvents({
-      kinds: [ORGANIZATION], 
-      ids: [id]
+      kinds: [ORGANIZATION],
+      ids: [id],
+      limit: 1,
+      since: 0
     }).then(events => {
       // Convert Set to Array and get first event
       const eventsArray = Array.from(events);
