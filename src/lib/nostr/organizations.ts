@@ -90,7 +90,9 @@ export async function updateOrganization(
   try {
     await ensureConnection();
     await ensureConnection();
-    if (!ndk.signer) {
+    await ensureConnection();
+    const ndkInstance = ndk.get();
+    if (!ndkInstance?.signer) {
       throw new SignerRequiredError();
     }
 

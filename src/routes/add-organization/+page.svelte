@@ -4,7 +4,8 @@
   import { initNostrLogin } from '$lib/nostr/login';
   import { createOrganization } from '$lib/nostr/organizations';
   import { getTopics } from '$lib/topics';
-  import NDK, { NDKNip07Signer } from '@nostr-dev-kit/ndk';
+  import { ndk } from '$lib/stores/ndk';
+  import { get } from 'svelte/store';
   import {
     ValidationError,
     SignerRequiredError,
@@ -12,7 +13,6 @@
   } from '$lib/nostr/errors';
 
   // --- Reactive Variables ---
-  let ndk: NDK;
   let focusAreas: string[] = [];
   let error: string | null = null;
   let success = false;
@@ -120,31 +120,16 @@
   // --- onMount: Initialize NDK and load data
   onMount(async () => {
     try {
-      ndk = new NDK({
-        explicitRelayUrls: [
-          'wss://relay.nos.social',
-          'wss://relay.damus.io',
-          'wss://relay.nostr.band',
-        ],
-        signer: new NDKNip07Signer(),
-      });
-
-      // Add debug logging for relay connections
-      ndk.pool.on('relay:connect', (relay) => {
-        console.log('Connected to relay:', relay.url);
-      });
-      ndk.pool.on('relay:error', (relay, error) => {
-        console.error('Relay error:', relay.url, error);
-      });
-
-      await ndk.connect();
-      console.log('NDK connected successfully');
-      
-      // Initialize Nostr login
+      // Initialize Nostr login which will set up NDK
       await initNostrLogin();
+      
+      const ndkInstance = get(ndk);
+      if (!ndkInstance) {
+        throw new Error('NDK not initialized');
+      }
 
       // Load dynamic "Focus Areas" from your function
-      focusAreas = await getTopics(ndk);
+      focusAreas = await getTopics(ndkInstance);
     } catch (err) {
       console.error('Error connecting to NDK or loading topics:', err);
       error = 'Failed to initialize. Please try again.';
