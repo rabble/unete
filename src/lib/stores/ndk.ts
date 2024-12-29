@@ -11,10 +11,17 @@ const ndk = new NDK({
   ]
 });
 
-// Create stores
+// Create stores with explicit typing and initial values
 export const ndkConnected = writable<boolean>(false);
 export const ndkSigner = writable<NDKNip07Signer | null>(null);
 export const ndkStore = writable<NDK | null>(null);
+
+// Create derived store for subscription management
+export const ndkState = {
+  subscribe: ndkStore.subscribe,
+  set: ndkStore.set,
+  update: ndkStore.update
+};
 
 // Initialize NDK and handle signer setup
 export async function initializeNDK() {
