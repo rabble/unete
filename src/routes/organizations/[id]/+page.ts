@@ -35,9 +35,9 @@ export const load: PageLoad = async ({ params }) => {
           id: event.id,
           pubkey: event.pubkey,
           created_at: event.created_at,
-          focusAreas: event.tags.filter(t => t[0] === 'f').map(t => t[1]),
-          locations: event.tags.filter(t => t[0] === 'l').map(t => t[1]),
-          engagementTypes: event.tags.filter(t => t[0] === 'e').map(t => t[1]),
+          focusAreas: event.tags.filter(t => t[0] === 't').map(t => t[1]),
+          locations: event.tags.filter(t => t[0] === 'l' && t[2] === 'location').map(t => t[1]),
+          engagementTypes: event.tags.filter(t => t[0] === 'l' && t[2] === 'engagement').map(t => t[1]),
           tags: event.tags
         };
       } catch (e) {

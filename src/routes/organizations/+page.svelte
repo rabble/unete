@@ -199,14 +199,23 @@
     const org = getOrgContent(event);
     const filters = $searchFilters;
     
+    // Filter by locations (using 'l' tags with 'location' mark)
     const locationMatch = !filters.locations?.length || 
-      org.locations?.some(loc => filters.locations.includes(loc));
+      event.tags
+        .filter(t => t[0] === 'l' && t[2] === 'location')
+        .some(t => filters.locations.includes(t[1]));
     
+    // Filter by focus areas (using 't' tags)
     const focusMatch = !filters.focusAreas?.length ||
-      org.focusAreas?.some(area => filters.focusAreas.includes(area));
+      event.tags
+        .filter(t => t[0] === 't')
+        .some(t => filters.focusAreas.includes(t[1]));
     
+    // Filter by engagement types (using 'l' tags with 'engagement' mark)
     const engagementMatch = !filters.engagementTypes?.length ||
-      org.engagementTypes?.some(type => filters.engagementTypes.includes(type));
+      event.tags
+        .filter(t => t[0] === 'l' && t[2] === 'engagement')
+        .some(t => filters.engagementTypes.includes(t[1]));
     
     return locationMatch && focusMatch && engagementMatch;
   });
@@ -316,18 +325,18 @@
                 <div>
                   <h3 class="font-semibold mb-2">Focus Areas:</h3>
                   <div class="flex flex-wrap gap-2">
-                    {#each org.focusAreas as area}
+                    {#each event.tags.filter(t => t[0] === 't') as [_, area]}
                       <span class="bg-purple-100 text-purple-800 px-3 py-1 rounded-full text-sm">
                         {area}
                       </span>
                     {/each}
                   </div>
                 </div>
-                
+              
                 <div>
                   <h3 class="font-semibold mb-2">Locations:</h3>
                   <div class="flex flex-wrap gap-2">
-                    {#each org.locations as location}
+                    {#each event.tags.filter(t => t[0] === 'l' && t[2] === 'location') as [_, location]}
                       <span class="bg-gray-100 text-gray-800 px-3 py-1 rounded-full text-sm">
                         {location}
                       </span>
@@ -338,7 +347,7 @@
                 <div>
                   <h3 class="font-semibold mb-2">Engagement Types:</h3>
                   <div class="flex flex-wrap gap-2">
-                    {#each org.engagementTypes as type}
+                    {#each event.tags.filter(t => t[0] === 'l' && t[2] === 'engagement') as [_, type]}
                       <span class="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm">
                         {type}
                       </span>
