@@ -92,13 +92,13 @@ export async function initializeNDK() {
         await signer.blockUntilReady();
         
         // Verify signer is working
-        const user = await signer.user();
-        if (!user?.pubkey) {
+        const signerUser = await signer.user();
+        if (!signerUser?.pubkey) {
           throw new Error('Signer not properly initialized - no pubkey');
         }
         
-        // Verify signer is working
-        const user = await signer.user();
+        // Log verification
+        console.log('Initial signer verification passed');
         if (!user?.pubkey) {
           throw new Error('Signer not properly initialized - no pubkey');
         }

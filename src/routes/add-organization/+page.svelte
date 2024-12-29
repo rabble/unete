@@ -566,8 +566,9 @@
           </label>
           <div class="flex gap-4">
             <div class="flex-1">
-              <label class="block text-xs text-gray-500">Minimum range</label>
+              <label for="supporter-min" class="block text-xs text-gray-500">Minimum range</label>
               <input
+                id="supporter-min"
                 type="number"
                 min="0"
                 bind:value={formData.supporter.range[0]}
@@ -575,8 +576,9 @@
               />
             </div>
             <div class="flex-1">
-              <label class="block text-xs text-gray-500">Maximum range</label>
+              <label for="supporter-max" class="block text-xs text-gray-500">Maximum range</label>
               <input
+                id="supporter-max"
                 type="number"
                 min="0"
                 bind:value={formData.supporter.range[1]}
@@ -585,8 +587,9 @@
             </div>
           </div>
           <div>
-            <label class="block text-xs text-gray-500">Description</label>
+            <label for="supporter-desc" class="block text-xs text-gray-500">Description</label>
             <textarea
+              id="supporter-desc"
               bind:value={formData.supporter.description}
               rows="2"
               placeholder="Describe your supporter base..."
@@ -601,8 +604,9 @@
           </label>
           <div class="flex gap-4">
             <div class="flex-1">
-              <label class="block text-xs text-gray-500">Minimum range</label>
+              <label for="staff-min" class="block text-xs text-gray-500">Minimum range</label>
               <input
+                id="staff-min"
                 type="number"
                 min="0"
                 bind:value={formData.staff.range[0]}
@@ -610,8 +614,9 @@
               />
             </div>
             <div class="flex-1">
-              <label class="block text-xs text-gray-500">Maximum range</label>
+              <label for="staff-max" class="block text-xs text-gray-500">Maximum range</label>
               <input
+                id="staff-max"
                 type="number"
                 min="0"
                 bind:value={formData.staff.range[1]}
@@ -620,8 +625,9 @@
             </div>
           </div>
           <div>
-            <label class="block text-xs text-gray-500">Description</label>
+            <label for="staff-desc" class="block text-xs text-gray-500">Description</label>
             <textarea
+              id="staff-desc"
               bind:value={formData.staff.description}
               rows="2"
               placeholder="Describe your staff structure..."

@@ -26,14 +26,14 @@ export async function initNostrLogin() {
             if (ndkInstance?.signer) {
               try {
                 // Verify signer has pubkey
-                const user = await ndkInstance.signer.user();
-                if (!user?.pubkey) {
+                const signerUser = await ndkInstance.signer.user();
+                if (!signerUser?.pubkey) {
                   throw new Error('Signer not properly initialized');
                 }
                 
                 // Verify pubkey matches
-                const user = await ndkInstance.signer.user();
-                if (user?.pubkey === pubkey) {
+                const verifiedUser = await ndkInstance.signer.user();
+                if (verifiedUser?.pubkey === pubkey) {
                   console.log('NDK initialized with verified signer');
                   resolve();
                   return;
