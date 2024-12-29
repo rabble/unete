@@ -136,12 +136,6 @@
           
           <!-- Right side navigation items -->
           <div class="flex items-center">
-            <button
-              on:click={login}
-              class="bg-purple-600 text-white px-4 py-2 rounded-md hover:bg-purple-700 transition-colors"
-            >
-              Connect with Nostr
-            </button>
           </div>
         </div>
       </div>
