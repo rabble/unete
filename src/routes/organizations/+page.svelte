@@ -97,13 +97,11 @@
 
   onMount(async () => {
     try {
-      if (!$ndk) {
-        throw new Error('NDK not initialized');
+      // Wait for NDK to be initialized
+      while (!$ndk) {
+        await new Promise(resolve => setTimeout(resolve, 100));
       }
       console.log('Using global NDK instance:', $ndk);
-      
-      // Ensure NDK is connected before proceeding
-      await $ndk.connect();
 
       // Set initial filters from URL params
       const params = $page.url.searchParams;

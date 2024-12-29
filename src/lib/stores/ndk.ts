@@ -116,21 +116,26 @@ export async function getCachedEvents(filter: any): Promise<Set<NDKEvent>> {
 
   return events;
 }
-// Create NDK instance
-export const ndk = new NDK({
-  explicitRelayUrls: [
-    'wss://relay.nos.social',
-    'wss://relay.damus.io',
-    'wss://relay.nostr.band',
-    'wss://relay.snort.social',
-    'wss://nostr.mom',
-    'wss://relay.current.fyi'
-  ]
-});
+// Initialize NDK store
+export const ndk = writable<NDK | null>(null);
 
 // Initialize NDK on import
 if (browser) {
-  initializeNDK().catch(error => {
+  const ndkInstance = new NDK({
+    explicitRelayUrls: [
+      'wss://relay.nos.social',
+      'wss://relay.damus.io',
+      'wss://relay.nostr.band',
+      'wss://relay.snort.social',
+      'wss://nostr.mom',
+      'wss://relay.current.fyi'
+    ]
+  });
+  
+  ndkInstance.connect().then(() => {
+    ndk.set(ndkInstance);
+    ndkConnected.set(true);
+  }).catch(error => {
     console.error('Failed to initialize NDK:', error);
   });
 }
