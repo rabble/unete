@@ -3,6 +3,7 @@
   import { i18n } from "$lib/i18n";
   import { ParaglideJS } from "@inlang/paraglide-sveltekit";
   import { page } from '$app/stores';
+  import { get } from 'svelte/store';
   import { onMount } from 'svelte';
   import { setContext } from 'svelte';
   import { NDKNip07Signer } from '@nostr-dev-kit/ndk';
