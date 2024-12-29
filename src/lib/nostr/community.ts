@@ -2,6 +2,9 @@ import type NDK from '@nostr-dev-kit/ndk';
 import type { NDKEvent } from '@nostr-dev-kit/ndk';
 import { COMMUNITY, COMMUNITY_POST_APPROVAL, type CommunityContent } from './kinds';
 
+// Initial admin pubkey
+const INITIAL_ADMIN = 'npub1wmr34t36fy03m8hvgl96zl3znndyzyaqhwmwdtshwmtkg03fetaqhjg240';
+
 export async function createCommunity(
   ndk: NDK, 
   content: CommunityContent, 
@@ -97,6 +100,10 @@ export async function isCommunityModerator(
   communityEvent: NDKEvent,
   pubkey: string
 ): Promise<boolean> {
+  // Check if user is the initial admin
+  if (pubkey === INITIAL_ADMIN) return true;
+  
+  // Check regular moderators
   const moderators = communityEvent.tags
     .filter(tag => tag[0] === 'p' && tag[3] === 'moderator')
     .map(tag => tag[1]);
