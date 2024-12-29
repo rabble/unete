@@ -95,8 +95,60 @@
   // Store all fetched organizations
   let allOrganizations: NDKEvent[] = [];
 
+  async function fetchOrganizations() {
+    if (!$ndk || !$ndkConnected) {
+      throw new Error('NDK not initialized or connected');
+    }
+
+    // Log relay status before fetching
+    const connectedRelays = Array.from($ndk.pool.relays.values())
+      .filter(relay => relay.status === 1);
+    console.log('Connected relays before fetch:', 
+      connectedRelays.map(r => ({url: r.url, status: r.status})));
+
+    if (connectedRelays.length === 0) {
+      throw new Error('No relays connected before fetch');
+    }
+
+    // Create a promise that will reject after 5 seconds
+    const timeoutPromise = new Promise((_, reject) => {
+      setTimeout(() => reject(new Error('Fetch timeout after 5s')), 5000);
+    });
+
+    // Create the fetch promise with explicit subscription options
+    const fetchPromise = new Promise((resolve, reject) => {
+      const events = new Set();
+      const sub = $ndk.subscribe({kinds: [ORGANIZATION]}, {
+        closeOnEose: true,
+        groupableDelay: 100
+      });
+
+      sub.on('event', (event) => {
+        console.log('Received event:', event.id);
+        events.add(event);
+      });
+
+      sub.on('eose', () => {
+        console.log(`EOSE received, got ${events.size} events`);
+        resolve(events);
+      });
+
+      // Add error handling
+      sub.on('error', (error) => {
+        console.error('Subscription error:', error);
+        reject(error);
+      });
+    });
+
+    const events = await Promise.race([fetchPromise, timeoutPromise]);
+    return events;
+  }
+
   onMount(async () => {
     try {
+      loading = true;
+      error = null;
+
       // Wait for NDK to be initialized and connected
       const startTime = Date.now();
       const timeout = 15000; // 15 seconds total timeout
@@ -117,65 +169,8 @@
         engagementTypes: params.getAll('engagementTypes') || []
       });
 
-      // Fetch organizations directly
-      console.log('Fetching organizations with NDK instance:', $ndk);
-      console.log('Connected relays:', Array.from($ndk.pool.relays.keys()));
-      
-      const filter = {
-        kinds: [ORGANIZATION]
-      };
-      console.log('Using filter:', filter);
-
-      try {
-        console.log('Starting fetchEvents...');
-        console.log('NDK instance state:', {
-          hasPool: Boolean($ndk.pool),
-          connectedRelays: Array.from($ndk.pool.relays.keys()),
-          hasSigner: Boolean($ndk.signer)
-        });
-        
-        // Log relay status before fetching
-        const connectedRelays = Array.from($ndk.pool.relays.values())
-          .filter(relay => relay.status === 1);
-        console.log('Connected relays before fetch:', 
-          connectedRelays.map(r => ({url: r.url, status: r.status})));
-
-        if (connectedRelays.length === 0) {
-          throw new Error('No relays connected before fetch');
-        }
-
-        // Create a promise that will reject after 5 seconds
-        const timeoutPromise = new Promise((_, reject) => {
-          setTimeout(() => reject(new Error('Fetch timeout after 5s')), 5000);
-        });
-
-        // Create the fetch promise with explicit subscription options
-        const fetchPromise = new Promise((resolve, reject) => {
-          const events = new Set();
-          const sub = $ndk.subscribe(filter, {
-            closeOnEose: true,
-            groupableDelay: 100
-          });
-
-          sub.on('event', (event) => {
-            console.log('Received event:', event.id);
-            events.add(event);
-          });
-
-          sub.on('eose', () => {
-            console.log(`EOSE received, got ${events.size} events`);
-            resolve(events);
-          });
-
-          // Add error handling
-          sub.on('error', (error) => {
-            console.error('Subscription error:', error);
-            reject(error);
-          });
-        });
-
-        console.log('Fetch promise created, waiting for results...');
-        const events = await Promise.race([fetchPromise, timeoutPromise]);
+      console.log('Fetching organizations...');
+      const events = await fetchOrganizations();
         
         // Log the result immediately
         console.log('Race completed:', {
