@@ -77,6 +77,42 @@ export const HANDLER_INFO = 31990;      // Handler information - NIP-89
 // Community events (34000+)
 export const COMMUNITY = 34550;         // Community definition - NIP-72
 
+// Community interfaces
+export interface CommunityContent {
+  name: string;
+  description: string;
+  image?: string;
+  rules?: string[];
+  guidelines?: string[];
+  lastUpdated: number;
+}
+
+export interface CommunityTags {
+  IDENTIFIER: 'd';           // Required unique identifier
+  NAME: 'name';             // Community name
+  DESCRIPTION: 'description'; // Community description
+  IMAGE: 'image';           // Community image URL
+  MODERATOR: 'p';          // Moderator pubkey
+  RELAY: 'relay';          // Community relay
+  APPROVAL: 'a';           // Approval reference
+  POST: 'e';               // Post reference
+  AUTHOR: 'p';             // Post author
+  KIND: 'k';               // Post kind
+}
+
+export const COMMUNITY_TAGS: CommunityTags = {
+  IDENTIFIER: 'd',
+  NAME: 'name', 
+  DESCRIPTION: 'description',
+  IMAGE: 'image',
+  MODERATOR: 'p',
+  RELAY: 'relay',
+  APPROVAL: 'a',
+  POST: 'e',
+  AUTHOR: 'p',
+  KIND: 'k'
+};
+
 // Custom organization events
 export const ORGANIZATION = 31312;      // Custom kind for organization directory listings
 export const TOPICS = 31313;            // Custom kind for topics
