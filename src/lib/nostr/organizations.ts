@@ -310,7 +310,7 @@ export async function createOrganization(
 
 // Helper function to test organization creation
 export async function deleteOrganization(
-  ndk: NDK,
+  ndk: NDK, 
   originalEvent: NDKEvent,
   reason?: string
 ): Promise<NDKEvent> {
@@ -321,24 +321,12 @@ export async function deleteOrganization(
       throw new SignerRequiredError();
     }
 
-    // Create deletion event directly as an object
-    const deleteEvent = {
-      kind: 5,
-      content: reason || 'Organization deleted by owner',
-      tags: [
-        ['e', originalEvent.id],
-        ['a', `${ORGANIZATION}:${originalEvent.tags.find(t => t[0] === 'd')?.[1]}`]
-      ]
-    };
-
-    console.log('Creating deletion event:', deleteEvent);
-
+    console.log('Deleting organization event:', originalEvent.id);
+    
     try {
-      const signedEvent = await ndk.publish(deleteEvent);
-      if (!signedEvent) {
-        throw new Error('Failed to get signed event after publish');
-      }
-      return signedEvent;
+      // Use NDKEvent's built-in delete method
+      const deletionEvent = await originalEvent.delete(reason);
+      return deletionEvent;
     } catch (error) {
       console.error('Delete publish error:', error);
       throw new PublishError(
