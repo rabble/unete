@@ -235,12 +235,19 @@
                 </a>
               </div>
               <p class="text-gray-700 line-clamp-2">{org.description}</p>
-              <div class="mt-2 flex flex-wrap gap-2">
-                {#each org.focusAreas as area}
-                  <span class="bg-purple-100 text-purple-700 text-sm px-2 py-1 rounded">
-                    {area}
-                  </span>
-                {/each}
+              <div class="mt-2 space-y-2">
+                <div class="flex flex-wrap gap-2">
+                  {#each org.focusAreas as area}
+                    <span class="bg-purple-100 text-purple-700 text-sm px-2 py-1 rounded">
+                      {area}
+                    </span>
+                  {/each}
+                </div>
+                {#if org.communityId}
+                  <div class="text-sm text-gray-600">
+                    Community: {org.communityId}
+                  </div>
+                {/if}
               </div>
             </div>
           {/each}

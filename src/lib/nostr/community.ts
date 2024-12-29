@@ -2,7 +2,11 @@ import type NDK from '@nostr-dev-kit/ndk';
 import type { NDKEvent } from '@nostr-dev-kit/ndk';
 import { COMMUNITY, COMMUNITY_POST_APPROVAL, type CommunityContent } from './kinds';
 
-export async function createCommunity(ndk: NDK, content: CommunityContent, moderators: string[]) {
+export async function createCommunity(
+  ndk: NDK, 
+  content: CommunityContent, 
+  moderators: string[]
+) {
   if (!ndk?.signer) {
     throw new Error('NDK signer required to create community');
   }
@@ -27,7 +31,8 @@ export async function createCommunity(ndk: NDK, content: CommunityContent, moder
 export async function approveOrganization(
   ndk: NDK, 
   communityEvent: NDKEvent,
-  organizationEvent: NDKEvent
+  organizationEvent: NDKEvent,
+  communityId: string
 ) {
   if (!ndk?.signer) {
     throw new Error('NDK signer required to approve organization');
@@ -37,10 +42,11 @@ export async function approveOrganization(
     kind: COMMUNITY_POST_APPROVAL,
     content: JSON.stringify(organizationEvent.rawEvent()),
     tags: [
-      ['a', `34550:${communityEvent.pubkey}:allofus.directory`],
+      ['a', `34550:${communityEvent.pubkey}:${communityId || 'allofus.directory'}`],
       ['e', organizationEvent.id],
       ['p', organizationEvent.pubkey],
-      ['k', organizationEvent.kind.toString()]
+      ['k', organizationEvent.kind.toString()],
+      ['d', communityId || 'allofus.directory']
     ]
   });
 

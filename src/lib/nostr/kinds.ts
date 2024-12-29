@@ -160,6 +160,7 @@ export interface OrganizationContent {
   founded?: string;
   size?: string;
   languages?: string[];
+  communityId?: string;
   socialLinks?: {
     twitter?: string;
     github?: string;
