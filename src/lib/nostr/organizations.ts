@@ -321,11 +321,25 @@ export async function deleteOrganization(
       throw new SignerRequiredError();
     }
 
-    console.log('Deleting organization event:', originalEvent.id);
+    console.log('Deleting organization event:', {
+      id: originalEvent.id,
+      kind: originalEvent.kind,
+      tags: originalEvent.tags,
+      pubkey: originalEvent.pubkey,
+      content: originalEvent.content
+    });
     
     try {
       // Use NDKEvent's built-in delete method
+      console.log('Calling delete() with reason:', reason);
       const deletionEvent = await originalEvent.delete(reason);
+      console.log('Deletion event created:', {
+        id: deletionEvent.id,
+        kind: deletionEvent.kind,
+        tags: deletionEvent.tags,
+        pubkey: deletionEvent.pubkey,
+        content: deletionEvent.content
+      });
       return deletionEvent;
     } catch (error) {
       console.error('Delete publish error:', error);

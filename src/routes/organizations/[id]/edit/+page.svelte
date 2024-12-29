@@ -633,7 +633,18 @@
                 throw new Error('Original event not found');
               }
               const reason = prompt('Please provide a reason for deletion (optional):');
-              await deleteOrganization(ndk, originalEvent, reason);
+              console.log('Starting deletion process with:', {
+                ndkState: ndk?.connected,
+                signerExists: !!ndk?.signer,
+                eventId: originalEvent?.id,
+                reason: reason
+              });
+              const deletionEvent = await deleteOrganization(ndk, originalEvent, reason);
+              console.log('Deletion completed:', {
+                deletionEventId: deletionEvent.id,
+                deletionEventKind: deletionEvent.kind,
+                deletionEventTags: deletionEvent.tags
+              });
               window.location.href = '/organizations';
             } catch (e) {
               if (e instanceof SignerRequiredError) {
