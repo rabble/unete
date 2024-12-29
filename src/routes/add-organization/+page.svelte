@@ -6,6 +6,7 @@
   import { getTopics } from '$lib/topics';
   import { ndk } from '$lib/stores/ndk';
   import { get } from 'svelte/store';
+  import { goto } from '$app/navigation';
   import {
     ValidationError,
     SignerRequiredError,
@@ -17,6 +18,7 @@
   let error: string | null = null;
   let success = false;
   let loading = false;
+  let isLoggedIn = false;
 
   // Form data object
   let otherLocation = '';
@@ -128,6 +130,9 @@
         throw new Error('NDK not initialized');
       }
 
+      // Check login status
+      isLoggedIn = !!ndkInstance.signer;
+
       // Load dynamic "Focus Areas" from your function
       focusAreas = await getTopics(ndkInstance);
     } catch (err) {
@@ -211,9 +216,24 @@
 <div class="max-w-4xl mx-auto px-4 py-12">
   <h1 class="text-4xl font-bold text-center mb-8">Add Your Organization</h1>
 
+  {#if !isLoggedIn}
+    <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-6">
+      <p class="text-yellow-700">
+        You need to be logged in to submit an organization. 
+        <a href="/get-started" class="underline hover:text-yellow-800">Get started here</a>
+      </p>
+    </div>
+  {/if}
+
   {#if error}
     <div class="bg-red-50 border-l-4 border-red-400 p-4 mb-6">
-      <p class="text-red-700">{error}</p>
+      <p class="text-red-700">
+        {#if error.includes('NDK signer required')}
+          Please <a href="/get-started" class="underline hover:text-red-800">login with a Nostr extension</a> to create an organization
+        {:else}
+          {error}
+        {/if}
+      </p>
     </div>
   {/if}
 
