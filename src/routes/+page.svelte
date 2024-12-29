@@ -65,13 +65,13 @@
 
   async function login() {
     try {
-      await ndk.connect();
-      user = await ndk.signer?.user();
+      const result = await initializeUser($ndk);
+      user = result.user;
+      profile = result.profile;
+      
       if (user) {
         isLoggedIn.set(true);
-        const profileData = await user.fetchProfile();
-        profile = profileData;
-        await fetchUserContent();
+        userPosts = await fetchUserContent($ndk, user);
         userLists = { ...userLists };
       }
     } catch (error) {
@@ -92,16 +92,6 @@
     } catch (error) {
       console.error('Logout failed:', error);
     }
-  }
-
-  async function fetchUserContent() {
-    if (!user) return;
-    const postsEvents = await ndk.fetchEvents({
-      kinds: [NDKKind.Text],
-      authors: [user.pubkey],
-      limit: 10
-    });
-    userPosts = Array.from(postsEvents);
   }
 </script>
 
