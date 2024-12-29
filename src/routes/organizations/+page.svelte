@@ -128,16 +128,47 @@
           hasSigner: Boolean($ndk.signer)
         });
         
-        // Create a promise that will reject after 1 second
+        // Log relay status before fetching
+        const connectedRelays = Array.from($ndk.pool.relays.values())
+          .filter(relay => relay.status === 1);
+        console.log('Connected relays before fetch:', 
+          connectedRelays.map(r => ({url: r.url, status: r.status})));
+
+        if (connectedRelays.length === 0) {
+          throw new Error('No relays connected before fetch');
+        }
+
+        // Create a promise that will reject after 5 seconds
         const timeoutPromise = new Promise((_, reject) => {
-          setTimeout(() => reject(new Error('Fetch timeout after 1s')), 1000);
+          setTimeout(() => reject(new Error('Fetch timeout after 5s')), 5000);
         });
 
-        // Create the fetch promise
-        const fetchPromise = $ndk.fetchEvents(filter);
-        console.log('Fetch promise created, waiting for results...');
+        // Create the fetch promise with explicit subscription options
+        const fetchPromise = new Promise((resolve, reject) => {
+          const events = new Set();
+          const sub = $ndk.subscribe(filter, {
+            closeOnEose: true,
+            groupableDelay: 100
+          });
 
-        // Race between the fetch and the timeout
+          sub.on('event', (event) => {
+            console.log('Received event:', event.id);
+            events.add(event);
+          });
+
+          sub.on('eose', () => {
+            console.log(`EOSE received, got ${events.size} events`);
+            resolve(events);
+          });
+
+          // Add error handling
+          sub.on('error', (error) => {
+            console.error('Subscription error:', error);
+            reject(error);
+          });
+        });
+
+        console.log('Fetch promise created, waiting for results...');
         const events = await Promise.race([fetchPromise, timeoutPromise]);
         
         // Log the result immediately
@@ -155,12 +186,26 @@
         
         // Log first few events for debugging
         const firstFew = Array.from(events).slice(0, 3);
-        console.log('Sample events:', firstFew.map(e => ({
-          id: e.id,
-          kind: e.kind,
-          tags: e.tags,
-          content: e.content.substring(0, 100) + '...' // First 100 chars
-        })));
+        console.log('Sample events:', firstFew.map(e => {
+          try {
+            return {
+              id: e.id,
+              kind: e.kind,
+              tags: e.tags,
+              created_at: e.created_at,
+              content: JSON.parse(e.content)
+            };
+          } catch (err) {
+            console.error('Failed to parse event content:', err, e);
+            return {
+              id: e.id,
+              kind: e.kind,
+              tags: e.tags,
+              created_at: e.created_at,
+              content: 'Failed to parse'
+            };
+          }
+        }));
         
         // Convert Set to Array and sort
         allOrganizations = Array.from(events).sort((a, b) => {
