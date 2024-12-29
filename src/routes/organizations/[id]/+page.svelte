@@ -132,37 +132,37 @@
           </div>
         </div>
 
-        <!-- Focus Areas -->
+        <!-- Focus Areas (using t tag for topics) -->
         {#if organization.focusAreas?.length}
           <div class="mb-8">
             <h2 class="text-2xl font-bold mb-4">Focus Areas</h2>
             <div class="flex flex-wrap">
               {#each organization.focusAreas as area}
-                <TagLink type="topic" value={area} />
+                <TagLink type="t" value={area} />
               {/each}
             </div>
           </div>
         {/if}
 
-        <!-- Locations -->
+        <!-- Locations (using l tag for locations) -->
         {#if organization.locations?.length}
           <div class="mb-8">
             <h2 class="text-2xl font-bold mb-4">Locations</h2>
             <div class="flex flex-wrap">
               {#each organization.locations as location}
-                <TagLink type="location" value={location} />
+                <TagLink type="l" value={location} />
               {/each}
             </div>
           </div>
         {/if}
 
-        <!-- Engagement Types -->
+        <!-- Engagement Types (using t tag with engagement- prefix) -->
         {#if organization.engagementTypes?.length}
           <div class="mb-8">
             <h2 class="text-2xl font-bold mb-4">Ways to Engage</h2>
             <div class="flex flex-wrap">
               {#each organization.engagementTypes as type}
-                <TagLink type="engagement" value={type} />
+                <TagLink type="t" value={`engagement-${type}`} />
               {/each}
             </div>
           </div>
