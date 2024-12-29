@@ -26,8 +26,21 @@
 
   onMount(async () => {
     if (browser) {
-      // Only set up signer, connection is handled by store
-      ndk.signer = new NDKNip07Signer();
+      try {
+        // Check if already logged in via nostr-login
+        if (window.nostr) {
+          const pubkey = await window.nostr.getPublicKey();
+          if (pubkey) {
+            console.log('User already logged in via nostr-login with pubkey:', pubkey);
+            // Set up NDK signer
+            $ndk.signer = new NDKNip07Signer();
+            await $ndk.connect();
+            console.log('NDK signer connected');
+          }
+        }
+      } catch (error) {
+        console.error('Error syncing nostr-login with NDK:', error);
+      }
     }
   });
 
