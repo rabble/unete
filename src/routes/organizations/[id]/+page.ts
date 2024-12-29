@@ -31,14 +31,16 @@ export const load: PageLoad = async ({ params }) => {
         console.log('Parsing event content:', event);
         const content = JSON.parse(event.content);
         return {
-          ...content,
-          id: event.id,
-          pubkey: event.pubkey,
-          created_at: event.created_at,
-          focusAreas: event.tags.filter(t => t[0] === 't').map(t => t[1]),
-          locations: event.tags.filter(t => t[0] === 'l' && t[2] === 'location').map(t => t[1]),
-          engagementTypes: event.tags.filter(t => t[0] === 'l' && t[2] === 'engagement').map(t => t[1]),
-          tags: event.tags
+          organization: {
+            ...content,
+            id: event.id,
+            created_at: event.created_at,
+            focusAreas: event.tags.filter(t => t[0] === 't').map(t => t[1]),
+            locations: event.tags.filter(t => t[0] === 'l' && t[2] === 'location').map(t => t[1]),
+            engagementTypes: event.tags.filter(t => t[0] === 'l' && t[2] === 'engagement').map(t => t[1]),
+            tags: event.tags
+          },
+          event: event
         };
       } catch (e) {
         console.error('Failed to parse organization content:', e, 'Event:', event);

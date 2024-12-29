@@ -9,6 +9,7 @@
   export let data;
   
   let organization: OrganizationContent | null = null;
+  let event: NDKEvent | null = null;
   let loading = true;
   let error: string | null = null;
   let showJson = false;
@@ -49,8 +50,8 @@
     $ndk.signer.user()
       .then(user => {
         console.log('Current user pubkey:', user.pubkey);
-        console.log('Organization pubkey:', organization.pubkey);
-        isOwner = user.pubkey === organization.pubkey;
+        console.log('Event pubkey:', event.pubkey);
+        isOwner = user.pubkey === event.pubkey;
         console.log('Is owner?', isOwner);
       })
       .catch(error => {
@@ -70,8 +71,9 @@
     loading = true;
     data.promise
       .then(result => {
-        organization = result;
-        rawEvent = data.event;
+        organization = result.organization;
+        event = result.event;
+        rawEvent = result.event;
         loading = false;
       })
       .catch(e => {
