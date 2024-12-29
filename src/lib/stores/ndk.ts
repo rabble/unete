@@ -36,13 +36,43 @@ export async function initializeNDK() {
       // First check if window.nostr is available and set up NDK signer
       if (window.nostr) {
         try {
+          console.log('Found window.nostr, initializing NDK signer...');
           const signer = new NDKNip07Signer();
-          await signer.blockUntilReady();
+          
+          // Explicitly wait for signer to be ready
+          await new Promise((resolve, reject) => {
+            const timeout = setTimeout(() => {
+              reject(new Error('Signer initialization timeout'));
+            }, 5000);
+
+            signer.blockUntilReady().then(() => {
+              clearTimeout(timeout);
+              resolve(true);
+            }).catch(reject);
+          });
+
+          // Verify we can get the public key
+          const pubkey = await window.nostr.getPublicKey();
+          if (!pubkey) {
+            throw new Error('Could not get public key from window.nostr');
+          }
+
+          // Set the signer on NDK instance
           ndk.signer = signer;
           ndkSigner.set(signer);
-          console.log('NDK signer initialized from window.nostr');
+          
+          // Verify signer is working
+          const user = await signer.user();
+          if (user.pubkey !== pubkey) {
+            throw new Error('Signer pubkey mismatch');
+          }
+          
+          console.log('NDK signer successfully initialized:', pubkey);
         } catch (error) {
           console.error('Failed to initialize NDK signer:', error);
+          // Reset signer state on failure
+          ndk.signer = null;
+          ndkSigner.set(null);
         }
       }
 
