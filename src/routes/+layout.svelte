@@ -36,48 +36,8 @@
 
   async function login() {
     try {
-      // First check if window.nostr is available
-      if (!window.nostr) {
-        throw new Error('No Nostr extension found. Please install Alby or another Nostr extension.');
-      }
-
-      // Check if already logged in by trying to get the public key
-      try {
-        const pubkey = await window.nostr.getPublicKey();
-        if (pubkey) {
-          // Already logged in, just connect NDK
-          await ndk.connect();
-          isLoggedIn = true;
-          return;
-        }
-      } catch (e) {
-        // Not logged in, continue with login flow
-      }
-
-      // Connect NDK
-      await ndk.connect();
-      
-      // Try to get user with explicit error handling
-      try {
-        const user = await ndk.signer?.user();
-        if (!user) {
-          throw new Error('Failed to get user information');
-        }
-        
-        isLoggedIn = true;
-        try {
-          profile = await user.fetchProfile();
-        } catch (profileError) {
-          console.warn('Could not fetch profile:', profileError);
-          profile = { name: 'Anonymous User' };
-        }
-      } catch (userError) {
-        if (userError.message.includes('Rejected by user')) {
-          throw new Error('Login cancelled by user');
-        } else {
-          throw new Error('Failed to authenticate with Nostr');
-        }
-      }
+      // Launch nostr-login dialog
+      document.dispatchEvent(new CustomEvent('nlLaunch', { detail: 'welcome' }));
     } catch (error) {
       console.error('Login failed:', error);
       alert(error.message);

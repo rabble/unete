@@ -1,6 +1,7 @@
 import { writable, get } from 'svelte/store';
 import NDK, { NDKEvent, NDKNip07Signer } from '@nostr-dev-kit/ndk';
 import { browser } from '$app/environment';
+import { init as initNostrLogin } from 'nostr-login';
 
 // Create NDK instance
 const ndk = new NDK({
@@ -29,26 +30,24 @@ export async function initializeNDK() {
 
   try {
     console.log('Initializing NDK...');
-    
-    // Check for window.nostr before anything else
-    if (window.nostr) {
-      console.log('Found window.nostr, attempting to get public key...');
-      try {
-        // First check if we already have a nostr-login user
-        const currentUser = await window.nostrLogin?.getCurrentUser();
-        console.log('Current nostr-login user:', currentUser);
+
+    // Initialize nostr-login first
+    initNostrLogin({
+      noBanner: true, // We'll handle the UI ourselves
+      onAuth: async (npub, options) => {
+        console.log('nostr-login auth:', npub, options);
         
-        if (currentUser) {
-          // Use the existing nostr-login NDK signer
+        try {
+          // Create and initialize NDK signer
           const signer = new NDKNip07Signer();
           await signer.blockUntilReady();
-          console.log('Signer ready');
-          
-          // Set the signer on NDK instance
+          console.log('NDK signer ready');
+
+          // Set signer on NDK instance
           ndk.signer = signer;
           const signerUser = await signer.user();
           console.log('NDK signer user:', signerUser);
-          
+
           // Verify the pubkeys match
           const pubkey = await window.nostr.getPublicKey();
           if (signerUser.pubkey !== pubkey) {
@@ -56,11 +55,23 @@ export async function initializeNDK() {
             throw new Error('Signer pubkey does not match window.nostr pubkey');
           }
           console.log('Verified signer pubkey matches window.nostr');
-          
+
           ndkSigner.set(signer);
           console.log('Set NDK signer');
-        } else {
-          console.log('No current nostr-login user found');
+        } catch (error) {
+          console.error('Failed to initialize NDK signer:', error);
+          throw error;
+        }
+      }
+    });
+
+    // Check if we already have a logged in user
+    if (window.nostr) {
+      try {
+        const pubkey = await window.nostr.getPublicKey();
+        if (pubkey) {
+          console.log('Found existing nostr login:', pubkey);
+          // The onAuth callback will handle NDK setup
         }
       } catch (e) {
         console.warn('Failed to get public key:', e);
