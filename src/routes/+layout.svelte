@@ -203,36 +203,66 @@
     <div class="max-w-7xl mx-auto">
       <h3 class="text-lg font-semibold mb-2">Debug Information</h3>
       <div class="bg-white rounded-lg shadow p-4">
+        <div class="mb-4">
+          <h4 class="font-medium mb-2">Login Status:</h4>
+          <div class="text-sm space-y-1">
+            <p>window.nostr exists: <span class="font-mono">{browser && window.nostr ? 'Yes' : 'No'}</span></p>
+            <p>NDK Connected: <span class="font-mono">{$ndkConnected ? 'Yes' : 'No'}</span></p>
+            <p>Has NDK Signer: <span class="font-mono">{Boolean($ndk?.signer)}</span></p>
+          </div>
+        </div>
+
+        {#if browser && window.nostr}
+          <div class="mb-4 pt-4 border-t">
+            <h4 class="font-medium mb-2">Nostr Extension:</h4>
+            {#await window.nostr.getPublicKey().catch(e => null)}
+              <p class="text-sm">Checking public key...</p>
+            {:then pubkey}
+              <p class="text-sm">Public Key: <span class="font-mono">{pubkey || 'None'}</span></p>
+            {:catch error}
+              <p class="text-sm text-red-500">Error getting public key: {error.message}</p>
+            {/await}
+          </div>
+        {/if}
+
         {#if $ndk?.signer}
-          {#await $ndk.signer.user() then user}
-            <div class="mb-4">
-              <h4 class="font-medium">User Info:</h4>
+          {#await $ndk.signer.user()}
+            <div class="mb-4 pt-4 border-t">
+              <p class="text-sm">Loading user info...</p>
+            </div>
+          {:then user}
+            <div class="mb-4 pt-4 border-t">
+              <h4 class="font-medium mb-2">User Info:</h4>
               <pre class="bg-gray-50 p-2 rounded mt-1 text-sm overflow-x-auto">
                 {JSON.stringify(user, null, 2)}
               </pre>
             </div>
-            {#await user.fetchProfile() then profile}
-              <div>
-                <h4 class="font-medium">Profile Info:</h4>
+            {#await user.fetchProfile()}
+              <div class="mb-4">
+                <p class="text-sm">Loading profile...</p>
+              </div>
+            {:then profile}
+              <div class="mb-4">
+                <h4 class="font-medium mb-2">Profile Info:</h4>
                 <pre class="bg-gray-50 p-2 rounded mt-1 text-sm overflow-x-auto">
                   {JSON.stringify(profile, null, 2)}
                 </pre>
               </div>
+            {:catch error}
+              <div class="mb-4">
+                <p class="text-sm text-red-500">Error loading profile: {error.message}</p>
+              </div>
             {/await}
+          {:catch error}
+            <div class="mb-4 pt-4 border-t">
+              <p class="text-sm text-red-500">Error loading user: {error.message}</p>
+            </div>
           {/await}
         {:else}
-          <div class="text-gray-500">
-            No user signed in. Debug information will appear here when logged in.
+          <div class="text-gray-500 pt-4 border-t">
+            <p>No NDK signer available. User info will appear here when logged in.</p>
           </div>
         {/if}
-
-        <div class="mt-4 pt-4 border-t">
-          <h4 class="font-medium mb-2">NDK Connection Status:</h4>
-          <div class="text-sm">
-            <p>NDK Connected: <span class="font-mono">{$ndkConnected ? 'Yes' : 'No'}</span></p>
-            <p>Has Signer: <span class="font-mono">{Boolean($ndk?.signer)}</span></p>
-          </div>
-        </div>
       </div>
     </div>
   </div>

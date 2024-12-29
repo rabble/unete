@@ -28,37 +28,42 @@ export async function initializeNDK() {
   if (!browser) return;
 
   try {
-    // First ensure NDK is initialized
-    if (!get(ndkConnected)) {
-      console.log('Initializing NDK...');
-      await ndk.connect();
-      ndkConnected.set(true);
-      console.log('NDK initialized successfully');
-    }
-
-    // Then check nostr login and set up signer
+    console.log('Initializing NDK...');
+    
+    // Check for window.nostr before anything else
     if (window.nostr) {
-      const pubkey = await window.nostr.getPublicKey();
-      if (pubkey) {
-        console.log('User already logged in via nostr-login with pubkey:', pubkey);
-        try {
+      console.log('Found window.nostr, attempting to get public key...');
+      try {
+        const pubkey = await window.nostr.getPublicKey();
+        console.log('Got public key:', pubkey);
+        if (pubkey) {
           const signer = new NDKNip07Signer();
           ndk.signer = signer;
           ndkSigner.set(signer);
-          await ndk.connect();
-      
-          // Set the active user when we have a signer
-          const user = await signer.user();
-          if (user) {
-            ndk.activeUser = user;
-            console.log('NDK active user set:', user.npub);
-          }
-      
-          console.log('NDK signer connected successfully');
-        } catch (signerError) {
-          console.error('Failed to initialize NDK signer:', signerError);
-          throw signerError;
+          console.log('Set NDK signer');
         }
+      } catch (e) {
+        console.warn('Failed to get public key:', e);
+      }
+    } else {
+      console.log('No window.nostr found');
+    }
+
+    // Connect NDK regardless of login state
+    await ndk.connect();
+    ndkConnected.set(true);
+    console.log('NDK connected successfully');
+
+    // If we have a signer, set up the active user
+    if (ndk.signer) {
+      try {
+        const user = await ndk.signer.user();
+        if (user) {
+          ndk.activeUser = user;
+          console.log('NDK active user set:', user.npub);
+        }
+      } catch (e) {
+        console.error('Failed to set active user:', e);
       }
     }
   } catch (error) {
