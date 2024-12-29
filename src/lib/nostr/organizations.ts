@@ -1,7 +1,15 @@
 import { ndk, ensureConnection, getCachedEvents } from '$lib/stores/ndk';
-import { NDKEvent } from '@nostr-dev-kit/ndk';
+import NDK, { NDKEvent } from '@nostr-dev-kit/ndk';
 import { ORGANIZATION, type OrganizationContent, ORGANIZATION_TAGS } from './kinds';
 import { SignerRequiredError, ValidationError, PublishError } from './errors';
+
+function validateAndFormatUrl(url: string): string {
+  const urlPattern = /^https?:\/\//i;
+  if (!urlPattern.test(url)) {
+    return `https://${url}`;
+  }
+  return url;
+}
 
 function validateOrganizationContent(content: OrganizationContent): void {
   // Required string fields
@@ -56,11 +64,10 @@ function validateOrganizationContent(content: OrganizationContent): void {
 
   // Optional URL fields
   const urlFields = ['website', 'picture'] as const;
-  const urlPattern = /^https?:\/\/.+/i;
 
   for (const field of urlFields) {
-    if (content[field] && !urlPattern.test(content[field]!)) {
-      throw new ValidationError(`${field} must be a valid URL starting with http:// or https://`);
+    if (content[field]) {
+      content[field] = validateAndFormatUrl(content[field]!);
     }
   }
 
@@ -74,10 +81,9 @@ function validateOrganizationContent(content: OrganizationContent): void {
 
   // Optional social links
   if (content.socialLinks) {
-    const socialPattern = /^https?:\/\/([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}(\/\S*)?$/;
     for (const [platform, url] of Object.entries(content.socialLinks)) {
-      if (url && !socialPattern.test(url)) {
-        throw new ValidationError(`Invalid ${platform} URL format`);
+      if (url) {
+        content.socialLinks[platform] = validateAndFormatUrl(url);
       }
     }
   }
@@ -89,9 +95,7 @@ export async function updateOrganization(
 ): Promise<NDKEvent> {
   try {
     await ensureConnection();
-    await ensureConnection();
-    await ensureConnection();
-    const ndkInstance = ndk.get();
+    const ndkInstance = ndk;
     if (!ndkInstance?.signer) {
       throw new SignerRequiredError();
     }
@@ -99,14 +103,12 @@ export async function updateOrganization(
     // Validate content
     validateOrganizationContent(content);
 
-    // Create new event based on original
-    const event = new NDKEvent(ndk);
-    event.kind = ORGANIZATION;
+    // Update the existing event
+    const event = originalEvent; // Use the original event
     event.content = JSON.stringify(content);
-    event.tags = originalEvent.tags;
 
     try {
-      await event.publish();
+      await event.publish(); // Publish the updated event
       return event;
     } catch (error) {
       console.error('Publish error:', error);
@@ -124,11 +126,12 @@ export async function updateOrganization(
 }
 
 export async function createOrganization(
+  ndk: NDK,
   content: OrganizationContent,
   identifier: string
 ): Promise<NDKEvent> {
   try {
-    const ndkInstance = ndk.get();
+    const ndkInstance = ndk;
     if (!ndkInstance?.signer) {
       throw new SignerRequiredError();
     }
@@ -156,51 +159,51 @@ export async function createOrganization(
     event.kind = ORGANIZATION;
     event.content = JSON.stringify(content);
   
-  // Add required tags
-  event.tags = [
-    [ORGANIZATION_TAGS.IDENTIFIER, identifier]
-  ];
+    // Add required tags
+    event.tags = [
+      [ORGANIZATION_TAGS.IDENTIFIER, identifier]
+    ];
 
-  // Add optional tags
-  if (content.focusAreas?.length) {
-    content.focusAreas.forEach(area => {
-      event.tags.push([ORGANIZATION_TAGS.FOCUS_AREA, area]);
-    });
-  }
+    // Add optional tags
+    if (content.focusAreas?.length) {
+      content.focusAreas.forEach(area => {
+        event.tags.push([ORGANIZATION_TAGS.FOCUS_AREA, area]);
+      });
+    }
 
-  if (content.locations?.length) {
-    content.locations.forEach(location => {
-      event.tags.push([ORGANIZATION_TAGS.LOCATION, location]);
-    });
-  }
+    if (content.locations?.length) {
+      content.locations.forEach(location => {
+        event.tags.push([ORGANIZATION_TAGS.LOCATION, location]);
+      });
+    }
 
-  if (content.engagementTypes?.length) {
-    content.engagementTypes.forEach(type => {
-      event.tags.push([ORGANIZATION_TAGS.ENGAGEMENT, type]);
-    });
-  }
+    if (content.engagementTypes?.length) {
+      content.engagementTypes.forEach(type => {
+        event.tags.push([ORGANIZATION_TAGS.ENGAGEMENT, type]);
+      });
+    }
 
-  if (content.website) {
-    event.tags.push([ORGANIZATION_TAGS.WEBSITE, content.website]);
-  }
+    if (content.website) {
+      event.tags.push([ORGANIZATION_TAGS.WEBSITE, content.website]);
+    }
 
-  if (content.picture) {
-    event.tags.push([ORGANIZATION_TAGS.PICTURE, content.picture]);
-  }
+    if (content.picture) {
+      event.tags.push([ORGANIZATION_TAGS.PICTURE, content.picture]);
+    }
 
-  if (content.languages?.length) {
-    content.languages.forEach(lang => {
-      event.tags.push([ORGANIZATION_TAGS.LANGUAGE, lang]);
-    });
-  }
+    if (content.languages?.length) {
+      content.languages.forEach(lang => {
+        event.tags.push([ORGANIZATION_TAGS.LANGUAGE, lang]);
+      });
+    }
 
-  if (content.socialLinks) {
-    Object.entries(content.socialLinks).forEach(([platform, url]) => {
-      if (url) {
-        event.tags.push([ORGANIZATION_TAGS.SOCIAL, platform, url]);
-      }
-    });
-  }
+    if (content.socialLinks) {
+      Object.entries(content.socialLinks).forEach(([platform, url]) => {
+        if (url) {
+          event.tags.push([ORGANIZATION_TAGS.SOCIAL, platform, url]);
+        }
+      });
+    }
 
     try {
       console.log('Publishing event:', event);
@@ -213,8 +216,9 @@ export async function createOrganization(
         throw new Error('No connected relays available');
       }
 
-      // First publish without waiting
-      const publishPromise = event.publish();
+      // Publish the event
+      await event.publish();
+
       console.log('Event published, waiting for verification...');
       
       // Then wait for verification with a longer timeout
@@ -266,7 +270,6 @@ export async function createOrganization(
     if (error instanceof ValidationError || error instanceof SignerRequiredError || error instanceof PublishError) {
       throw error;
     }
-    // Wrap unknown errors in PublishError instead of NostrError
     throw new PublishError(`Unexpected error creating organization: ${error instanceof Error ? error.message : 'Unknown error'}`);
   }
 }
