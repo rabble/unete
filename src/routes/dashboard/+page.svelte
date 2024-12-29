@@ -1,10 +1,10 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-  import NDK, { NDKEvent, NDKNip07Signer, type NDKUser } from '@nostr-dev-kit/ndk';
+  import type { NDKEvent, NDKUser } from '@nostr-dev-kit/ndk';
   import { ndk } from '$lib/stores/ndk';
-  import { isLoggedIn } from '$lib/stores/userProfile';
-  import { goto } from '$app/navigation';
+  import { isLoggedIn, userProfile } from '$lib/stores/userProfile';
   import type { OrganizationContent } from '$lib/nostr/kinds';
+  import { fetchUserContent, getMediaType, getMediaUrls, initializeUser } from '$lib/nostr/ndk-utils';
 
   let user: NDKUser | undefined;
   let profile: { name?: string; about?: string; picture?: string; } | undefined;
@@ -56,56 +56,31 @@
     }
   }
 
-  function getMediaType(url: string): 'image' | 'video' | 'audio' | 'unknown' {
-    const extension = url.split('.').pop()?.toLowerCase();
-    if (['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(extension || '')) return 'image';
-    if (['mp4', 'webm', 'ogg'].includes(extension || '')) return 'video';
-    if (['mp3', 'wav', 'ogg'].includes(extension || '')) return 'audio';
-    return 'unknown';
-  }
-
-  function getMediaUrls(content: string): string[] {
-    const urlRegex = /(https?:\/\/[^\s]+\.(jpg|jpeg|png|gif|webp|mp4|webm|ogg|mp3|wav))/gi;
-    return Array.from(content.matchAll(urlRegex), m => m[0]);
-  }
-
-  async function fetchUserContent() {
-    if (!user) return;
-    const postsEvents = await $ndk.fetchEvents({
-      kinds: [1], // NDKKind.Text
-      authors: [user.pubkey],
-      limit: 10
-    });
-    userPosts = Array.from(postsEvents);
-  }
 
   onMount(async () => {
-    if (!$isLoggedIn) {
-      goto('/');
-      return;
-    }
-
     try {
-      if (!$ndk?.signer) {
+      // Initialize user and profile
+      const result = await initializeUser($ndk);
+      user = result.user;
+      profile = result.profile;
+      
+      if (!user) {
         throw new Error('Please login using the Nostr extension');
       }
 
-      user = await $ndk.signer.user();
-      if (!user) {
-        throw new Error('No user found');
-      }
-
-      const profileData = await user.fetchProfile();
-      profile = profileData;
-
-      // Fetch user content
-      await fetchUserContent();
-
-      // Fetch organizations
-      const events = await $ndk.fetchEvents({
-        authors: [user.pubkey],
-        kinds: [31337] // Organization kind
-      });
+      // Update the global user profile store
+      userProfile.set(user);
+      
+      // Fetch user content in parallel
+      const [posts, events] = await Promise.all([
+        fetchUserContent($ndk, user),
+        $ndk.fetchEvents({
+          authors: [user.pubkey],
+          kinds: [31337] // Organization kind
+        })
+      ]);
+      
+      userPosts = posts;
       userEvents = Array.from(events).sort((a, b) => b.created_at - a.created_at);
       
     } catch (err) {
