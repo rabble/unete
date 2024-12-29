@@ -200,8 +200,8 @@
         <div class="mb-4 pt-4 border-t">
           <h4 class="font-medium mb-2">NDK Status:</h4>
           <div class="text-sm space-y-1">
-            <p>NDK Instance: <span class="font-mono">{Boolean($ndk) ? 'Created' : 'Not Created'}</span></p>
-            <p>NDK Connected: <span class="font-mono">{$ndkConnected ? 'Yes' : 'No'}</span></p>
+            <p>NDK Instance: <span class="font-mono">{$ndk && $ndk.pool ? 'Created' : 'Not Created'}</span></p>
+            <p>NDK Connected: <span class="font-mono">{$ndk && $ndk.pool && $ndkConnected ? 'Yes' : 'No'}</span></p>
             <p>Has NDK Signer: <span class="font-mono">{Boolean($ndk?.signer) ? 'Yes' : 'No'}</span></p>
             {#if $ndk?.signer}
               {#await $ndk.signer.user()}
