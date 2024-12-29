@@ -37,13 +37,19 @@ export async function initializeNDK() {
         const pubkey = await window.nostr.getPublicKey();
         console.log('Got public key:', pubkey);
         if (pubkey) {
+          // Create and initialize the signer
           const signer = new NDKNip07Signer();
+          await signer.blockUntilReady();
+          console.log('Signer ready');
+          
+          // Set the signer on NDK instance
           ndk.signer = signer;
           ndkSigner.set(signer);
           console.log('Set NDK signer');
         }
       } catch (e) {
         console.warn('Failed to get public key:', e);
+        throw new Error('Failed to initialize signer: ' + e.message);
       }
     } else {
       console.log('No window.nostr found');
