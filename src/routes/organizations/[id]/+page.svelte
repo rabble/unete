@@ -5,6 +5,8 @@
   import type { OrganizationContent } from '$lib/nostr/kinds';
   import { isAdmin } from '$lib/nostr/admin';
   import { goto } from '$app/navigation';
+  import { SignerRequiredError, PublishError } from '$lib/nostr/errors';
+  import { deleteOrganization } from '$lib/nostr/organizations';
 
   export let data;
   
@@ -308,6 +310,54 @@
           </div>
         {/if}
       </div>
+
+      <!-- Delete Button -->
+      {#if isOwner}
+        <div class="mt-8 flex justify-center">
+          <button
+            on:click={async () => {
+              if (confirm('Are you sure you want to delete this organization? This action cannot be undone.')) {
+                error = null;
+                loading = true;
+                try {
+                  if (!$ndk?.signer) {
+                    throw new SignerRequiredError();
+                  }
+                  if (!event) {
+                    throw new Error('Original event not found');
+                  }
+                  const reason = prompt('Please provide a reason for deletion (optional):');
+                  console.log('Starting deletion process with:', {
+                    ndkState: $ndk?.connected,
+                    signerExists: !!$ndk?.signer,
+                    eventId: event?.id,
+                    reason: reason
+                  });
+                  const deletionEvent = await deleteOrganization($ndk, event, reason);
+                  console.log('Organization deleted successfully:', deletionEvent.id);
+                  // Wait briefly to allow deletion event to propagate
+                  setTimeout(() => {
+                    window.location.href = '/organizations';
+                  }, 1000);
+                } catch (e) {
+                  if (e instanceof SignerRequiredError) {
+                    error = 'Please login with a Nostr extension first';
+                  } else if (e instanceof PublishError) {
+                    error = 'Failed to delete organization. Please try again.';
+                  } else {
+                    error = 'An unexpected error occurred';
+                    console.error(e);
+                  }
+                  loading = false;
+                }
+              }
+            }}
+            class="bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-8 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            Delete Organization
+          </button>
+        </div>
+      {/if}
     </div>
   {:else}
     <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4">
