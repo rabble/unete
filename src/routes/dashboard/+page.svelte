@@ -2,7 +2,7 @@
   import { onMount } from 'svelte';
   import type { NDKEvent, NDKUser } from '@nostr-dev-kit/ndk';
   import { NDKNip07Signer } from '@nostr-dev-kit/ndk';
-  import { ndk } from '$lib/stores/ndk';
+  import { ndk, initNostrLogin } from '$lib/stores/ndk';
   import { isLoggedIn, userProfile } from '$lib/stores/userProfile';
   import { ORGANIZATION, type OrganizationContent } from '$lib/nostr/kinds';
   import { initializeUser } from '$lib/nostr/ndk-utils';
