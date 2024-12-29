@@ -107,8 +107,8 @@
 
   <!-- Community Management -->
   {#if selectedCommunity && isModerator}
+    {@const content = JSON.parse(selectedCommunity.content)}
     <div class="bg-white rounded-lg shadow-lg p-6">
-      {@const content = JSON.parse(selectedCommunity.content)}
       <h2 class="text-2xl font-semibold mb-6">{content.name} Management</h2>
 
       {#if loading}
