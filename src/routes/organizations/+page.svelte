@@ -122,8 +122,23 @@
 
       try {
         console.log('Starting fetchEvents...');
-        const events = await $ndk.fetchEvents(filter);
-        console.log('Fetched events:', events);
+        
+        // Create a promise that will reject after 30 seconds
+        const timeoutPromise = new Promise((_, reject) => {
+          setTimeout(() => reject(new Error('Fetch timeout after 30s')), 30000);
+        });
+
+        // Race between the fetch and the timeout
+        const events = await Promise.race([
+          $ndk.fetchEvents(filter),
+          timeoutPromise
+        ]);
+        
+        if (!events) {
+          throw new Error('No events returned from fetchEvents');
+        }
+        
+        console.log('Fetch complete, received events:', events);
         console.log('Number of events:', events.size);
         
         // Log first few events for debugging
