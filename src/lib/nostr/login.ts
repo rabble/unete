@@ -11,21 +11,22 @@ export async function initNostrLogin() {
       if (pubkey) {
         console.log('Found existing Nostr pubkey:', pubkey);
         
-        // Create NDK instance with NIP-07 signer and user
+        // Create NDK instance with NIP-07 signer
         const signer = new NDKNip07Signer();
+        const user = await signer.user();
+         
+        if (!user || user.pubkey !== pubkey) {
+          throw new Error('Failed to initialize signer with correct user');
+        }
+         
         const ndkInstance = new NDK({
           explicitRelayUrls: [
             'wss://relay.nos.social',
             'wss://relay.damus.io',
             'wss://relay.nostr.band',
           ],
-          signer
-        });
-         
-        // Set the user explicitly
-        await signer.user().then(user => {
-          ndkInstance.signer = signer;
-          ndkInstance.activeUser = user;
+          signer,
+          activeUser: user
         });
 
         // Connect before setting the store
