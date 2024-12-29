@@ -130,8 +130,8 @@ export async function getCachedEvents(filter: any): Promise<Set<NDKEvent>> {
   const timeoutPromise = new Promise((_, reject) => {
     setTimeout(() => {
       console.log('Timeout reached, forcing rejection');
-      reject(new Error('Fetch timeout after 30s'));
-    }, 30000);
+      reject(new Error('Fetch timeout after 1s'));
+    }, 1000);
   });
 
   const events = await Promise.race([fetchPromise, timeoutPromise]);

@@ -128,9 +128,9 @@
           hasSigner: Boolean($ndk.signer)
         });
         
-        // Create a promise that will reject after 30 seconds
+        // Create a promise that will reject after 1 second
         const timeoutPromise = new Promise((_, reject) => {
-          setTimeout(() => reject(new Error('Fetch timeout after 30s')), 30000);
+          setTimeout(() => reject(new Error('Fetch timeout after 1s')), 1000);
         });
 
         // Create the fetch promise
