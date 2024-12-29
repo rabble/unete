@@ -109,9 +109,9 @@
 
       // Set a longer timeout but resolve early if we get events
       const timeout = setTimeout(() => {
-        sub.close();
+        sub.stop();
         console.log('Fetch timeout reached, events collected:', events.size);
-        resolve(events); // Resolve with whatever we have instead of rejecting
+        resolve(Array.from(events));
       }, 10000);
 
       // Add an early resolution if we get enough events
@@ -119,34 +119,43 @@
         if (events.size >= 5) {
           clearTimeout(timeout);
           clearInterval(checkEvents);
-          sub.close();
+          sub.stop();
           console.log('Got sufficient events early:', events.size);
-          resolve(events);
+          resolve(Array.from(events));
         }
       }, 1000);
 
       sub.on('event', (event: NDKEvent) => {
-        console.log('Received event:', event.id);
-        try {
-          console.log('Event details:', {
-            id: event.id,
-            kind: event.kind,
-            pubkey: event.pubkey,
-            created_at: event.created_at,
-            tags: event.tags,
-            content: JSON.parse(event.content),
-            sig: event.sig
-          });
-        } catch (e) {
-          console.error('Failed to parse event content:', e, 'Raw event:', event);
-        }
+        console.log('Received event:', {
+          id: event.id,
+          content: getOrgContent(event),
+          currentStoreSize: allOrganizations.length
+        });
         events.add(event);
+        
+        // Log before and after updating allOrganizations
+        console.log('Before update:', {
+          eventsSize: events.size,
+          allOrganizationsLength: allOrganizations.length
+        });
+        
+        allOrganizations = Array.from(events).sort((a, b) => {
+          const orgA = getOrgContent(a);
+          const orgB = getOrgContent(b);
+          return orgA.name.localeCompare(orgB.name);
+        });
+        
+        console.log('After update:', {
+          eventsSize: events.size,
+          allOrganizationsLength: allOrganizations.length,
+          firstThreeOrgs: allOrganizations.slice(0, 3).map(org => getOrgContent(org).name)
+        });
       });
 
       sub.on('eose', () => {
         console.log(`EOSE received, got ${events.size} events`);
         clearTimeout(timeout);
-        resolve(events);
+        resolve(Array.from(events));
       });
     });
   }
@@ -277,10 +286,12 @@
   function getOrgContent(event: NDKEvent): OrganizationContent {
     try {
       if (!event?.content) {
+        console.error('Event has no content:', event);
         throw new Error('Event has no content');
       }
       const content = JSON.parse(event.content);
       if (!content.name || !content.category || !content.description) {
+        console.error('Missing required organization fields:', content);
         throw new Error('Missing required organization fields');
       }
       return content;
@@ -315,6 +326,14 @@
     const org = getOrgContent(event);
     const filters = $searchFilters;
     
+    // Log the event being filtered
+    console.log('Filtering event:', {
+      id: event.id,
+      name: org.name,
+      tags: event.tags,
+      filters: filters
+    });
+    
     // Filter by locations (using 'l' tags with 'location' mark)
     const locationMatch = !filters.locations?.length || 
       event.tags
@@ -333,8 +352,34 @@
         .filter(t => t[0] === 'l' && t[2] === 'engagement')
         .some(t => filters.engagementTypes.includes(t[1]));
     
+    // Log the match results
+    console.log('Filter results:', {
+      name: org.name,
+      locationMatch,
+      focusMatch,
+      engagementMatch,
+      passed: locationMatch && focusMatch && engagementMatch
+    });
+    
     return locationMatch && focusMatch && engagementMatch;
   });
+
+  // Add logging to the reactive statement
+  $: {
+    console.log('Reactive statement triggered:', {
+      allOrganizationsLength: allOrganizations.length,
+      filteredOrganizationsLength: filteredOrganizations?.length,
+      filters: $searchFilters
+    });
+    
+    if (filteredOrganizations) {
+      console.log('First 3 filtered organizations:', filteredOrganizations.slice(0, 3).map(event => ({
+        id: event.id,
+        content: getOrgContent(event),
+        tags: event.tags
+      })));
+    }
+  }
 </script>
 
 <div class="max-w-7xl mx-auto px-4 py-12">
@@ -501,4 +546,29 @@
       </div>
     {/if}
   </div>
+
+  <!-- Debug: All Organizations -->
+  <div class="mt-8 border-t pt-8">
+    <h3 class="text-xl font-semibold mb-4">Debug: All Loaded Organizations</h3>
+    <div class="bg-gray-100 p-4 rounded-lg">
+      <p class="mb-2">Total organizations loaded: {allOrganizations.length}</p>
+      <div class="space-y-4">
+        {#each allOrganizations as event}
+          {@const org = getOrgContent(event)}
+          <div class="bg-white p-4 rounded shadow">
+            <p class="font-bold">{org.name}</p>
+            <p class="text-sm text-gray-600">ID: {event.id}</p>
+            <p class="text-sm text-gray-600">Category: {org.category}</p>
+            <div class="text-sm">
+              <p class="font-semibold mt-2">Tags:</p>
+              <pre class="bg-gray-50 p-2 rounded mt-1 text-xs overflow-x-auto">
+                {JSON.stringify(event.tags, null, 2)}
+              </pre>
+            </div>
+          </div>
+        {/each}
+      </div>
+    </div>
+  </div>
+
 </div>
