@@ -228,12 +228,20 @@
     <div class="bg-white rounded-lg shadow-lg p-6">
       <div class="flex justify-between items-center mb-6">
         <h2 class="text-2xl font-semibold">Your Groups</h2>
-        <button
-          on:click={() => revealedSections.add('createInvite')}
-          class="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors"
-        >
-          Create Invite
-        </button>
+        <div class="flex gap-2">
+          <a 
+            href="/groups/create"
+            class="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors"
+          >
+            Create Group
+          </a>
+          <button
+            on:click={() => revealedSections.add('createInvite')}
+            class="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors"
+          >
+            Create Invite
+          </button>
+        </div>
       </div>
 
       <!-- Create Invite Form -->
