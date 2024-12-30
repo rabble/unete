@@ -209,41 +209,44 @@
           </div>
         {/if}
 
-        <!-- Focus Areas (using t tag for topics) -->
-        {#if organization.focusAreas?.length}
-          <div class="mb-8">
-            <h2 class="text-2xl font-bold mb-4">Focus Areas</h2>
-            <div class="flex flex-wrap">
-              {#each organization.focusAreas as area}
-                <TagLink type="t" value={area} />
-              {/each}
+        <!-- Tags Section -->
+        <div class="mb-8 bg-gray-50 p-6 rounded-lg">
+          <!-- Focus Areas -->
+          {#if organization.focusAreas?.length}
+            <div class="mb-6">
+              <h2 class="text-2xl font-bold mb-3">Focus Areas</h2>
+              <div class="flex flex-wrap gap-2">
+                {#each organization.focusAreas as area}
+                  <TagLink type="t" value={area} />
+                {/each}
+              </div>
             </div>
-          </div>
-        {/if}
+          {/if}
 
-        <!-- Locations (using l tag for locations) -->
-        {#if organization.locations?.length}
-          <div class="mb-8">
-            <h2 class="text-2xl font-bold mb-4">Locations</h2>
-            <div class="flex flex-wrap">
-              {#each organization.locations as location}
-                <TagLink type="l" value={location} />
-              {/each}
+          <!-- Locations -->
+          {#if organization.locations?.length}
+            <div class="mb-6">
+              <h2 class="text-2xl font-bold mb-3">Locations</h2>
+              <div class="flex flex-wrap gap-2">
+                {#each organization.locations as location}
+                  <TagLink type="l" value={location} context="location" />
+                {/each}
+              </div>
             </div>
-          </div>
-        {/if}
+          {/if}
 
-        <!-- Engagement Types (using t tag with engagement- prefix) -->
-        {#if organization.engagementTypes?.length}
-          <div class="mb-8">
-            <h2 class="text-2xl font-bold mb-4">Ways to Engage</h2>
-            <div class="flex flex-wrap">
-              {#each organization.engagementTypes as type}
-                <TagLink type="t" value={`engagement-${type}`} />
-              {/each}
+          <!-- Engagement Types -->
+          {#if organization.engagementTypes?.length}
+            <div class="mb-6">
+              <h2 class="text-2xl font-bold mb-3">Ways to Engage</h2>
+              <div class="flex flex-wrap gap-2">
+                {#each organization.engagementTypes as type}
+                  <TagLink type="l" value={type} context="engagement" />
+                {/each}
+              </div>
             </div>
-          </div>
-        {/if}
+          {/if}
+        </div>
 
         <!-- Additional Information -->
         {#if organization.about || organization.mission || organization.vision || organization.founded || organization.size || organization.languages?.length}
