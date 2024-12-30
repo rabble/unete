@@ -24,7 +24,7 @@
   $: {
     loading = true;
     data.promise
-      .then(result => {
+      .then(async (result) => {
         organization = result.organization;
         event = result.event;
         rawEvent = result.event;
@@ -32,7 +32,8 @@
         // Check ownership after event is loaded
         if ($ndk?.signer) {
           console.log('Checking ownership - NDK signer and event available');
-          $ndk.signer.user().then(async (user) => {
+          try {
+            const user = await $ndk.signer.user();
             if (user?.npub) {
               console.log('User found:', user.npub);
               console.log('Event pubkey:', event.pubkey);
@@ -42,19 +43,19 @@
               console.log('No user found from signer');
               isOwner = false;
             }
-          }).catch(error => {
+          } catch (error) {
             console.error('Failed to get user from signer:', error);
             isOwner = false;
-          });
+          }
         } else {
           console.log('Cannot check ownership - no signer available');
           isOwner = false;
         }
-        
-        loading = false;
       })
       .catch(e => {
         error = e instanceof Error ? e.message : 'Failed to load organization';
+      })
+      .finally(() => {
         loading = false;
       });
   }
