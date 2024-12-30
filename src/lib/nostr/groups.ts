@@ -315,22 +315,17 @@ export async function createGroup(
     const metadataEvent = await group.setMetadata(metadata);
     console.log('Raw metadata event:', metadataEvent);
 
-    // Simple verification of metadata publication
-    const check = await group.getMetadata();
-    console.log('Metadata verification check:', check);
-
-    if (!check?.name) {
-      console.error('Failed to verify group metadata');
+    // Immediately verify the event was published by requesting it
+    const verifyEvent = await ndk.fetchEvent({
+      ids: [metadataEvent.id]
+    });
+    
+    if (!verifyEvent) {
+      console.error('Failed to verify metadata event publication');
       throw new PublishError('Failed to create group: metadata not published');
     }
 
-    // Basic validation that critical fields match
-    if (check.name !== content.name) {
-      console.error('Group name mismatch:', { expected: content.name, got: check.name });
-      throw new PublishError('Failed to create group: metadata mismatch');
-    }
-
-    console.log('Group metadata verified');
+    console.log('Group metadata publication verified');
     return metadataEvent;
     } catch (error) {
       console.error('Failed to verify metadata:', error);
