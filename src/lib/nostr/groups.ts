@@ -81,48 +81,48 @@ export async function getGroupMetadata(ndk: NDK, groupId: string): Promise<Group
   console.log('Getting metadata for group:', groupId);
   
   try {
-    // Create a new NDKSimpleGroup instance
-    const group = new NDKSimpleGroup(ndk, ndk.pool.relaySet, groupId);
-    
-    // Get the metadata with retries
-    let metadata = null;
-    const maxRetries = 3;
-    
-    for (let i = 0; i < maxRetries; i++) {
-      metadata = await group.getMetadata();
-      console.log(`Metadata fetch attempt ${i + 1}:`, metadata);
-      
-      if (metadata?.name) {
-        console.log('Valid metadata found:', {
-          name: metadata.name,
-          about: metadata.about,
-          picture: metadata.picture,
-          event: metadata.event
-        });
-        break;
-      }
-      
-      if (i < maxRetries - 1) {
-        console.log(`Retrying metadata fetch in ${(i + 1) * 1000}ms...`);
-        await new Promise(resolve => setTimeout(resolve, (i + 1) * 1000));
-      }
-    }
+    // Fetch the group metadata event directly
+    const metadataEvent = await ndk.fetchEvent({
+      kinds: [GROUP_METADATA],
+      '#d': [groupId]
+    });
 
-    if (!metadata?.name) {
-      console.log('No valid metadata found after retries for group:', groupId);
+    if (!metadataEvent) {
+      console.log('No metadata event found for group:', groupId);
       return null;
     }
+
+    // Parse the metadata content
+    let metadataContent;
+    try {
+      metadataContent = JSON.parse(metadataEvent.content);
+    } catch (err) {
+      console.error('Failed to parse metadata content:', err);
+      return null;
+    }
+
+    // Get member and admin counts
+    const [memberEvents, adminEvents] = await Promise.all([
+      ndk.fetchEvents({
+        kinds: [GROUP_MEMBERS],
+        '#d': [groupId]
+      }),
+      ndk.fetchEvents({
+        kinds: [GROUP_ADMINS],
+        '#d': [groupId]
+      })
+    ]);
 
     // Parse metadata
     const result: GroupMetadata = {
       id: groupId,
-      name: metadata.name || 'Unnamed Group',
-      about: metadata.about,
-      picture: metadata.picture,
-      isPrivate: !!metadata.event.tags.find(t => t[0] === 'private'),
-      isClosed: !!metadata.event.tags.find(t => t[0] === 'closed'),
-      memberCount: group.members.length,
-      adminCount: group.admins.length
+      name: metadataContent.name || 'Unnamed Group',
+      about: metadataContent.about,
+      picture: metadataContent.picture,
+      isPrivate: !!metadataEvent.tags.find(t => t[0] === 'private'),
+      isClosed: !!metadataEvent.tags.find(t => t[0] === 'closed'),
+      memberCount: memberEvents.size,
+      adminCount: adminEvents.size
     };
 
     return result;
