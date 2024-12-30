@@ -107,18 +107,25 @@ export async function getGroupMetadata(ndk: NDK, groupId: string): Promise<Group
       content: metadataEvent.content
     });
 
-    // Parse the metadata content
+    // Try to get metadata from content first, then fall back to tags
     let metadataContent;
     try {
-      if (!metadataEvent.content) {
-        console.error('Metadata event has empty content');
-        return null;
+      if (metadataEvent.content) {
+        metadataContent = JSON.parse(metadataEvent.content);
+        console.log('Parsed metadata from content:', metadataContent);
+      } else {
+        // Extract metadata from tags
+        console.log('Content empty, extracting from tags:', metadataEvent.tags);
+        metadataContent = {
+          name: metadataEvent.tags.find(t => t[0] === 'name')?.[1] || 'Unnamed Group',
+          about: metadataEvent.tags.find(t => t[0] === 'about')?.[1],
+          picture: metadataEvent.tags.find(t => t[0] === 'picture')?.[1]
+        };
+        console.log('Extracted metadata from tags:', metadataContent);
       }
-      metadataContent = JSON.parse(metadataEvent.content);
-      console.log('Parsed metadata content:', metadataContent);
     } catch (err) {
-      console.error('Failed to parse metadata content:', err);
-      console.error('Raw content:', metadataEvent.content);
+      console.error('Failed to parse metadata:', err);
+      console.error('Raw event:', metadataEvent);
       return null;
     }
 
