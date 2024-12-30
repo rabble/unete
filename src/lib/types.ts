@@ -33,6 +33,15 @@ export interface OrganizationContent {
     linkedin?: string;
     facebook?: string;
     instagram?: string;
+    nostr?: string;
+  };
+  supporter?: {
+    range: [number, number];
+    description: string;
+  };
+  staff?: {
+    range: [number, number];
+    description: string;
   };
 }
 

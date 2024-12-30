@@ -284,6 +284,32 @@
                 <p class="text-gray-700">{organization.communityId}</p>
               </div>
             {/if}
+
+            {#if organization.supporter}
+              <div class="mb-4">
+                <h3 class="text-xl font-semibold mb-2">Supporters</h3>
+                <p class="text-gray-700">
+                  Range: {organization.supporter.range[0]} - {organization.supporter.range[1]}
+                  {#if organization.supporter.description}
+                    <br>
+                    {organization.supporter.description}
+                  {/if}
+                </p>
+              </div>
+            {/if}
+
+            {#if organization.staff}
+              <div class="mb-4">
+                <h3 class="text-xl font-semibold mb-2">Staff</h3>
+                <p class="text-gray-700">
+                  Range: {organization.staff.range[0]} - {organization.staff.range[1]}
+                  {#if organization.staff.description}
+                    <br>
+                    {organization.staff.description}
+                  {/if}
+                </p>
+              </div>
+            {/if}
           </div>
         {/if}
 
@@ -340,6 +366,16 @@
                   class="text-gray-600 hover:text-purple-600"
                 >
                   Instagram
+                </a>
+              {/if}
+              {#if organization.socialLinks.nostr}
+                <a
+                  href={organization.socialLinks.nostr}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="text-gray-600 hover:text-purple-600"
+                >
+                  Nostr
                 </a>
               {/if}
             </div>
