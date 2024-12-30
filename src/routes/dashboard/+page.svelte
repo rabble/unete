@@ -4,7 +4,7 @@
   import { NDKNip07Signer } from '@nostr-dev-kit/ndk';
   import { ndk, initNostrLogin } from '$lib/stores/ndk';
   import { isLoggedIn, userProfile } from '$lib/stores/userProfile';
-  import { ORGANIZATION, type OrganizationContent } from '$lib/nostr/kinds';
+  import { ORGANIZATION, GROUP_MEMBERS, type OrganizationContent } from '$lib/nostr/kinds';
   import { initializeUser } from '$lib/nostr/ndk-utils';
   import { getUserGroups, type GroupMetadata, createGroupInvite } from '$lib/nostr/groups';
 
