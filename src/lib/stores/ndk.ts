@@ -30,11 +30,7 @@ export async function initializeNDK() {
     const ndkInstance = new NDK({
       explicitRelayUrls: [
         'wss://relay.nos.social',
-        'wss://relay.damus.io',
-        'wss://relay.nostr.band',
-        'wss://relay.snort.social',
-        'wss://nostr.mom',
-        'wss://relay.current.fyi'
+        'wss://communities.nos.social'
       ]
     });
 
