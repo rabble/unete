@@ -336,7 +336,7 @@
         <!-- Social Links -->
         {#if organization.socialLinks && Object.values(organization.socialLinks).some(link => link)}
           <div class="mb-8 bg-gray-50 p-6 rounded-lg">
-            <h2 class="text-2xl font-bold mb-4">Connect With Us</h2>
+            <h2 class="text-2xl font-bold mb-4">Connect With {organization.name}</h2>
             <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
               {#if organization.socialLinks.twitter}
                 <a
