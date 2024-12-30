@@ -485,8 +485,6 @@
           </div>
         {/if}
       </div>
-
-    </div>
   {:else}
     <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4">
       <p class="text-yellow-700">Organization not found</p>
