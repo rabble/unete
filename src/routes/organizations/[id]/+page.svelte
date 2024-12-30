@@ -389,8 +389,6 @@
         {/if}
       </div>
     </div>
-
-    </div>
     <!-- Sidebar -->
     <div class="lg:w-1/3">
       <div class="bg-gray-50 p-6 rounded-lg sticky top-4">
