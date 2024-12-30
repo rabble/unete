@@ -38,14 +38,20 @@ export class NostrClient {
   constructor(key: string, config?: Partial<NostrClientConfig>) {
     try {
       this.config = {
-        relayUrl: "/ws",
+        relayUrl: "wss://relay.damus.io",  // Primary relay
         ...config,
       };
 
       const signer = new NDKPrivateKeySigner(key);
 
       this.ndk = new NDK({
-        explicitRelayUrls: [this.config.relayUrl],
+        explicitRelayUrls: [
+          this.config.relayUrl,
+          "wss://nos.lol",
+          "wss://relay.nostr.band",
+          "wss://relay.current.fyi",
+          "wss://nostr.mom",
+        ],
         signer,
       });
 
