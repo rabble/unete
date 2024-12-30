@@ -236,47 +236,8 @@ export async function createOrganization(
     }
 
     try {
-      // Ensure we're connected to relays before publishing
-      await new Promise<void>((resolve, reject) => {
-        const timeout = setTimeout(() => {
-          reject(new Error('Relay connection timeout'));
-        }, 5000);
-
-        const checkRelays = () => {
-          const connectedRelays = Array.from(ndk.pool.relays.values())
-            .filter(r => r.connected);
-          
-          if (connectedRelays.length > 0) {
-            clearTimeout(timeout);
-            resolve();
-          }
-        };
-
-        // Check immediately
-        checkRelays();
-        
-        // Also set up a periodic check
-        const interval = setInterval(() => {
-          checkRelays();
-        }, 100);
-
-        // Clean up interval on timeout
-        timeout.onTimeout = () => {
-          clearInterval(interval);
-        };
-      });
-
-      // Set publish options for better reliability
-      const publishOptions = {
-        skipVerification: false,
-        skipValidation: false,
-        // Wait for at least one relay to confirm
-        relay: Array.from(ndk.pool.relays.values())
-          .find(r => r.connected)
-      };
-
-      // Publish with options
-      await event.publish(publishOptions);
+      // Publish the event using NDK directly
+      await ndk.publish(event);
       return event;
     } catch (error) {
       console.error('Publish error details:', {
