@@ -36,6 +36,15 @@ export interface OrganizationContent {
   };
 }
 
+export interface OrganizationListContent {
+  name: string;
+  description?: string;
+  organizations: string[];  // List of organization event IDs
+  lastUpdated: number;
+}
+
+export type CuratorList = string[];  // List of approved curator npubs
+
 export interface Group {
   id: string;
   name: string;

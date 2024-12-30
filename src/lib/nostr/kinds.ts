@@ -93,6 +93,15 @@ export const GROUP_LEAVE = 9022;          // Request to leave group
 // Custom organization events
 export const ORGANIZATION = 31312;      // Custom kind for organization directory listings
 export const TOPICS = 31313;            // Custom kind for topics
+export const ORGANIZATION_LIST = 31314;  // Custom kind for curated organization lists
+
+// Organization list tags
+export const ORGANIZATION_LIST_TAGS = {
+  IDENTIFIER: 'd',           // Required for addressable events
+  ORGANIZATION: 'o',         // Reference to organization event
+  CURATOR: 'p',             // Curator's pubkey
+  REASON: 'reason',         // Optional reason for inclusion
+};
 
 // Topics event content schema
 export interface TopicsContent {
