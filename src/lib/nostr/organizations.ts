@@ -185,14 +185,15 @@ export async function createOrganization(
       throw new ValidationError('Organization identifier must contain only lowercase letters, numbers, and hyphens');
     }
 
-    // Create the group first
-    const groupContent: GroupContent = {
+    // Create the group first using NDKSimpleGroup
+    const group = new NDKSimpleGroup(ndk, ndk.pool.relaySet, identifier);
+    await group.createGroup();
+    await group.setMetadata({
       name: content.name,
       about: content.description,
       picture: content.picture,
-      isClosed: true // Organizations are moderated
-    };
-    await createGroup(ndk, groupContent, identifier);
+      tags: [['closed']] // Organizations are moderated
+    });
 
     // Create organization metadata as a message in the group
     const event = new NDKEvent(ndk);
