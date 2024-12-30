@@ -1,6 +1,6 @@
 import { ndk } from '$lib/stores/ndk';
 import NDK, { NDKEvent, NDKUser, NDKFilter } from '@nostr-dev-kit/ndk';
-import { NDKSimpleGroup } from '@nostr-dev-kit/ndk';
+import { NostrClient, GroupEventKind } from './client';
 import { SignerRequiredError, ValidationError, PublishError } from './errors';
 import { 
   GROUP_MEMBERS, 
