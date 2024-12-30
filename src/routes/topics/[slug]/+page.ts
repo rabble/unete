@@ -1,3 +1,4 @@
+import { error } from '@sveltejs/kit';
 import type { PageLoad } from './$types';
 import { topics } from '$lib/topics';
 import { ndk, ensureConnection, getCachedEvents } from '$lib/stores/ndk';
@@ -12,7 +13,9 @@ export const load: PageLoad = async ({ params }) => {
   // Immediately return the current topic data
   const currentTopic = topics.find(t => t.slug === slug);
   if (!currentTopic) {
-    throw new Error(`Topic ${slug} not found`);
+    throw error(404, {
+      message: `Topic "${slug}" not found`
+    });
   }
 
   // Ensure NDK is connected
