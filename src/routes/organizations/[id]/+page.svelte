@@ -66,7 +66,10 @@
 
 </script>
 
-<div class="max-w-4xl mx-auto px-4 py-12">
+<div class="container mx-auto px-4 py-12">
+  <div class="flex flex-col lg:flex-row gap-8">
+    <!-- Main Content -->
+    <div class="lg:w-2/3">
   {#if organization && isOwner}
     <div class="flex justify-end mb-4 space-x-4">
       <button
@@ -209,44 +212,6 @@
           </div>
         {/if}
 
-        <!-- Tags Section -->
-        <div class="mb-8 bg-gray-50 p-6 rounded-lg">
-          <!-- Focus Areas -->
-          {#if organization.focusAreas?.length}
-            <div class="mb-6">
-              <h2 class="text-2xl font-bold mb-3">Focus Areas</h2>
-              <div class="flex flex-wrap gap-2">
-                {#each organization.focusAreas as area}
-                  <TagLink type="t" value={area} />
-                {/each}
-              </div>
-            </div>
-          {/if}
-
-          <!-- Locations -->
-          {#if organization.locations?.length}
-            <div class="mb-6">
-              <h2 class="text-2xl font-bold mb-3">Locations</h2>
-              <div class="flex flex-wrap gap-2">
-                {#each organization.locations as location}
-                  <TagLink type="l" value={location} context="location" />
-                {/each}
-              </div>
-            </div>
-          {/if}
-
-          <!-- Engagement Types -->
-          {#if organization.engagementTypes?.length}
-            <div class="mb-6">
-              <h2 class="text-2xl font-bold mb-3">Ways to Engage</h2>
-              <div class="flex flex-wrap gap-2">
-                {#each organization.engagementTypes as type}
-                  <TagLink type="l" value={type} context="engagement" />
-                {/each}
-              </div>
-            </div>
-          {/if}
-        </div>
 
         <!-- Additional Information -->
         {#if organization.about || organization.mission || organization.vision || organization.founded || organization.size || organization.languages?.length}
@@ -423,8 +388,51 @@
           </div>
         {/if}
       </div>
+    </div>
 
-      <!-- Raw Data Display -->
+    <!-- Sidebar -->
+    <div class="lg:w-1/3">
+      <div class="bg-gray-50 p-6 rounded-lg sticky top-4">
+        <!-- Focus Areas -->
+        {#if organization.focusAreas?.length}
+          <div class="mb-6">
+            <h2 class="text-xl font-bold mb-3">Focus Areas</h2>
+            <div class="flex flex-col gap-2">
+              {#each organization.focusAreas as area}
+                <TagLink type="t" value={area} />
+              {/each}
+            </div>
+          </div>
+        {/if}
+
+        <!-- Locations -->
+        {#if organization.locations?.length}
+          <div class="mb-6">
+            <h2 class="text-xl font-bold mb-3">Locations</h2>
+            <div class="flex flex-col gap-2">
+              {#each organization.locations as location}
+                <TagLink type="l" value={location} context="location" />
+              {/each}
+            </div>
+          </div>
+        {/if}
+
+        <!-- Engagement Types -->
+        {#if organization.engagementTypes?.length}
+          <div class="mb-6 border-b border-gray-200 pb-6">
+            <h2 class="text-xl font-bold mb-3">Ways to Engage</h2>
+            <div class="flex flex-col gap-2">
+              {#each organization.engagementTypes as type}
+                <TagLink type="l" value={type} context="engagement" />
+              {/each}
+            </div>
+          </div>
+        {/if}
+      </div>
+    </div>
+  </div>
+
+  <!-- Raw Data Display -->
       <div class="mt-8 flex flex-col items-center border-t pt-8">
         <h3 class="text-xl font-semibold mb-4">Developer Tools</h3>
         
