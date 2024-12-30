@@ -70,25 +70,64 @@ import { error } from '@sveltejs/kit';
 import type { PageLoad } from './$types';
 
 export const load: PageLoad = async ({ params }) => {
-    try {
-        // TODO: Replace with actual topic data fetching
-        const topic = {
-            slug: params.slug,
-            title: params.slug.split('-').map(word => 
-                word.charAt(0).toUpperCase() + word.slice(1)
-            ).join(' '),
-            description: `Information about ${params.slug}`,
-            count: 0
-        };
+  const { slug } = params;
 
-        return {
-            topic,
-            allTopics: [], // TODO: Replace with actual topics list
-            promise: Promise.resolve({ organizations: [], allTopics: [] })
-        };
-    } catch (e) {
-        throw error(404, {
-            message: `Topic "${params.slug}" not found`
-        });
-    }
+  // Immediately return the current topic data
+  const currentTopic = topics.find(t => t.slug === slug);
+  if (!currentTopic) {
+    throw error(404, {
+      message: `Topic "${slug}" not found`
+    });
+  }
+
+  // Ensure NDK is connected
+  await ensureConnection();
+
+  // Return initial data immediately
+  return {
+    topic: currentTopic,
+    organizations: [], // Empty initially
+    allTopics: topics, // Use static topics initially
+    promise: getCachedEvents({
+      kinds: [ORGANIZATION],
+      '#t': [slug] // Only fetch organizations with this topic tag
+    }).then(events => {
+      const eventsArray = Array.from(events);
+      
+      // Process organizations and counts after data loads
+      const topicsWithCounts = topics.map(topic => ({
+        ...topic,
+        count: eventsArray.filter(event => 
+          event.tags.some(t => t[0] === 't' && t[1] === topic.slug)
+        ).length
+      }));
+
+      const topicOrganizations = eventsArray
+        .filter(event => event.tags.some(t => t[0] === 't' && t[1] === slug))
+        .map(event => {
+          try {
+            const content = JSON.parse(event.content);
+            return {
+              id: event.id,
+              name: content.name,
+              category: content.category,
+              description: content.description,
+              focusAreas: event.tags.filter(t => t[0] === 'f').map(t => t[1]),
+              locations: event.tags.filter(t => t[0] === 'l').map(t => t[1]),
+              engagementTypes: event.tags.filter(t => t[0] === 'e').map(t => t[1]),
+              tags: event.tags
+            };
+          } catch (e) {
+            console.error('Failed to parse organization content:', e);
+            return null;
+          }
+        })
+        .filter(org => org !== null); // Remove any failed parses
+
+      return {
+        organizations: topicOrganizations,
+        allTopics: topicsWithCounts
+      };
+    })
+  };
 };
