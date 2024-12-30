@@ -93,13 +93,18 @@
         throw new Error('Please login using the Nostr extension');
       }
 
-      // Only fetch events if we have a user
+      // Fetch both organizations and groups if we have a user
       if (user?.pubkey) {
-        const events = await $ndk.fetchEvents({
-          authors: [user.pubkey],
-          kinds: [ORGANIZATION]
-        });
+        const [events, groups] = await Promise.all([
+          $ndk.fetchEvents({
+            authors: [user.pubkey],
+            kinds: [ORGANIZATION]
+          }),
+          getUserGroups($ndk)
+        ]);
+        
         userEvents = Array.from(events).sort((a, b) => b.created_at - a.created_at);
+        userGroups = groups;
       }
     } catch (err) {
       console.error('Error loading dashboard:', err);
