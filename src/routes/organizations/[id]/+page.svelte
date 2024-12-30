@@ -430,8 +430,7 @@
         {/if}
       </div>
     </div>
-  </div>
-
+  
   <!-- Raw Data Display -->
       <div class="mt-8 flex flex-col items-center border-t pt-8">
         <h3 class="text-xl font-semibold mb-4">Developer Tools</h3>
