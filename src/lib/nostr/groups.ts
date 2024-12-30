@@ -2,7 +2,13 @@ import { ndk } from '$lib/stores/ndk';
 import NDK, { NDKEvent, NDKUser, NDKFilter } from '@nostr-dev-kit/ndk';
 import { NDKSimpleGroup } from '@nostr-dev-kit/ndk';
 import { SignerRequiredError, ValidationError, PublishError } from './errors';
-import { GROUP_MEMBERS, GROUP_ADMINS, GROUP_CREATE_INVITE, GROUP_JOIN } from './kinds';
+import { 
+  GROUP_MEMBERS, 
+  GROUP_ADMINS, 
+  GROUP_CREATE_INVITE, 
+  GROUP_JOIN,
+  GROUP_METADATA 
+} from './kinds';
 
 export interface GroupContent {
   name: string;
