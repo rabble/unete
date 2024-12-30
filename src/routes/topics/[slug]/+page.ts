@@ -27,16 +27,19 @@ export const load: PageLoad = async ({ params }) => {
     organizations: [], // Empty initially
     allTopics: topics, // Use static topics initially
     promise: (async () => {
-      const filters = {
-        kinds: [ORGANIZATION],
-        '#f': [slug] // Use focus area tag 'f' instead of topic tag 't'
-      };
-      console.log('Querying Nostr with filters:', JSON.stringify(filters, null, 2));
-      const events = await getCachedEvents(filters);
-      if (!events) {
-        console.log('No events returned from getCachedEvents');
-        return { organizations: [], allTopics: topics };
-      }
+      try {
+        const filters = {
+          kinds: [ORGANIZATION],
+          '#f': [slug] // Use focus area tag 'f' instead of topic tag 't'
+        };
+        console.log('Querying Nostr with filters:', JSON.stringify(filters, null, 2));
+        const events = await getCachedEvents(filters);
+        console.log('Received events:', events ? Array.from(events).length : 0);
+        
+        if (!events || events.size === 0) {
+          console.log('No events returned from getCachedEvents');
+          return { organizations: [], allTopics: topics };
+        }
       const eventsArray = Array.from(events);
       
       // Process organizations and counts after data loads

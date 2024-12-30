@@ -7,18 +7,27 @@
   let organizations = [];
   let allTopics = data.allTopics;
   let loadingNostr = true;
+  let error = null;
 
   // Handle the promise when data changes
   $: {
     loadingNostr = true;
-    data.promise.then(result => {
-      organizations = result.organizations || [];
-      allTopics = result.allTopics || data.allTopics;
-      loadingNostr = false;
-    }).catch(err => {
-      console.error('Failed to load Nostr data:', err);
-      loadingNostr = false;
-    });
+    error = null;
+    console.log('Starting to load data...');
+    
+    data.promise
+      .then(result => {
+        console.log('Received result:', result);
+        organizations = result.organizations || [];
+        allTopics = result.allTopics || data.allTopics;
+        console.log('Updated organizations:', organizations.length);
+        loadingNostr = false;
+      })
+      .catch(err => {
+        console.error('Failed to load Nostr data:', err);
+        error = err.message;
+        loadingNostr = false;
+      });
   }
   
   $: engagementTypes = [...new Set(
@@ -92,9 +101,18 @@
       <section class="mb-12">
         <h2 class="text-2xl font-semibold mb-6">Organizations Working on {data.topic.title}</h2>
         
-        {#if loadingNostr}
+        {#if error}
+          <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
+            <strong class="font-bold">Error loading data: </strong>
+            <span class="block sm:inline">{error}</span>
+          </div>
+        {:else if loadingNostr}
           <div class="flex justify-center items-center py-12">
             <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
+          </div>
+        {:else if organizations.length === 0}
+          <div class="text-center py-12">
+            <p class="text-gray-600">No organizations found for this focus area.</p>
           </div>
         {:else}
           <div class="space-y-8">
