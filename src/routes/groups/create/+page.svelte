@@ -1,9 +1,20 @@
 <script lang="ts">
-  import { ndk } from '$lib/stores/ndk';
+  import { ndk, ensureConnection } from '$lib/stores/ndk';
   import { createGroup } from '$lib/nostr/groups';
   import { goto } from '$app/navigation';
+  import { onMount } from 'svelte';
 
   let name = '';
+  let initialized = false;
+
+  onMount(async () => {
+    try {
+      await ensureConnection();
+      initialized = true;
+    } catch (err) {
+      error = 'Failed to initialize Nostr connection';
+    }
+  });
   let about = '';
   let picture = '';
   let isPrivate = false;
@@ -20,10 +31,14 @@
     loading = true;
     error = null;
 
+    if (!initialized) {
+      error = 'Please wait for Nostr connection to initialize';
+      return;
+    }
+
     try {
-      // Generate a unique identifier
+      await ensureConnection();
       const identifier = `${Date.now()}-${name.toLowerCase().replace(/[^a-z0-9]/g, '-')}`;
-      
       await createGroup($ndk, {
         name,
         about,
