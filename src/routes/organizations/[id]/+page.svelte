@@ -169,7 +169,7 @@
             <h2 class="text-xl font-bold mb-3">Focus Areas</h2>
             <div class="flex flex-col gap-2">
               {#each organization.focusAreas as area}
-                <TagLink type="t" value={area} />
+                <TagLink type="topic" value={area} />
               {/each}
             </div>
           </div>
