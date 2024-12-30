@@ -26,10 +26,13 @@ export const load: PageLoad = async ({ params }) => {
     topic: currentTopic,
     organizations: [], // Empty initially
     allTopics: topics, // Use static topics initially
-    promise: getCachedEvents({
-      kinds: [ORGANIZATION],
-      '#f': [slug] // Use focus area tag 'f' instead of topic tag 't'
-    }).then(events => {
+    promise: (async () => {
+      const filters = {
+        kinds: [ORGANIZATION],
+        '#f': [slug] // Use focus area tag 'f' instead of topic tag 't'
+      };
+      console.log('Querying Nostr with filters:', JSON.stringify(filters, null, 2));
+      const events = await getCachedEvents(filters);
       const eventsArray = Array.from(events);
       
       // Process organizations and counts after data loads
