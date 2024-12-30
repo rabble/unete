@@ -66,3 +66,29 @@ export const load: PageLoad = async ({ params }) => {
     })
   };
 };
+import { error } from '@sveltejs/kit';
+import type { PageLoad } from './$types';
+
+export const load: PageLoad = async ({ params }) => {
+    try {
+        // TODO: Replace with actual topic data fetching
+        const topic = {
+            slug: params.slug,
+            title: params.slug.split('-').map(word => 
+                word.charAt(0).toUpperCase() + word.slice(1)
+            ).join(' '),
+            description: `Information about ${params.slug}`,
+            count: 0
+        };
+
+        return {
+            topic,
+            allTopics: [], // TODO: Replace with actual topics list
+            promise: Promise.resolve({ organizations: [], allTopics: [] })
+        };
+    } catch (e) {
+        throw error(404, {
+            message: `Topic "${params.slug}" not found`
+        });
+    }
+};
