@@ -231,6 +231,7 @@
       {/if}
     </div>
     <!-- User Groups -->
+    <!--
     <div class="bg-white rounded-lg shadow-lg p-6">
       <div class="flex justify-between items-center mb-6">
         <h2 class="text-2xl font-semibold">Your Groups</h2>
@@ -250,14 +251,13 @@
         </div>
       </div>
 
-      <!-- Create Invite Form -->
       {#if revealedSections.has('createInvite')}
         <div class="mb-6 p-4 bg-gray-50 rounded-lg">
           <h3 class="text-lg font-semibold mb-4">Create Group Invite</h3>
           <form on:submit|preventDefault={async () => {
             try {
               const invite = await createGroupInvite($ndk, selectedGroupId, {
-                expiresIn: inviteExpiration ? 86400 : undefined, // 24 hours if selected
+                expiresIn: inviteExpiration ? 86400 : undefined,
                 maxUses: inviteMaxUses || undefined
               });
               inviteCode = invite.code;
@@ -378,5 +378,6 @@
         </div>
       {/if}
     </div>
+    -->
   </div>
 </div>
