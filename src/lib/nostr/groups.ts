@@ -87,10 +87,28 @@ export async function getGroupMetadata(ndk: NDK, groupId: string): Promise<Group
     // Get the metadata
     const metadata = await group.getMetadata();
     console.log('Fetched group metadata:', metadata);
+    
+    // Log detailed metadata state
+    console.log('Metadata event:', metadata?.event);
+    console.log('Metadata content:', metadata?.content);
+    console.log('Metadata raw:', metadata?.raw);
 
     if (!metadata || !metadata.event) {
       console.log('No metadata found for group:', groupId);
       return null;
+    }
+
+    // Wait a moment and try again if metadata is missing
+    if (!metadata.name) {
+      console.log('Metadata missing name, retrying after delay...');
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      const retryMetadata = await group.getMetadata();
+      console.log('Retry metadata:', retryMetadata);
+      if (retryMetadata?.name) {
+        metadata.name = retryMetadata.name;
+        metadata.about = retryMetadata.about;
+        metadata.picture = retryMetadata.picture;
+      }
     }
 
     // Parse metadata
@@ -277,6 +295,7 @@ export async function createGroup(
 
     // Create the group and get the metadata event
     const metadataEvent = await group.createGroup();
+    console.log('Group created, metadata event:', metadataEvent);
 
     // Prepare metadata content
     const metadata = {
@@ -289,8 +308,23 @@ export async function createGroup(
       ].flat()
     };
 
-    // Set the metadata with all properties at once
+    // Set the metadata and ensure publication
+    console.log('Setting group metadata:', metadata);
     await group.setMetadata(metadata);
+    
+    // Verify the metadata was published
+    const verifyMetadata = await group.getMetadata();
+    console.log('Verified metadata:', verifyMetadata);
+    
+    if (!verifyMetadata) {
+      throw new Error('Failed to verify group metadata publication');
+    }
+
+    // Explicitly publish the metadata event if needed
+    if (!metadataEvent.sig) {
+      await metadataEvent.sign();
+    }
+    await metadataEvent.publish();
 
     return metadataEvent;
   } catch (error) {
