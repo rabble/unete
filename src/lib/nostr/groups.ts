@@ -84,31 +84,33 @@ export async function getGroupMetadata(ndk: NDK, groupId: string): Promise<Group
     // Create a new NDKSimpleGroup instance
     const group = new NDKSimpleGroup(ndk, ndk.pool.relaySet, groupId);
     
-    // Get the metadata
-    const metadata = await group.getMetadata();
-    console.log('Fetched group metadata:', metadata);
+    // Get the metadata with retries
+    let metadata = null;
+    const maxRetries = 3;
     
-    // Log detailed metadata state
-    console.log('Metadata event:', metadata?.event);
-    console.log('Metadata content:', metadata?.content);
-    console.log('Metadata raw:', metadata?.raw);
-
-    if (!metadata || !metadata.event) {
-      console.log('No metadata found for group:', groupId);
-      return null;
+    for (let i = 0; i < maxRetries; i++) {
+      metadata = await group.getMetadata();
+      console.log(`Metadata fetch attempt ${i + 1}:`, metadata);
+      
+      if (metadata?.name) {
+        console.log('Valid metadata found:', {
+          name: metadata.name,
+          about: metadata.about,
+          picture: metadata.picture,
+          event: metadata.event
+        });
+        break;
+      }
+      
+      if (i < maxRetries - 1) {
+        console.log(`Retrying metadata fetch in ${(i + 1) * 1000}ms...`);
+        await new Promise(resolve => setTimeout(resolve, (i + 1) * 1000));
+      }
     }
 
-    // Wait a moment and try again if metadata is missing
-    if (!metadata.name) {
-      console.log('Metadata missing name, retrying after delay...');
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      const retryMetadata = await group.getMetadata();
-      console.log('Retry metadata:', retryMetadata);
-      if (retryMetadata?.name) {
-        metadata.name = retryMetadata.name;
-        metadata.about = retryMetadata.about;
-        metadata.picture = retryMetadata.picture;
-      }
+    if (!metadata?.name) {
+      console.log('No valid metadata found after retries for group:', groupId);
+      return null;
     }
 
     // Parse metadata
@@ -293,9 +295,9 @@ export async function createGroup(
     // Create a new NDKSimpleGroup instance
     const group = new NDKSimpleGroup(ndk, ndk.pool.relaySet, identifier);
 
-    // Create the group
-    await group.createGroup();
-    console.log('Group created');
+    // Create the group and wait for confirmation
+    const createEvent = await group.createGroup();
+    console.log('Group creation event:', createEvent);
 
     // Prepare metadata content
     const metadata = {
@@ -308,20 +310,39 @@ export async function createGroup(
       ].flat()
     };
 
-    // Set the metadata and ensure publication
+    // Set the metadata
     console.log('Setting group metadata:', metadata);
     const metadataEvent = await group.setMetadata(metadata);
-    console.log('Metadata event created:', metadataEvent);
-    
-    // Verify the metadata was published
-    const verifyMetadata = await group.getMetadata();
-    console.log('Verified metadata:', verifyMetadata);
-    
-    if (!verifyMetadata) {
-      throw new Error('Failed to verify group metadata publication');
-    }
+    console.log('Raw metadata event:', metadataEvent);
 
-    return metadataEvent;
+    // Wait for metadata to be published with timeout
+    const verifyPromise = new Promise((resolve, reject) => {
+      const timeout = setTimeout(() => {
+        reject(new Error('Timeout waiting for metadata publication'));
+      }, 5000);
+
+      const checkMetadata = async () => {
+        const check = await group.getMetadata();
+        console.log('Metadata verification check:', check);
+        if (check?.name === content.name) {
+          clearTimeout(timeout);
+          resolve(check);
+        } else {
+          setTimeout(checkMetadata, 500);
+        }
+      };
+
+      checkMetadata();
+    });
+
+    try {
+      await verifyPromise;
+      console.log('Group metadata verified');
+      return metadataEvent;
+    } catch (error) {
+      console.error('Failed to verify metadata:', error);
+      throw new PublishError('Failed to verify group metadata publication');
+    }
   } catch (error) {
     console.error('Group creation error:', error);
     if (error instanceof ValidationError || error instanceof SignerRequiredError) {
