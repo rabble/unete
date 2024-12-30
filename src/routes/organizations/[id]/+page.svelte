@@ -344,12 +344,12 @@
         {#if showRawData}
           <div class="mt-4 w-full max-w-4xl bg-gray-900 text-gray-100 p-6 rounded-lg overflow-x-auto">
             <pre>{JSON.stringify({
-              id: data.promise.id,
-              pubkey: data.promise.pubkey,
-              kind: data.promise.kind,
-              tags: data.promise.tags,
+              id: event?.id,
+              pubkey: event?.pubkey,
+              kind: event?.kind,
+              tags: event?.tags,
               content: organization,
-              created_at: data.promise.created_at
+              created_at: event?.created_at
             }, null, 2)}</pre>
           </div>
         {/if}
