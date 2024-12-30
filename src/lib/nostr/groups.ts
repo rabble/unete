@@ -84,7 +84,7 @@ export async function getUserGroups(ndk: NDK): Promise<GroupMetadata[]> {
  * Get metadata for a specific group
  */
 export async function getGroupMetadata(ndk: NDK, groupId: string): Promise<GroupMetadata | null> {
-  console.log('Getting metadata for group:', groupId);
+  // console.log('Getting metadata for group:', groupId);
   
   try {
     // Fetch the group metadata event directly
@@ -98,34 +98,34 @@ export async function getGroupMetadata(ndk: NDK, groupId: string): Promise<Group
       return null;
     }
 
-    // Add debugging for the metadata event
-    console.log('Raw metadata event:', {
-      id: metadataEvent.id,
-      pubkey: metadataEvent.pubkey,
-      kind: metadataEvent.kind,
-      tags: metadataEvent.tags,
-      content: metadataEvent.content
-    });
+    // // Add debugging for the metadata event
+    // console.log('Raw metadata event:', {
+    //   id: metadataEvent.id,
+    //   pubkey: metadataEvent.pubkey,
+    //   kind: metadataEvent.kind,
+    //   tags: metadataEvent.tags,
+    //   content: metadataEvent.content
+    // });
 
     // Try to get metadata from content first, then fall back to tags
     let metadataContent;
     try {
       if (metadataEvent.content) {
         metadataContent = JSON.parse(metadataEvent.content);
-        console.log('Parsed metadata from content:', metadataContent);
+        // console.log('Parsed metadata from content:', metadataContent);
       } else {
         // Extract metadata from tags
-        console.log('Content empty, extracting from tags:', metadataEvent.tags);
+        // console.log('Content empty, extracting from tags:', metadataEvent.tags);
         metadataContent = {
           name: metadataEvent.tags.find(t => t[0] === 'name')?.[1] || 'Unnamed Group',
           about: metadataEvent.tags.find(t => t[0] === 'about')?.[1],
           picture: metadataEvent.tags.find(t => t[0] === 'picture')?.[1]
         };
-        console.log('Extracted metadata from tags:', metadataContent);
+        // console.log('Extracted metadata from tags:', metadataContent);
       }
     } catch (err) {
-      console.error('Failed to parse metadata:', err);
-      console.error('Raw event:', metadataEvent);
+      // console.error('Failed to parse metadata:', err);
+      // console.error('Raw event:', metadataEvent);
       return null;
     }
 
@@ -155,7 +155,7 @@ export async function getGroupMetadata(ndk: NDK, groupId: string): Promise<Group
 
     return result;
   } catch (error) {
-    console.error('Error fetching group metadata:', error);
+    // console.error('Error fetching group metadata:', error);
     return null;
   }
 }
