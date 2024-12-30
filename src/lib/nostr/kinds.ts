@@ -71,6 +71,25 @@ export const CALENDAR_RSVP = 31925;     // Calendar event RSVP - NIP-52
 export const HANDLER_RECOMMEND = 31989; // Handler recommendation - NIP-89
 export const HANDLER_INFO = 31990;      // Handler information - NIP-89
 
+// Group event kinds (NIP-29)
+export const GROUP_METADATA = 39000;      // Group metadata
+export const GROUP_ADMINS = 39001;        // Group admins list
+export const GROUP_MEMBERS = 39002;       // Group members list
+export const GROUP_ROLES = 39003;         // Group roles definition
+
+// Group moderation events (NIP-29)
+export const GROUP_ADD_USER = 9000;       // Add user to group
+export const GROUP_REMOVE_USER = 9001;    // Remove user from group
+export const GROUP_EDIT_METADATA = 9002;  // Edit group metadata
+export const GROUP_DELETE_EVENT = 9005;   // Delete event from group
+export const GROUP_CREATE = 9007;         // Create group
+export const GROUP_DELETE = 9008;         // Delete group
+export const GROUP_CREATE_INVITE = 9009;  // Create invite code
+
+// Group user events (NIP-29)
+export const GROUP_JOIN = 9021;           // Request to join group
+export const GROUP_LEAVE = 9022;          // Request to leave group
+
 // Custom organization events
 export const ORGANIZATION = 31312;      // Custom kind for organization directory listings
 export const TOPICS = 31313;            // Custom kind for topics

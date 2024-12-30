@@ -176,10 +176,8 @@ export async function createOrganization(
       throw new SignerRequiredError('Failed to verify signer');
     }
 
-    // Validate content
+    // Validate content and identifier
     validateOrganizationContent(content);
-
-    // Validate identifier
     if (!identifier?.trim()) {
       throw new ValidationError('Organization identifier is required');
     }
@@ -187,15 +185,22 @@ export async function createOrganization(
       throw new ValidationError('Organization identifier must contain only lowercase letters, numbers, and hyphens');
     }
 
+    // Create the group first
+    const groupContent: GroupContent = {
+      name: content.name,
+      about: content.description,
+      picture: content.picture,
+      isClosed: true // Organizations are moderated
+    };
+    await createGroup(ndk, groupContent, identifier);
+
+    // Create organization metadata as a message in the group
     const event = new NDKEvent(ndk);
     event.kind = ORGANIZATION;
     event.content = JSON.stringify(content);
-  
-    // Add required 'd' tag for parameterized replaceable events
-    // Use a consistent format for the identifier to ensure replaceability
-    const dTag = `org:${identifier}`; // Namespace the identifier
     event.tags = [
-      ['d', dTag]  // This makes it a parameterized replaceable event
+      ['h', identifier], // Group identifier
+      ['d', `org:${identifier}`] // Organization identifier for compatibility
     ];
 
     // Add optional tags
