@@ -42,7 +42,7 @@
 
     try {
       await ensureConnection();
-      const identifier = `${Date.now()}-${name.toLowerCase().replace(/[^a-z0-9]/g, '-')}`;
+      const identifier = name.toLowerCase().replace(/[^a-z0-9]/g, '-');
       const groupEvent = await createGroup($ndk, {
         name,
         about,

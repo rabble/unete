@@ -84,13 +84,20 @@ export async function getUserGroups(ndk: NDK): Promise<GroupMetadata[]> {
  * Get metadata for a specific group
  */
 export async function getGroupMetadata(ndk: NDK, groupId: string): Promise<GroupMetadata | null> {
+  console.log('Getting metadata for group:', groupId);
+  
   // Fetch group metadata event
   const metadataEvent = await ndk.fetchEvent({
     kinds: [GROUP_METADATA],
     '#d': [groupId]
   });
 
-  if (!metadataEvent) return null;
+  console.log('Metadata event:', metadataEvent);
+
+  if (!metadataEvent) {
+    console.log('No metadata event found for group:', groupId);
+    return null;
+  }
 
   // Parse metadata from tags
   const metadata: GroupMetadata = {

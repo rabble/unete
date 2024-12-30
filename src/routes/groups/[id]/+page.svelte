@@ -11,11 +11,14 @@
 
   onMount(async () => {
     try {
+      console.log('Fetching group metadata for ID:', groupId);
       group = await getGroupMetadata($ndk, groupId);
+      console.log('Fetched group metadata:', group);
       if (!group) {
         error = 'Group not found';
       }
     } catch (err) {
+      console.error('Error fetching group:', err);
       error = err instanceof Error ? err.message : 'Failed to load group';
     } finally {
       loading = false;
