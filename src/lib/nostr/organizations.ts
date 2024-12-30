@@ -370,6 +370,131 @@ export async function deleteOrganization(
   }
 }
 
+export async function addToCuratorList(
+  ndk: NDK,
+  organizationEvent: NDKEvent,
+  reason?: string
+): Promise<NDKEvent> {
+  try {
+    await ensureConnection();
+    const ndkInstance = ndk;
+    if (!ndkInstance?.signer) {
+      throw new SignerRequiredError();
+    }
+
+    // Create curator list event
+    const listEvent = new NDKEvent(ndk);
+    listEvent.kind = ORGANIZATION_LIST;
+    listEvent.tags = [
+      ['d', 'curator-list'], // Identifier for the curator list
+      ['o', organizationEvent.id], // Reference to the organization event
+      ['p', organizationEvent.pubkey], // Organization creator's pubkey
+    ];
+
+    if (reason) {
+      listEvent.tags.push(['reason', reason]);
+    }
+
+    // Set content with metadata
+    const content: OrganizationListContent = {
+      name: "Curated Organizations",
+      organizations: [organizationEvent.id],
+      lastUpdated: Math.floor(Date.now() / 1000)
+    };
+    listEvent.content = JSON.stringify(content);
+
+    try {
+      await ndk.publish(listEvent);
+      return listEvent;
+    } catch (error) {
+      throw new PublishError(
+        `Failed to add organization to curator list: ${error instanceof Error ? error.message : 'Unknown error'}`
+      );
+    }
+  } catch (error) {
+    if (error instanceof ValidationError || error instanceof SignerRequiredError || error instanceof PublishError) {
+      throw error;
+    }
+    throw new PublishError(`Unexpected error adding to curator list: ${error instanceof Error ? error.message : 'Unknown error'}`);
+  }
+}
+
+export async function removeFromCuratorList(
+  ndk: NDK,
+  organizationEvent: NDKEvent,
+  reason?: string
+): Promise<NDKEvent> {
+  try {
+    await ensureConnection();
+    const ndkInstance = ndk;
+    if (!ndkInstance?.signer) {
+      throw new SignerRequiredError();
+    }
+
+    // Create deletion event for the organization from the curator list
+    const deletionEvent = new NDKEvent(ndk);
+    deletionEvent.kind = EVENT_DELETION;
+    deletionEvent.tags = [
+      ['e', organizationEvent.id],
+      ['a', `${ORGANIZATION_LIST}:curator-list`]
+    ];
+    deletionEvent.content = reason || 'Organization removed from curator list';
+
+    try {
+      await ndk.publish(deletionEvent);
+      return deletionEvent;
+    } catch (error) {
+      throw new PublishError(
+        `Failed to remove organization from curator list: ${error instanceof Error ? error.message : 'Unknown error'}`
+      );
+    }
+  } catch (error) {
+    if (error instanceof ValidationError || error instanceof SignerRequiredError || error instanceof PublishError) {
+      throw error;
+    }
+    throw new PublishError(`Unexpected error removing from curator list: ${error instanceof Error ? error.message : 'Unknown error'}`);
+  }
+}
+
+export async function getVisibleOrganizations(
+  ndk: NDK,
+  curatorPubkeys: string[]
+): Promise<NDKEvent[]> {
+  try {
+    await ensureConnection();
+    
+    // Fetch curator list events
+    const filter = {
+      kinds: [ORGANIZATION_LIST],
+      authors: curatorPubkeys,
+      '#d': ['curator-list']
+    };
+
+    const events = await ndk.fetchEvents(filter);
+    const visibleOrgIds = new Set<string>();
+
+    // Collect all organization IDs from curator lists
+    events.forEach(event => {
+      const orgTags = event.tags.filter(t => t[0] === 'o');
+      orgTags.forEach(tag => visibleOrgIds.add(tag[1]));
+    });
+
+    // Fetch the actual organization events
+    if (visibleOrgIds.size === 0) return [];
+
+    const orgFilter = {
+      kinds: [ORGANIZATION],
+      ids: Array.from(visibleOrgIds)
+    };
+
+    const orgEvents = await ndk.fetchEvents(orgFilter);
+    return Array.from(orgEvents);
+  } catch (error) {
+    console.error('Error fetching visible organizations:', error);
+    return [];
+  }
+}
+
 export async function createTestOrganization(): Promise<NDKEvent> {
   await ensureConnection();
   const content: OrganizationContent = {
