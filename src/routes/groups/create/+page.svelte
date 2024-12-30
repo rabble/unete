@@ -9,7 +9,11 @@
 
   onMount(async () => {
     try {
-      await ensureConnection();
+      const ndkInstance = await ensureConnection();
+      if (!ndkInstance?.signer) {
+        error = 'Please install a Nostr extension';
+        return;
+      }
       initialized = true;
     } catch (err) {
       error = 'Failed to initialize Nostr connection';

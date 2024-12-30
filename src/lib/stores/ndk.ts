@@ -34,6 +34,16 @@ export async function initializeNDK() {
       ]
     });
 
+    // Initialize signer if window.nostr is available
+    if (window.nostr) {
+      try {
+        ndkInstance.signer = new NDKNip07Signer();
+        console.log('NDK signer initialized from window.nostr');
+      } catch (err) {
+        console.warn('Failed to initialize NDK signer:', err);
+      }
+    }
+
     // Set up connection with timeout
     const connectionPromise = Promise.race([
       ndkInstance.connect(),
