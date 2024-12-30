@@ -293,9 +293,9 @@ export async function createGroup(
     // Create a new NDKSimpleGroup instance
     const group = new NDKSimpleGroup(ndk, ndk.pool.relaySet, identifier);
 
-    // Create the group and get the metadata event
-    const metadataEvent = await group.createGroup();
-    console.log('Group created, metadata event:', metadataEvent);
+    // Create the group
+    await group.createGroup();
+    console.log('Group created');
 
     // Prepare metadata content
     const metadata = {
@@ -310,7 +310,8 @@ export async function createGroup(
 
     // Set the metadata and ensure publication
     console.log('Setting group metadata:', metadata);
-    await group.setMetadata(metadata);
+    const metadataEvent = await group.setMetadata(metadata);
+    console.log('Metadata event created:', metadataEvent);
     
     // Verify the metadata was published
     const verifyMetadata = await group.getMetadata();
@@ -319,12 +320,6 @@ export async function createGroup(
     if (!verifyMetadata) {
       throw new Error('Failed to verify group metadata publication');
     }
-
-    // Explicitly publish the metadata event if needed
-    if (!metadataEvent.sig) {
-      await metadataEvent.sign();
-    }
-    await metadataEvent.publish();
 
     return metadataEvent;
   } catch (error) {
