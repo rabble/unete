@@ -315,29 +315,54 @@ export async function createGroup(
     const metadataEvent = await group.setMetadata(metadata);
     console.log('Raw metadata event:', metadataEvent);
 
-    // Wait for metadata to be published with timeout
-    const verifyPromise = new Promise((resolve, reject) => {
-      const timeout = setTimeout(() => {
-        reject(new Error('Timeout waiting for metadata publication'));
-      }, 5000);
-
-      const checkMetadata = async () => {
-        const check = await group.getMetadata();
-        console.log('Metadata verification check:', check);
-        if (check?.name === content.name) {
-          clearTimeout(timeout);
-          resolve(check);
-        } else {
-          setTimeout(checkMetadata, 500);
+    // Wait for metadata to be published with retries and timeout
+    const verifyMetadata = async () => {
+      const maxAttempts = 5;
+      const maxTimeout = 15000; // 15 seconds total timeout
+      const startTime = Date.now();
+      
+      for (let attempt = 0; attempt < maxAttempts; attempt++) {
+        const elapsedTime = Date.now() - startTime;
+        if (elapsedTime >= maxTimeout) {
+          throw new Error('Timeout waiting for metadata publication');
         }
-      };
 
-      checkMetadata();
-    });
+        try {
+          console.log(`Verification attempt ${attempt + 1}/${maxAttempts}`);
+          const check = await group.getMetadata();
+          console.log('Metadata verification check:', check);
+
+          // Verify all metadata fields match
+          if (check?.name === content.name &&
+              check?.about === content.about &&
+              check?.picture === content.picture) {
+            console.log('All metadata fields verified successfully');
+            return check;
+          }
+
+          // Log which fields don't match
+          const mismatchedFields = [];
+          if (check?.name !== content.name) mismatchedFields.push('name');
+          if (check?.about !== content.about) mismatchedFields.push('about');
+          if (check?.picture !== content.picture) mismatchedFields.push('picture');
+          console.log('Mismatched fields:', mismatchedFields);
+
+        } catch (err) {
+          console.warn(`Verification attempt ${attempt + 1} failed:`, err);
+        }
+
+        // Exponential backoff with jitter
+        const delay = Math.min(1000 * Math.pow(2, attempt) + Math.random() * 1000, 5000);
+        console.log(`Waiting ${Math.round(delay)}ms before next attempt...`);
+        await new Promise(resolve => setTimeout(resolve, delay));
+      }
+
+      throw new Error('Failed to verify metadata after maximum attempts');
+    };
 
     try {
-      await verifyPromise;
-      console.log('Group metadata verified');
+      await verifyMetadata();
+      console.log('Group metadata fully verified');
       return metadataEvent;
     } catch (error) {
       console.error('Failed to verify metadata:', error);
