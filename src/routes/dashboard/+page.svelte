@@ -38,17 +38,18 @@
       // Clear any previous errors
       error = null;
       
-      // Fetch organization events
+      // Fetch organizations and groups in parallel
       if (user?.pubkey) {
-        // Fetch organizations
-        const events = await $ndk.fetchEvents({
-          authors: [user.pubkey],
-          kinds: [ORGANIZATION]
-        });
-        userEvents = Array.from(events).sort((a, b) => b.created_at - a.created_at);
+        const [events, groups] = await Promise.all([
+          $ndk.fetchEvents({
+            authors: [user.pubkey],
+            kinds: [ORGANIZATION]
+          }),
+          getUserGroups($ndk)
+        ]);
         
-        // Fetch groups
-        userGroups = await getUserGroups($ndk);
+        userEvents = Array.from(events).sort((a, b) => b.created_at - a.created_at);
+        userGroups = groups;
       }
     } catch (err) {
       console.error('Login failed:', err);
