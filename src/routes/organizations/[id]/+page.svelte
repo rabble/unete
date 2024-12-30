@@ -171,44 +171,43 @@
         </div>
 
         <!-- Contact Info -->
-        <div class="mb-8 bg-gray-50 p-6 rounded-lg">
-          <h2 class="text-2xl font-bold mb-4">Contact Information</h2>
-          <div class="grid gap-4">
-            {#if organization.website}
-              <div class="flex items-center">
-                <span class="font-medium min-w-[100px]">Website:</span>
-                <a 
-                  href={organization.website} 
-                  class="text-purple-600 hover:text-purple-800 hover:underline flex items-center"
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                >
-                  <span>{organization.website}</span>
-                  <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                  </svg>
-                </a>
-              </div>
-            {/if}
-            {#if organization.email}
-              <div class="flex items-center">
-                <span class="font-medium min-w-[100px]">Email:</span>
-                <a 
-                  href="mailto:{organization.email}" 
-                  class="text-purple-600 hover:text-purple-800 hover:underline flex items-center"
-                >
-                  <span>{organization.email}</span>
-                  <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                  </svg>
-                </a>
-              </div>
-            {/if}
-            {#if !organization.website && !organization.email}
-              <p class="text-gray-500 italic">No contact information provided</p>
-            {/if}
+        {#if organization.website || organization.email}
+          <div class="mb-8 bg-gray-50 p-6 rounded-lg">
+            <h2 class="text-2xl font-bold mb-4">Contact Information</h2>
+            <div class="grid gap-4">
+              {#if organization.website}
+                <div class="flex items-center">
+                  <span class="font-medium min-w-[100px]">Website:</span>
+                  <a 
+                    href={organization.website} 
+                    class="text-purple-600 hover:text-purple-800 hover:underline flex items-center"
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                  >
+                    <span>{organization.website}</span>
+                    <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                    </svg>
+                  </a>
+                </div>
+              {/if}
+              {#if organization.email}
+                <div class="flex items-center">
+                  <span class="font-medium min-w-[100px]">Email:</span>
+                  <a 
+                    href="mailto:{organization.email}" 
+                    class="text-purple-600 hover:text-purple-800 hover:underline flex items-center"
+                  >
+                    <span>{organization.email}</span>
+                    <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                    </svg>
+                  </a>
+                </div>
+              {/if}
+            </div>
           </div>
-        </div>
+        {/if}
 
         <!-- Focus Areas (using t tag for topics) -->
         {#if organization.focusAreas?.length}
