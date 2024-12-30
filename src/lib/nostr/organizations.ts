@@ -328,13 +328,13 @@ export async function deleteOrganization(
       throw new SignerRequiredError();
     }
 
-    console.log('Deleting organization event:', {
-      id: originalEvent.id,
-      kind: originalEvent.kind,
-      tags: originalEvent.tags,
-      pubkey: originalEvent.pubkey,
-      content: originalEvent.content
-    });
+    // console.log('Deleting organization event:', {
+    //   id: originalEvent.id,
+    //   kind: originalEvent.kind,
+    //   tags: originalEvent.tags,
+    //   pubkey: originalEvent.pubkey,
+    //   content: originalEvent.content
+    // });
     
     try {
       // Create deletion event
@@ -346,14 +346,14 @@ export async function deleteOrganization(
       ];
       deletionEvent.content = reason || 'Organization deleted by owner';
       
-      console.log('Publishing deletion event:', {
-        kind: deletionEvent.kind,
-        tags: deletionEvent.tags,
-        content: deletionEvent.content
-      });
+      // console.log('Publishing deletion event:', {
+      //   kind: deletionEvent.kind,
+      //   tags: deletionEvent.tags,
+      //   content: deletionEvent.content
+      // });
       
       await ndk.publish(deletionEvent);
-      console.log('Deletion event published successfully:', deletionEvent.id);
+      // console.log('Deletion event published successfully:', deletionEvent.id);
       return deletionEvent;
     } catch (error) {
       console.error('Delete publish error:', error);
