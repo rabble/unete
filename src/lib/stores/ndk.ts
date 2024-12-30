@@ -29,10 +29,10 @@ export async function initializeNDK() {
     // Create new NDK instance with explicit connection timeout
     const ndkInstance = new NDK({
       explicitRelayUrls: [
-        'wss://relay.nos.social',
-        'wss://communities.nos.social',
-        'wss://groups.fiatjaf.com',
-        'wss://relay.groups.nip29.com'
+        "wss://nos.lol",
+        "wss://relay.nostr.band",
+        "wss://relay.current.fyi",
+        "wss://nostr.mom"
       ]
     });
 
