@@ -6,37 +6,14 @@
   import { isLoggedIn, userProfile } from '$lib/stores/userProfile';
   import { ORGANIZATION, type OrganizationContent } from '$lib/nostr/kinds';
   import { initializeUser } from '$lib/nostr/ndk-utils';
+  import { getUserGroups, type GroupMetadata } from '$lib/nostr/groups';
 
   let user: NDKUser | undefined;
   let profile: { name?: string; about?: string; picture?: string; } | undefined;
   let userEvents: NDKEvent[] = [];
   let loading = true;
   let error: string | null = null;
-  let userLists: { [key: string]: NDKEvent[] } = {
-    followSets: [],
-    pins: [],
-    relaySets: [],
-    bookmarkSets: [],
-    curationSets: [],
-    videoSets: [],
-    muteSets: [],
-    interestSets: [],
-    emojiSets: [],
-    releaseSets: [],
-    mutes: [],
-    bookmarks: [],
-    contacts: [],
-    people: [],
-    chats: [],
-    blockedRelays: [],
-    searchRelays: [],
-    groups: [],
-    interests: [],
-    emojis: [],
-    dmRelays: [],
-    wikiAuthors: [],
-    wikiRelays: []
-  };
+  let userGroups: GroupMetadata[] = [];
   let revealedSections: Set<string> = new Set();
 
   async function login() {
@@ -58,11 +35,15 @@
       
       // Fetch organization events
       if (user?.pubkey) {
+        // Fetch organizations
         const events = await $ndk.fetchEvents({
           authors: [user.pubkey],
           kinds: [ORGANIZATION]
         });
         userEvents = Array.from(events).sort((a, b) => b.created_at - a.created_at);
+        
+        // Fetch groups
+        userGroups = await getUserGroups($ndk);
       }
     } catch (err) {
       console.error('Login failed:', err);
@@ -231,6 +212,48 @@
                   <div class="text-sm text-gray-600">
                     Community: {org.communityId}
                   </div>
+                {/if}
+              </div>
+            </div>
+          {/each}
+        </div>
+      {/if}
+    </div>
+    <!-- User Groups -->
+    <div class="bg-white rounded-lg shadow-lg p-6">
+      <div class="flex justify-between items-center mb-6">
+        <h2 class="text-2xl font-semibold">Your Groups</h2>
+      </div>
+      
+      {#if loading}
+        <div class="flex justify-center py-8">
+          <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"></div>
+        </div>
+      {:else if userGroups.length === 0}
+        <p class="text-gray-600 text-center py-8">You're not a member of any groups yet.</p>
+      {:else}
+        <div class="space-y-6">
+          {#each userGroups as group}
+            <div class="border rounded-lg p-4 hover:bg-gray-50">
+              <div class="flex justify-between items-start">
+                <div>
+                  <h3 class="text-xl font-semibold">{group.name}</h3>
+                  {#if group.about}
+                    <p class="text-gray-600 mt-1">{group.about}</p>
+                  {/if}
+                  <div class="mt-2 flex gap-4 text-sm text-gray-500">
+                    <span>{group.memberCount || 0} members</span>
+                    <span>{group.adminCount || 0} admins</span>
+                    <span>{group.isPrivate ? 'Private' : 'Public'}</span>
+                    <span>{group.isClosed ? 'Closed' : 'Open'}</span>
+                  </div>
+                </div>
+                {#if group.picture}
+                  <img 
+                    src={group.picture} 
+                    alt={group.name}
+                    class="w-16 h-16 rounded-lg object-cover"
+                  />
                 {/if}
               </div>
             </div>
