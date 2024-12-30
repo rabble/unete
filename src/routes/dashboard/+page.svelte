@@ -6,7 +6,7 @@
   import { isLoggedIn, userProfile } from '$lib/stores/userProfile';
   import { ORGANIZATION, type OrganizationContent } from '$lib/nostr/kinds';
   import { initializeUser } from '$lib/nostr/ndk-utils';
-  import { getUserGroups, type GroupMetadata } from '$lib/nostr/groups';
+  import { getUserGroups, type GroupMetadata, createGroupInvite } from '$lib/nostr/groups';
 
   let user: NDKUser | undefined;
   let profile: { name?: string; about?: string; picture?: string; } | undefined;
@@ -15,6 +15,11 @@
   let error: string | null = null;
   let userGroups: GroupMetadata[] = [];
   let revealedSections: Set<string> = new Set();
+  let selectedGroupId: string = '';
+  let inviteExpiration: boolean = false;
+  let inviteMaxUses: number | null = null;
+  let inviteCode: string | null = null;
+  let copied: boolean = false;
 
   async function login() {
     try {
@@ -223,7 +228,105 @@
     <div class="bg-white rounded-lg shadow-lg p-6">
       <div class="flex justify-between items-center mb-6">
         <h2 class="text-2xl font-semibold">Your Groups</h2>
+        <button
+          on:click={() => revealedSections.add('createInvite')}
+          class="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors"
+        >
+          Create Invite
+        </button>
       </div>
+
+      <!-- Create Invite Form -->
+      {#if revealedSections.has('createInvite')}
+        <div class="mb-6 p-4 bg-gray-50 rounded-lg">
+          <h3 class="text-lg font-semibold mb-4">Create Group Invite</h3>
+          <form on:submit|preventDefault={async () => {
+            try {
+              const invite = await createGroupInvite($ndk, selectedGroupId, {
+                expiresIn: inviteExpiration ? 86400 : undefined, // 24 hours if selected
+                maxUses: inviteMaxUses || undefined
+              });
+              inviteCode = invite.code;
+              error = null;
+            } catch (err) {
+              error = err.message;
+            }
+          }}>
+            <div class="space-y-4">
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">
+                  Select Group
+                </label>
+                <select
+                  bind:value={selectedGroupId}
+                  class="w-full rounded-md border border-gray-300 p-2"
+                  required
+                >
+                  <option value="">Choose a group...</option>
+                  {#each userGroups as group}
+                    <option value={group.id}>{group.name}</option>
+                  {/each}
+                </select>
+              </div>
+
+              <div class="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  id="expiration"
+                  bind:checked={inviteExpiration}
+                  class="rounded border-gray-300"
+                />
+                <label for="expiration" class="text-sm text-gray-700">
+                  Expires in 24 hours
+                </label>
+              </div>
+
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">
+                  Maximum Uses
+                </label>
+                <input
+                  type="number"
+                  bind:value={inviteMaxUses}
+                  min="1"
+                  class="w-full rounded-md border border-gray-300 p-2"
+                  placeholder="Unlimited"
+                />
+              </div>
+
+              <button
+                type="submit"
+                class="w-full bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors"
+              >
+                Generate Invite
+              </button>
+            </div>
+          </form>
+
+          {#if inviteCode}
+            <div class="mt-4 p-4 bg-white rounded border">
+              <p class="text-sm font-medium text-gray-700 mb-2">Invite Code:</p>
+              <div class="flex items-center gap-2">
+                <code class="flex-1 p-2 bg-gray-100 rounded">{inviteCode}</code>
+                <button
+                  on:click={() => {
+                    navigator.clipboard.writeText(inviteCode);
+                    copied = true;
+                    setTimeout(() => copied = false, 2000);
+                  }}
+                  class="text-purple-600 hover:text-purple-700"
+                >
+                  {#if copied}
+                    Copied!
+                  {:else}
+                    Copy
+                  {/if}
+                </button>
+              </div>
+            </div>
+          {/if}
+        </div>
+      {/if}
       
       {#if loading}
         <div class="flex justify-center py-8">
