@@ -226,7 +226,7 @@
         {/if}
 
         <!-- Additional Information -->
-        {#if organization.about || organization.mission || organization.vision}
+        {#if organization.about || organization.mission || organization.vision || organization.founded || organization.size || organization.languages?.length}
           <div class="mb-8">
             <h2 class="text-2xl font-bold mb-4">Additional Information</h2>
             
@@ -248,6 +248,40 @@
               <div class="mb-4">
                 <h3 class="text-xl font-semibold mb-2">Vision</h3>
                 <p class="text-gray-700">{organization.vision}</p>
+              </div>
+            {/if}
+
+            {#if organization.founded}
+              <div class="mb-4">
+                <h3 class="text-xl font-semibold mb-2">Founded</h3>
+                <p class="text-gray-700">{organization.founded}</p>
+              </div>
+            {/if}
+
+            {#if organization.size}
+              <div class="mb-4">
+                <h3 class="text-xl font-semibold mb-2">Organization Size</h3>
+                <p class="text-gray-700">{organization.size}</p>
+              </div>
+            {/if}
+
+            {#if organization.languages?.length}
+              <div class="mb-4">
+                <h3 class="text-xl font-semibold mb-2">Languages</h3>
+                <div class="flex flex-wrap gap-2">
+                  {#each organization.languages as language}
+                    <span class="bg-purple-100 text-purple-800 px-3 py-1 rounded-full text-sm">
+                      {language}
+                    </span>
+                  {/each}
+                </div>
+              </div>
+            {/if}
+
+            {#if organization.communityId}
+              <div class="mb-4">
+                <h3 class="text-xl font-semibold mb-2">Community ID</h3>
+                <p class="text-gray-700">{organization.communityId}</p>
               </div>
             {/if}
           </div>
