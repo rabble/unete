@@ -1,5 +1,5 @@
 import { ndk, ensureConnection, getCachedEvents } from '$lib/stores/ndk';
-import NDK, { NDKEvent } from '@nostr-dev-kit/ndk';
+import NDK, { NDKEvent, NDKSimpleGroup } from '@nostr-dev-kit/ndk';
 import { ORGANIZATION, ORGANIZATION_TAGS } from './kinds';
 import type { OrganizationContent } from '../types';
 import { SignerRequiredError, ValidationError, PublishError } from './errors';
