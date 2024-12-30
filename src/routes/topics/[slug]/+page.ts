@@ -67,7 +67,7 @@ export const load: PageLoad = async ({ params }) => {
         allTopics: topicsWithCounts
       };
     })
-  };
+  }
 };
 
   // Immediately return the current topic data
