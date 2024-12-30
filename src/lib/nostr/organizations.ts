@@ -1,6 +1,7 @@
 import { ndk, ensureConnection, getCachedEvents } from '$lib/stores/ndk';
 import NDK, { NDKEvent } from '@nostr-dev-kit/ndk';
-import { ORGANIZATION, type OrganizationContent, ORGANIZATION_TAGS } from './kinds';
+import { ORGANIZATION, ORGANIZATION_TAGS } from './kinds';
+import type { OrganizationContent } from '../types';
 import { SignerRequiredError, ValidationError, PublishError } from './errors';
 
 function validateAndFormatUrl(url: string): string {
