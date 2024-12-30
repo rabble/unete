@@ -390,11 +390,12 @@
       </div>
     </div>
 
+    </div>
     <!-- Sidebar -->
     <div class="lg:w-1/3">
       <div class="bg-gray-50 p-6 rounded-lg sticky top-4">
         <!-- Focus Areas -->
-        {#if organization.focusAreas?.length}
+        {#if organization?.focusAreas?.length}
           <div class="mb-6">
             <h2 class="text-xl font-bold mb-3">Focus Areas</h2>
             <div class="flex flex-col gap-2">
@@ -406,7 +407,7 @@
         {/if}
 
         <!-- Locations -->
-        {#if organization.locations?.length}
+        {#if organization?.locations?.length}
           <div class="mb-6">
             <h2 class="text-xl font-bold mb-3">Locations</h2>
             <div class="flex flex-col gap-2">
@@ -418,7 +419,7 @@
         {/if}
 
         <!-- Engagement Types -->
-        {#if organization.engagementTypes?.length}
+        {#if organization?.engagementTypes?.length}
           <div class="mb-6 border-b border-gray-200 pb-6">
             <h2 class="text-xl font-bold mb-3">Ways to Engage</h2>
             <div class="flex flex-col gap-2">
