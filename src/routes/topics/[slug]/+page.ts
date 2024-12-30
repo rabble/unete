@@ -69,11 +69,6 @@ export const load: PageLoad = async ({ params }) => {
     })
   };
 };
-import { error } from '@sveltejs/kit';
-import type { PageLoad } from './$types';
-
-export const load: PageLoad = async ({ params }) => {
-  const { slug } = params;
 
   // Immediately return the current topic data
   const currentTopic = topics.find(t => t.slug === slug);
