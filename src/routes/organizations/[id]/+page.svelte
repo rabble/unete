@@ -12,7 +12,7 @@
   
   let organization: OrganizationContent | null = null;
   let event: NDKEvent | null = null;
-  let loading = true;
+  let loading = false;
   let error: string | null = null;
   let showJson = false;
   let rawEvent: any = null;
@@ -23,7 +23,7 @@
   // Handle the promise when data changes
   $: {
     loading = true;
-    data.promise
+    Promise.resolve(data.promise)
       .then(async (result) => {
         organization = result.organization;
         event = result.event;
