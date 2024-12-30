@@ -327,10 +327,6 @@ export async function createGroup(
 
     console.log('Group metadata publication verified');
     return metadataEvent;
-    } catch (error) {
-      console.error('Failed to verify metadata:', error);
-      throw new PublishError('Failed to verify group metadata publication');
-    }
   } catch (error) {
     console.error('Group creation error:', error);
     if (error instanceof ValidationError || error instanceof SignerRequiredError) {
