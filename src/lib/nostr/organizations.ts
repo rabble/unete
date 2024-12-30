@@ -186,31 +186,12 @@ export async function createOrganization(
       throw new ValidationError('Organization identifier must contain only lowercase letters, numbers, and hyphens');
     }
 
-    // Create the group first
-    const createEvent = new NDKEvent(ndk);
-    createEvent.kind = GROUP_CREATE;
-    createEvent.tags = [['h', identifier]];
-    await createEvent.publish();
-
-    // Set group metadata
-    const metadataEvent = new NDKEvent(ndk);
-    metadataEvent.kind = GROUP_METADATA;
-    metadataEvent.tags = [
-      ['h', identifier],
-      ['name', content.name],
-      ['about', content.description || ''],
-      content.picture ? ['picture', content.picture] : [],
-      ['closed']  // Organizations are moderated
-    ].filter(tag => tag.length > 0);
-    await metadataEvent.publish();
-
-    // Create organization metadata as a message in the group
+    // Create organization event
     const event = new NDKEvent(ndk);
     event.kind = ORGANIZATION;
     event.content = JSON.stringify(content);
     event.tags = [
-      ['h', identifier], // Group identifier
-      ['d', `org:${identifier}`] // Organization identifier for compatibility
+      ['d', `org:${identifier}`] // Organization identifier
     ];
 
     // Add optional tags
