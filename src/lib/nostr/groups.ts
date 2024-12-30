@@ -295,9 +295,21 @@ export async function createGroup(
     // Create a new NDKSimpleGroup instance
     const group = new NDKSimpleGroup(ndk, ndk.pool.relaySet, identifier);
 
+    // Log connected relays before creating group
+    console.log('Connected relays before group creation:', 
+      Array.from(ndk.pool.relays.values())
+        .filter(r => r.connected)
+        .map(r => r.url)
+    );
+
     // Create the group and wait for confirmation
     const createEvent = await group.createGroup();
     console.log('Group creation event:', createEvent);
+    
+    // Log which relay accepted the event
+    console.log('Event published to relays:', 
+      Array.from(createEvent.relay?.url ? [createEvent.relay.url] : [])
+    );
 
     // Prepare metadata content
     const metadata = {
@@ -314,6 +326,9 @@ export async function createGroup(
     console.log('Setting group metadata:', metadata);
     const metadataEvent = await group.setMetadata(metadata);
     console.log('Raw metadata event:', metadataEvent);
+    console.log('Metadata event published to relays:',
+      Array.from(metadataEvent.relay?.url ? [metadataEvent.relay.url] : [])
+    );
 
     // Immediately verify the event was published by requesting it
     const verifyEvent = await ndk.fetchEvent({
