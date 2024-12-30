@@ -29,6 +29,15 @@ export interface GroupMetadata {
   adminCount?: number;
 }
 
+export interface GroupInvite {
+  code: string;
+  groupId: string;
+  createdAt: number;
+  expiresAt?: number;
+  maxUses?: number;
+  useCount?: number;
+}
+
 /**
  * Fetch all groups the current user is a member of
  */
@@ -158,6 +167,107 @@ function validateGroupContent(content: GroupContent): void {
       throw new ValidationError('Invalid picture URL');
     }
   }
+}
+
+export async function createGroupInvite(
+  ndk: NDK,
+  groupId: string,
+  options?: {
+    expiresIn?: number;  // Duration in seconds
+    maxUses?: number;    // Maximum number of times invite can be used
+  }
+): Promise<GroupInvite> {
+  if (!ndk?.signer) {
+    throw new SignerRequiredError();
+  }
+
+  // Verify user is an admin
+  const isAdmin = await isGroupAdmin(ndk, groupId, (await ndk.signer.user()).pubkey);
+  if (!isAdmin) {
+    throw new ValidationError('Only group admins can create invites');
+  }
+
+  const invite: GroupInvite = {
+    code: crypto.randomUUID(),
+    groupId,
+    createdAt: Math.floor(Date.now() / 1000),
+    expiresAt: options?.expiresIn ? Math.floor(Date.now() / 1000) + options.expiresIn : undefined,
+    maxUses: options?.maxUses,
+    useCount: 0
+  };
+
+  // Create invite event
+  const inviteEvent = new NDKEvent(ndk);
+  inviteEvent.kind = GROUP_CREATE_INVITE;
+  inviteEvent.tags = [
+    ['d', invite.code],
+    ['h', groupId],
+    ['created_at', invite.createdAt.toString()]
+  ];
+
+  if (invite.expiresAt) {
+    inviteEvent.tags.push(['expires_at', invite.expiresAt.toString()]);
+  }
+  if (invite.maxUses) {
+    inviteEvent.tags.push(['max_uses', invite.maxUses.toString()]);
+  }
+
+  await inviteEvent.publish();
+  return invite;
+}
+
+export async function redeemGroupInvite(
+  ndk: NDK,
+  inviteCode: string
+): Promise<boolean> {
+  if (!ndk?.signer) {
+    throw new SignerRequiredError();
+  }
+
+  // Fetch invite event
+  const inviteEvent = await ndk.fetchEvent({
+    kinds: [GROUP_CREATE_INVITE],
+    '#d': [inviteCode]
+  });
+
+  if (!inviteEvent) {
+    throw new ValidationError('Invalid invite code');
+  }
+
+  // Check expiration
+  const expiresAt = inviteEvent.tags.find(t => t[0] === 'expires_at')?.[1];
+  if (expiresAt && parseInt(expiresAt) < Math.floor(Date.now() / 1000)) {
+    throw new ValidationError('Invite code has expired');
+  }
+
+  // Check usage limit
+  const maxUses = inviteEvent.tags.find(t => t[0] === 'max_uses')?.[1];
+  if (maxUses) {
+    const useEvents = await ndk.fetchEvents({
+      kinds: [GROUP_JOIN],
+      '#i': [inviteCode]
+    });
+    if (useEvents.size >= parseInt(maxUses)) {
+      throw new ValidationError('Invite code has reached maximum uses');
+    }
+  }
+
+  // Get group ID
+  const groupId = inviteEvent.tags.find(t => t[0] === 'h')?.[1];
+  if (!groupId) {
+    throw new ValidationError('Invalid invite: missing group ID');
+  }
+
+  // Join the group
+  const joinEvent = new NDKEvent(ndk);
+  joinEvent.kind = GROUP_JOIN;
+  joinEvent.tags = [
+    ['h', groupId],
+    ['i', inviteCode] // Reference the invite code used
+  ];
+
+  await joinEvent.publish();
+  return true;
 }
 
 export async function createGroup(
