@@ -140,7 +140,7 @@
         <div class="p-8">
           <h2 class="text-2xl font-bold mb-4">Raw Event Data</h2>
           <pre class="bg-gray-100 p-4 rounded-lg overflow-x-auto whitespace-pre-wrap">
-            {JSON.stringify(data.event, null, 2)}
+            {JSON.stringify(event, null, 2)}
           </pre>
         </div>
       </div>
