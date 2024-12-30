@@ -289,7 +289,7 @@ export async function createGroup(
     createEvent.tags = [
       ['h', identifier]
     ];
-    await createEvent.publish();
+    await ndk.publish(createEvent);
 
     // Set metadata with kind:39000
     const metadataEvent = new NDKEvent(ndk);
@@ -306,7 +306,7 @@ export async function createGroup(
     if (content.isClosed) metadataEvent.tags.push(['closed']);
     else metadataEvent.tags.push(['open']);
 
-    await metadataEvent.publish();
+    await ndk.publish(metadataEvent);
 
     // Add creator as admin
     const user = await ndk.signer.user();
@@ -316,7 +316,7 @@ export async function createGroup(
       ['h', identifier],
       ['p', user.pubkey, 'admin']
     ];
-    await addAdminEvent.publish();
+    await ndk.publish(addAdminEvent);
 
     return metadataEvent;
 

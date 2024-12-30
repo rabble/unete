@@ -43,7 +43,7 @@
     try {
       await ensureConnection();
       const identifier = `${Date.now()}-${name.toLowerCase().replace(/[^a-z0-9]/g, '-')}`;
-      await createGroup($ndk, {
+      const groupEvent = await createGroup($ndk, {
         name,
         about,
         picture,
@@ -51,8 +51,8 @@
         isClosed
       }, identifier);
 
-      // Redirect to dashboard after success
-      goto('/dashboard');
+      // Redirect to group details page
+      goto(`/groups/${identifier}`);
     } catch (err) {
       error = err instanceof Error ? err.message : 'Failed to create group';
     } finally {
