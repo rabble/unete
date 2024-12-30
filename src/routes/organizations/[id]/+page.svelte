@@ -160,7 +160,47 @@
           />
         {/if}
       </div>
-      
+          <!-- Sidebar -->
+    <div class="lg:w-1/3 lg:float-right">
+      <div class="bg-gray-50 p-6 rounded-lg sticky top-4">
+        <!-- Focus Areas -->
+        {#if organization?.focusAreas?.length}
+          <div class="mb-6">
+            <h2 class="text-xl font-bold mb-3">Focus Areas</h2>
+            <div class="flex flex-col gap-2">
+              {#each organization.focusAreas as area}
+                <TagLink type="t" value={area} />
+              {/each}
+            </div>
+          </div>
+        {/if}
+
+        <!-- Locations -->
+        {#if organization?.locations?.length}
+          <div class="mb-6">
+            <h2 class="text-xl font-bold mb-3">Locations</h2>
+            <div class="flex flex-col gap-2">
+              {#each organization.locations as location}
+                <TagLink type="l" value={location} context="location" />
+              {/each}
+            </div>
+          </div>
+        {/if}
+
+        <!-- Engagement Types -->
+        {#if organization?.engagementTypes?.length}
+          <div class="mb-6 border-b border-gray-200 pb-6">
+            <h2 class="text-xl font-bold mb-3">Ways to Engage</h2>
+            <div class="flex flex-col gap-2">
+              {#each organization.engagementTypes as type}
+                <TagLink type="l" value={type} context="engagement" />
+              {/each}
+            </div>
+          </div>
+        {/if}
+      </div>
+    </div>
+
       <div class="p-8">
         <!-- Basic Info -->
         <div class="mb-8">
@@ -389,52 +429,10 @@
         {/if}
       </div>
     </div>
-    <!-- Sidebar -->
-    <div class="lg:w-1/3">
-      <div class="bg-gray-50 p-6 rounded-lg sticky top-4">
-        <!-- Focus Areas -->
-        {#if organization?.focusAreas?.length}
-          <div class="mb-6">
-            <h2 class="text-xl font-bold mb-3">Focus Areas</h2>
-            <div class="flex flex-col gap-2">
-              {#each organization.focusAreas as area}
-                <TagLink type="t" value={area} />
-              {/each}
-            </div>
-          </div>
-        {/if}
-
-        <!-- Locations -->
-        {#if organization?.locations?.length}
-          <div class="mb-6">
-            <h2 class="text-xl font-bold mb-3">Locations</h2>
-            <div class="flex flex-col gap-2">
-              {#each organization.locations as location}
-                <TagLink type="l" value={location} context="location" />
-              {/each}
-            </div>
-          </div>
-        {/if}
-
-        <!-- Engagement Types -->
-        {#if organization?.engagementTypes?.length}
-          <div class="mb-6 border-b border-gray-200 pb-6">
-            <h2 class="text-xl font-bold mb-3">Ways to Engage</h2>
-            <div class="flex flex-col gap-2">
-              {#each organization.engagementTypes as type}
-                <TagLink type="l" value={type} context="engagement" />
-              {/each}
-            </div>
-          </div>
-        {/if}
-      </div>
-    </div>
-      
-    </div>
-    
-    <!-- Raw Data Display -->
-    <div class="mt-8 flex flex-col items-center border-t pt-8">
-      <h3 class="text-xl font-semibold mb-4">Developer Tools</h3>
+  
+  <!-- Raw Data Display -->
+  <div class="mt-8 flex flex-col items-center border-t pt-8">
+    <h3 class="text-xl font-semibold mb-4">Developer Tools</h3>
         
         <!-- Organization Data -->
         <div class="mb-4 w-full max-w-4xl bg-gray-100 p-4 rounded-lg">
@@ -491,4 +489,7 @@
       <p class="text-yellow-700">Organization not found</p>
     </div>
   {/if}
+
+  </div>
+</div>
 </div>
