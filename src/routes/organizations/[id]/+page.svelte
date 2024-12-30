@@ -317,6 +317,19 @@
       <div class="mt-8 flex flex-col items-center border-t pt-8">
         <h3 class="text-xl font-semibold mb-4">Developer Tools</h3>
         
+        <!-- Organization Data -->
+        <div class="mb-4 w-full max-w-4xl bg-gray-100 p-4 rounded-lg">
+          <h4 class="font-semibold mb-2">Organization Event Data:</h4>
+          <pre class="overflow-x-auto">{JSON.stringify({
+            id: event?.id,
+            pubkey: event?.pubkey,
+            kind: event?.kind,
+            tags: event?.tags,
+            content: organization,
+            created_at: event?.created_at
+          }, null, 2)}</pre>
+        </div>
+
         <!-- Current User Profile -->
         {#if $ndk?.signer}
           {#await $ndk.signer.user().then(user => user.fetchProfile()) then profile}
