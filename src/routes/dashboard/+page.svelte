@@ -147,13 +147,13 @@
   {/if}
 
   <!-- Relay Status -->
-  {#if $ndk?.pool?.relays}
+  {#if $ndk?.pool}
     <div class="mb-8 bg-white rounded-lg shadow-lg p-6">
       <h2 class="text-xl font-semibold mb-4">Connected Relays</h2>
       <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
-        {#each Object.entries($ndk.pool.relays) as [url, relay]}
+        {#each Array.from($ndk.pool.relays.entries()) as [url, relay]}
           <div class="flex items-center gap-2 p-2 bg-gray-50 rounded">
-            <div class={`w-2 h-2 rounded-full ${relay.status === 1 ? 'bg-green-500' : 'bg-red-500'}`}></div>
+            <div class={`w-2 h-2 rounded-full ${relay.connected ? 'bg-green-500' : 'bg-red-500'}`}></div>
             <span class="text-sm font-mono">{url}</span>
           </div>
         {/each}
