@@ -19,12 +19,13 @@
   let showRawData = false;
   let isOwner = false;
 
-
-  // Handle the promise when data changes
-  $: {
+  // Load data once on mount
+  const loadData = async () => {
+    if (!data.promise) return;
+    
     loading = true;
-    Promise.resolve(data.promise)
-      .then(async (result) => {
+    try {
+      const result = await data.promise;
         organization = result.organization;
         event = result.event;
         rawEvent = result.event;
@@ -51,13 +52,16 @@
           console.log('Cannot check ownership - no signer available');
           isOwner = false;
         }
-      })
-      .catch(e => {
-        error = e instanceof Error ? e.message : 'Failed to load organization';
-      })
-      .finally(() => {
-        loading = false;
-      });
+    } catch (e) {
+      error = e instanceof Error ? e.message : 'Failed to load organization';
+    } finally {
+      loading = false;
+    }
+  };
+
+  // Run once on mount
+  $: if (data.promise) {
+    loadData();
   }
 
 </script>
