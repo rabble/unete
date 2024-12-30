@@ -275,28 +275,22 @@ export async function createGroup(
     // Create a new NDKSimpleGroup instance
     const group = new NDKSimpleGroup(ndk, ndk.pool.relaySet, identifier);
 
-    // Create the group
-    await group.createGroup();
+    // Create the group and get the metadata event
+    const metadataEvent = await group.createGroup();
 
-    // Set the metadata
-    await group.setMetadata({
+    // Prepare metadata content
+    const metadata = {
       name: content.name,
       about: content.about,
-      picture: content.picture
-    });
+      picture: content.picture,
+      tags: [
+        content.isPrivate ? ['private'] : ['public'],
+        content.isClosed ? ['closed'] : ['open']
+      ].flat()
+    };
 
-    // Get the metadata event
-    const metadata = await group.getMetadata();
-    const metadataEvent = metadata.event;
-
-    // Add additional tags for privacy and closure status
-    if (content.isPrivate) metadataEvent.tags.push(['private']);
-    else metadataEvent.tags.push(['public']);
-    if (content.isClosed) metadataEvent.tags.push(['closed']);
-    else metadataEvent.tags.push(['open']);
-
-    // Publish updated metadata
-    await metadataEvent.publish();
+    // Set the metadata with all properties at once
+    await group.setMetadata(metadata);
 
     return metadataEvent;
   } catch (error) {
