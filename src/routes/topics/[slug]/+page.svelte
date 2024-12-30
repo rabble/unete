@@ -4,21 +4,22 @@
 
   export let data;
   
-  let nostrData = { organizations: [], allTopics: [] };
+  let organizations = [];
+  let allTopics = data.allTopics;
   let loadingNostr = true;
 
   // Handle the promise when data changes
   $: {
     loadingNostr = true;
     data.promise.then(result => {
-      nostrData = result;
+      organizations = result.organizations || [];
+      allTopics = result.allTopics || data.allTopics;
+      loadingNostr = false;
+    }).catch(err => {
+      console.error('Failed to load Nostr data:', err);
       loadingNostr = false;
     });
   }
-
-  // Use either Nostr data or initial data
-  $: organizations = nostrData.organizations.length ? nostrData.organizations : [];
-  $: allTopics = nostrData.allTopics.length ? nostrData.allTopics : data.allTopics;
   
   $: engagementTypes = [...new Set(
     organizations?.flatMap(org => 

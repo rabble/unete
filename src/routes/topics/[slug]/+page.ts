@@ -33,6 +33,10 @@ export const load: PageLoad = async ({ params }) => {
       };
       console.log('Querying Nostr with filters:', JSON.stringify(filters, null, 2));
       const events = await getCachedEvents(filters);
+      if (!events) {
+        console.log('No events returned from getCachedEvents');
+        return { organizations: [], allTopics: topics };
+      }
       const eventsArray = Array.from(events);
       
       // Process organizations and counts after data loads
