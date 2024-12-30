@@ -98,12 +98,27 @@ export async function getGroupMetadata(ndk: NDK, groupId: string): Promise<Group
       return null;
     }
 
+    // Add debugging for the metadata event
+    console.log('Raw metadata event:', {
+      id: metadataEvent.id,
+      pubkey: metadataEvent.pubkey,
+      kind: metadataEvent.kind,
+      tags: metadataEvent.tags,
+      content: metadataEvent.content
+    });
+
     // Parse the metadata content
     let metadataContent;
     try {
+      if (!metadataEvent.content) {
+        console.error('Metadata event has empty content');
+        return null;
+      }
       metadataContent = JSON.parse(metadataEvent.content);
+      console.log('Parsed metadata content:', metadataContent);
     } catch (err) {
       console.error('Failed to parse metadata content:', err);
+      console.error('Raw content:', metadataEvent.content);
       return null;
     }
 
