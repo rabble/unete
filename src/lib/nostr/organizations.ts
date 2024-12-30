@@ -247,49 +247,47 @@ export async function createOrganization(
     }
 
     try {
-      console.log('Publishing event:', event);
-      const connectedRelays = Array.from(ndk.pool.relays.values())
-        .filter(r => r.connected)
-        .map(r => r.url);
-      console.log('Connected relays:', connectedRelays);
-      
-      if (connectedRelays.length === 0) {
-        throw new Error('No connected relays available');
-      }
-
-      // Publish the event
-      await event.publish();
-
-      console.log('Event published, waiting for verification...');
-      
-      // Then wait for verification with a longer timeout
-      const verified = await new Promise<NDKEvent>((resolve, reject) => {
+      // Ensure we're connected to relays before publishing
+      await new Promise<void>((resolve, reject) => {
         const timeout = setTimeout(() => {
-          console.warn('Event verification timed out after 30 seconds');
-          // Don't reject - some relays might be slow
-          resolve(event);
-        }, 30000); // 30 second timeout
+          reject(new Error('Relay connection timeout'));
+        }, 5000);
 
-        let verifiedCount = 0;
-        const requiredVerifications = 1; // Adjust as needed
-        
-        const handleVerification = (e: NDKEvent) => {
-          if (e.id === event.id) {
-            verifiedCount++;
-            console.log(`Event verified by relay (${verifiedCount}/${requiredVerifications})`);
-            
-            if (verifiedCount >= requiredVerifications) {
-              clearTimeout(timeout);
-              ndk.pool.removeListener('event:verified', handleVerification);
-              resolve(e);
-            }
+        const checkRelays = () => {
+          const connectedRelays = Array.from(ndk.pool.relays.values())
+            .filter(r => r.connected);
+          
+          if (connectedRelays.length > 0) {
+            clearTimeout(timeout);
+            resolve();
           }
         };
 
-        ndk.pool.on('event:verified', handleVerification);
+        // Check immediately
+        checkRelays();
+        
+        // Also set up a periodic check
+        const interval = setInterval(() => {
+          checkRelays();
+        }, 100);
+
+        // Clean up interval on timeout
+        timeout.onTimeout = () => {
+          clearInterval(interval);
+        };
       });
 
-      console.log('Event fully verified');
+      // Set publish options for better reliability
+      const publishOptions = {
+        skipVerification: false,
+        skipValidation: false,
+        // Wait for at least one relay to confirm
+        relay: Array.from(ndk.pool.relays.values())
+          .find(r => r.connected)
+      };
+
+      // Publish with options
+      await event.publish(publishOptions);
       return event;
     } catch (error) {
       console.error('Publish error details:', {
