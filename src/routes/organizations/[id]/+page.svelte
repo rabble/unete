@@ -430,9 +430,11 @@
       </div>
     </div>
       
+    </div>
+    
     <!-- Raw Data Display -->
     <div class="mt-8 flex flex-col items-center border-t pt-8">
-        <h3 class="text-xl font-semibold mb-4">Developer Tools</h3>
+      <h3 class="text-xl font-semibold mb-4">Developer Tools</h3>
         
         <!-- Organization Data -->
         <div class="mb-4 w-full max-w-4xl bg-gray-100 p-4 rounded-lg">
@@ -484,7 +486,6 @@
           </div>
         {/if}
       </div>
-    </div>
   {:else}
     <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4">
       <p class="text-yellow-700">Organization not found</p>
