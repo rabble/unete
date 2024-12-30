@@ -1,14 +1,7 @@
 import { ndk } from '$lib/stores/ndk';
 import NDK, { NDKEvent, NDKUser, NDKFilter } from '@nostr-dev-kit/ndk';
+import { NDKSimpleGroup } from '@nostr-dev-kit/ndk';
 import { SignerRequiredError, ValidationError, PublishError } from './errors';
-import { 
-  GROUP_METADATA,
-  GROUP_CREATE,
-  GROUP_EDIT_METADATA,
-  GROUP_ADD_USER,
-  GROUP_MEMBERS,
-  GROUP_ADMINS
-} from './kinds';
 
 export interface GroupContent {
   name: string;
@@ -86,48 +79,36 @@ export async function getUserGroups(ndk: NDK): Promise<GroupMetadata[]> {
 export async function getGroupMetadata(ndk: NDK, groupId: string): Promise<GroupMetadata | null> {
   console.log('Getting metadata for group:', groupId);
   
-  // Fetch group metadata event
-  const metadataEvent = await ndk.fetchEvent({
-    kinds: [GROUP_METADATA],
-    '#d': [groupId]
-  });
+  try {
+    // Create a new NDKSimpleGroup instance
+    const group = new NDKSimpleGroup(ndk, ndk.pool.relaySet, groupId);
+    
+    // Get the metadata
+    const metadata = await group.getMetadata();
+    console.log('Fetched group metadata:', metadata);
 
-  console.log('Metadata event:', metadataEvent);
+    if (!metadata || !metadata.event) {
+      console.log('No metadata found for group:', groupId);
+      return null;
+    }
 
-  if (!metadataEvent) {
-    console.log('No metadata event found for group:', groupId);
+    // Parse metadata
+    const result: GroupMetadata = {
+      id: groupId,
+      name: metadata.name || 'Unnamed Group',
+      about: metadata.about,
+      picture: metadata.picture,
+      isPrivate: !!metadata.event.tags.find(t => t[0] === 'private'),
+      isClosed: !!metadata.event.tags.find(t => t[0] === 'closed'),
+      memberCount: group.members.length,
+      adminCount: group.admins.length
+    };
+
+    return result;
+  } catch (error) {
+    console.error('Error fetching group metadata:', error);
     return null;
   }
-
-  // Parse metadata from tags
-  const metadata: GroupMetadata = {
-    id: groupId,
-    name: metadataEvent.tags.find(t => t[0] === 'name')?.[1] || 'Unnamed Group',
-    about: metadataEvent.tags.find(t => t[0] === 'about')?.[1],
-    picture: metadataEvent.tags.find(t => t[0] === 'picture')?.[1],
-    isPrivate: !!metadataEvent.tags.find(t => t[0] === 'private'),
-    isClosed: !!metadataEvent.tags.find(t => t[0] === 'closed')
-  };
-
-  // Get member count
-  const memberEvent = await ndk.fetchEvent({
-    kinds: [GROUP_MEMBERS],
-    '#d': [groupId]
-  });
-  if (memberEvent) {
-    metadata.memberCount = memberEvent.tags.filter(t => t[0] === 'p').length;
-  }
-
-  // Get admin count
-  const adminEvent = await ndk.fetchEvent({
-    kinds: [GROUP_ADMINS],
-    '#d': [groupId]
-  });
-  if (adminEvent) {
-    metadata.adminCount = adminEvent.tags.filter(t => t[0] === 'p').length;
-  }
-
-  return metadata;
 }
 
 /**
@@ -290,43 +271,33 @@ export async function createGroup(
     // Validate content
     validateGroupContent(content);
 
-    // Create group with kind:9007
-    const createEvent = new NDKEvent(ndk);
-    createEvent.kind = GROUP_CREATE;
-    createEvent.tags = [
-      ['h', identifier]
-    ];
-    await ndk.publish(createEvent);
+    // Create a new NDKSimpleGroup instance
+    const group = new NDKSimpleGroup(ndk, ndk.pool.relaySet, identifier);
 
-    // Set metadata with kind:39000
-    const metadataEvent = new NDKEvent(ndk);
-    metadataEvent.kind = GROUP_METADATA;
-    metadataEvent.tags = [
-      ['d', identifier],
-      ['name', content.name]
-    ];
+    // Create the group
+    await group.createGroup();
 
-    if (content.about) metadataEvent.tags.push(['about', content.about]);
-    if (content.picture) metadataEvent.tags.push(['picture', content.picture]);
+    // Set the metadata
+    await group.setMetadata({
+      name: content.name,
+      about: content.about,
+      picture: content.picture
+    });
+
+    // Get the metadata event
+    const metadata = await group.getMetadata();
+    const metadataEvent = metadata.event;
+
+    // Add additional tags for privacy and closure status
     if (content.isPrivate) metadataEvent.tags.push(['private']);
     else metadataEvent.tags.push(['public']);
     if (content.isClosed) metadataEvent.tags.push(['closed']);
     else metadataEvent.tags.push(['open']);
 
-    await ndk.publish(metadataEvent);
-
-    // Add creator as admin
-    const user = await ndk.signer.user();
-    const addAdminEvent = new NDKEvent(ndk);
-    addAdminEvent.kind = GROUP_ADD_USER;
-    addAdminEvent.tags = [
-      ['h', identifier],
-      ['p', user.pubkey, 'admin']
-    ];
-    await ndk.publish(addAdminEvent);
+    // Publish updated metadata
+    await metadataEvent.publish();
 
     return metadataEvent;
-
   } catch (error) {
     console.error('Group creation error:', error);
     if (error instanceof ValidationError || error instanceof SignerRequiredError) {
