@@ -28,7 +28,7 @@ export const load: PageLoad = async ({ params }) => {
     allTopics: topics, // Use static topics initially
     promise: getCachedEvents({
       kinds: [ORGANIZATION],
-      '#t': [slug] // Only fetch organizations with this topic tag
+      '#f': [slug] // Use focus area tag 'f' instead of topic tag 't'
     }).then(events => {
       const eventsArray = Array.from(events);
       
@@ -36,12 +36,12 @@ export const load: PageLoad = async ({ params }) => {
       const topicsWithCounts = topics.map(topic => ({
         ...topic,
         count: eventsArray.filter(event => 
-          event.tags.some(t => t[0] === 't' && t[1] === topic.slug)
+          event.tags.some(t => t[0] === 'f' && t[1] === topic.slug)
         ).length
       }));
 
       const topicOrganizations = eventsArray
-        .filter(event => event.tags.some(t => t[0] === 't' && t[1] === slug))
+        .filter(event => event.tags.some(t => t[0] === 'f' && t[1] === slug))
         .map(event => {
           try {
             const content = JSON.parse(event.content);
