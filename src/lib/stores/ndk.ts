@@ -142,6 +142,26 @@ export async function ensureConnection() {
           setTimeout(() => reject(new Error('Connection timeout')), 5000)
         )
       ]);
+      if (!ndk) {
+        throw new Error('Failed to initialize NDK');
+      }
+      
+      // Wait for connection with timeout
+      await Promise.race([
+        new Promise((resolve) => {
+          const checkConnection = () => {
+            if (get(ndkConnected)) {
+              resolve(true);
+            } else {
+              setTimeout(checkConnection, 100);
+            }
+          };
+          checkConnection();
+        }),
+        new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('Connection timeout')), 5000)
+        )
+      ]);
       
       return ndk;
     }
@@ -157,7 +177,16 @@ export async function ensureConnection() {
 export const eventCache = writable<Map<string, NDKEvent>>(new Map());
 
 // Helper to get cached events or fetch new ones
+let lastFetchTime = 0;
+const MIN_FETCH_INTERVAL = 1000; // 1 second between fetches
+
 export async function getCachedEvents(filter: any): Promise<Set<NDKEvent>> {
+  const now = Date.now();
+  if (now - lastFetchTime < MIN_FETCH_INTERVAL) {
+    throw new Error('Rate limit exceeded - please wait before fetching again');
+  }
+  lastFetchTime = now;
+  
   const ndk = await ensureConnection();
   if (!ndk) {
     throw new Error('NDK not initialized');
@@ -284,10 +313,13 @@ export async function initNostrLogin() {
   }
 }
 
-// Initialize NDK on import if in browser
-if (browser) {
-  initializeNDK().catch(error => {
-    console.error('Failed to initialize NDK:', error);
-  });
-}
+// Initialize NDK only once when needed
+let ndkInitialized = false;
+
+export async function initializeNDK() {
+  if (!browser || ndkInitialized) return null;
+  ndkInitialized = true;
+  
+  try {
+    console.log('Initializing NDK...');
 
