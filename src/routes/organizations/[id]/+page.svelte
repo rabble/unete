@@ -211,46 +211,6 @@
     </div>
     
 
-      <!-- Sidebar -->
-      <div class="lg:w-1/3 lg:float-right">
-        <div class="bg-gray-50 p-6 rounded-lg sticky top-4">
-          <!-- Focus Areas -->
-          {#if organization?.focusAreas?.length}
-            <div class="mb-6">
-              <h2 class="text-xl font-bold mb-3">Focus Areas</h2>
-              <div class="flex flex-col gap-2">
-                {#each organization.focusAreas as area}
-                  <TagLink type="topic" value={area} />
-                {/each}
-              </div>
-            </div>
-          {/if}
-
-          <!-- Locations -->
-          {#if organization?.locations?.length}
-            <div class="mb-6">
-              <h2 class="text-xl font-bold mb-3">Locations</h2>
-              <div class="flex flex-col gap-2">
-                {#each organization.locations as location}
-                  <TagLink type="l" value={location} context="location" />
-                {/each}
-              </div>
-            </div>
-          {/if}
-
-          <!-- Engagement Types -->
-          {#if organization?.engagementTypes?.length}
-            <div class="mb-6 border-b border-gray-200 pb-6">
-              <h2 class="text-xl font-bold mb-3">Ways to Engage</h2>
-              <div class="flex flex-col gap-2">
-                {#each organization.engagementTypes as type}
-                  <TagLink type="l" value={type} context="engagement" />
-                {/each}
-              </div>
-            </div>
-          {/if}
-        </div>
-      </div>
 
       <!-- Main Content -->
       <div class="lg:w-2/3 p-8">
