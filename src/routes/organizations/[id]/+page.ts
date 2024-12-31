@@ -43,7 +43,7 @@ export const load: PageLoad = async ({ params }) => {
 
   try {
     // Always get fresh data first
-    const ndkInstance = ndk;
+    const ndkInstance = await ensureConnection();
     
     // Fetch with a short timeout (no signer needed)
     const fetchWithTimeout = (timeout: number) => {
@@ -52,14 +52,24 @@ export const load: PageLoad = async ({ params }) => {
           reject(new Error('Fetch timeout'));
         }, timeout);
 
-        ndkInstance.fetchEvents({
+        const sub = ndkInstance.subscribe({
           kinds: [ORGANIZATION],
           ids: [id],
           limit: 1
-        }).then(events => {
+        }, { closeOnEose: true });
+
+        const events: NDKEvent[] = [];
+        
+        sub.on('event', (event) => {
+          events.push(event);
+        });
+
+        sub.on('eose', () => {
           clearTimeout(timer);
-          resolve(Array.from(events));
-        }).catch(err => {
+          resolve(events);
+        });
+
+        sub.on('error', (err) => {
           clearTimeout(timer);
           reject(err);
         });
