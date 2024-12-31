@@ -67,9 +67,17 @@ export async function fetchEvents(ndk: NDK): Promise<NDKEvent[]> {
 
     console.log('Fetching organizations with filter:', filter);
 
-    // Create a promise that will resolve with events or timeout
-    const fetchPromise = new Promise<NDKEvent[]>((resolve, reject) => {
-      const events = new Set<NDKEvent>();
+    // Create a promise that will resolve with events
+    const events = new Set<NDKEvent>();
+    let hasReceivedEvents = false;
+    
+    return new Promise<NDKEvent[]>((resolve, reject) => {
+      const timeoutId = setTimeout(() => {
+        if (!hasReceivedEvents) {
+          console.warn('No events received within timeout, but continuing to wait...');
+        }
+      }, 5000);
+
       const sub = ndk.subscribe(filter, { 
         closeOnEose: true,
         groupableDelay: 0 // Disable grouping for initial fetch
@@ -80,6 +88,7 @@ export async function fetchEvents(ndk: NDK): Promise<NDKEvent[]> {
           const content = JSON.parse(event.content);
           if (content && content.name) { // Basic validation
             console.log('Received valid organization event:', event.id);
+            hasReceivedEvents = true;
             events.add(event);
           }
         } catch (e) {
@@ -88,22 +97,30 @@ export async function fetchEvents(ndk: NDK): Promise<NDKEvent[]> {
       });
 
       sub.on('eose', () => {
+        clearTimeout(timeoutId);
         console.log('EOSE received, total valid organizations:', events.size);
         resolve(Array.from(events));
       });
 
       // Add error handling
       sub.on('error', (error: any) => {
+        clearTimeout(timeoutId);
         console.error('Subscription error:', error);
-        reject(error);
+        // Don't reject on error, just log it
+        console.warn('Continuing despite error:', error);
       });
-    });
 
-    // Race between fetch and timeout
-    const events = await Promise.race([
-      fetchPromise,
-      new Promise((_, reject) => setTimeout(() => reject(new Error('Fetch timeout')), 10000))
-    ]) as NDKEvent[];
+      // Set a longer timeout for the overall operation
+      setTimeout(() => {
+        if (events.size > 0) {
+          console.log('Resolving with partial results after timeout');
+          resolve(Array.from(events));
+        } else {
+          console.error('No events received after extended timeout');
+          resolve([]); // Return empty array instead of rejecting
+        }
+      }, 30000); // 30 second timeout
+    });
 
     if (!events || events.length === 0) {
       console.warn('No organization events received from relays');
