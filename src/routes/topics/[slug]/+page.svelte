@@ -1,81 +1,170 @@
 <script lang="ts">
   import { navigating } from '$app/stores';
   import TagLink from '$lib/components/TagLink.svelte';
-  import NDK from '@nostr-dev-kit/ndk';
-  import { getNDK } from '$lib/ndk';
+  import { onMount, onDestroy } from 'svelte';
+  import { writable, get } from 'svelte/store';
+  import type { NDKEvent } from '@nostr-dev-kit/ndk';
+  import { ndk, ensureConnection, ndkConnected } from '$lib/stores/ndk';
+  import { ORGANIZATION } from '$lib/nostr/kinds';
+  import { searchFilters } from '$lib/stores/searchStore';
+  import { page } from '$app/stores';
 
   export let data;
   
-  let organizations = [];
-  let allTopics = data.allTopics;
+  const organizations = writable<NDKEvent[]>([]);
   let loadingNostr = true;
-  let error = null;
+  let error: string | null = null;
+  let allTopics = data.allTopics;
+  let subscription: NDKSubscription | undefined;
 
   // Create NDK filter for topic
   function createTopicFilter(topicSlug: string) {
     return {
-      kinds: [31312], // Organization kind
-      '#t': [topicSlug], // Topic tag
-      limit: 100 // Limit results
+      kinds: [ORGANIZATION],
+      '#t': [topicSlug],
+      limit: 100
     };
   }
 
   // Load data once when component mounts
-  let ndk: NDK;
-  
-  async function loadData() {
+  onMount(async () => {
     try {
-      console.log('Starting data load...');
+      console.log('Starting topic page mount');
       loadingNostr = true;
       error = null;
+
+      // Start NDK connection
+      const ndkInstance = await ensureConnection();
       
-      // Initialize NDK instance
-      ndk = await getNDK();
-      await ndk.connect();
-      
-      // Create filter for current topic
-      const filter = createTopicFilter(data.topic.slug);
-      console.log('NDK filter:', filter);
-      
-      // Fetch organizations directly with topic filter
-      const result = await data.promise;
-      const orgEvents = await ndk.fetchEvents(filter);
-      
-      console.log(`Found ${orgEvents.size} organizations matching topic`);
-      
-      // Convert NDK events to organization objects
-      organizations = Array.from(orgEvents).map(event => {
-        const content = JSON.parse(event.content) as OrganizationContent;
-        return {
-          id: event.id,
-          ...content,
-          tags: event.tags
-        };
+      console.log('NDK connection result:', {
+        instance: !!ndkInstance,
+        connected: ndkInstance.connected,
+        poolSize: ndkInstance.pool?.relays?.size,
+        relayUrls: Array.from(ndkInstance.pool?.relays?.keys() || [])
       });
 
-      console.log(`Found ${organizations.length} matching organizations`);
-      allTopics = data.allTopics;
-      console.log('All topics:', allTopics);
+      // Load initial events with timeout
+      try {
+        const initialFetch = new Promise<NDKEvent[]>((resolve, reject) => {
+          const timeout = setTimeout(() => {
+            reject(new Error('Initial fetch timeout'));
+          }, 5000); // 5 second timeout
+
+          const sub = ndkInstance.subscribe(
+            createTopicFilter(data.topic.slug),
+            { closeOnEose: true, groupableDelay: 100 }
+          );
+
+          const events: NDKEvent[] = [];
+          
+          sub.on('event', (event) => {
+            if (event.kind === ORGANIZATION) {
+              events.push(event);
+            }
+          });
+
+          sub.on('eose', () => {
+            clearTimeout(timeout);
+            resolve(events);
+          });
+
+          sub.on('error', (err) => {
+            clearTimeout(timeout);
+            reject(err);
+          });
+        });
+
+        // Wait for initial fetch or timeout
+        const events = await initialFetch;
+        organizations.set(events);
+        
+        // Start realtime subscription after initial load
+        subscription = ndkInstance.subscribe(
+          { 
+            kinds: [ORGANIZATION], 
+            '#t': [data.topic.slug],
+            since: Math.floor(Date.now() / 1000)
+          },
+          { closeOnEose: false, groupableDelay: 100 }
+        );
+      } catch (err) {
+        console.error('Error fetching events:', err);
+        throw new Error(`Failed to fetch events: ${err.message}`);
+      }
+
+      // Setup realtime subscription for new organization events
+      try {
+        console.log('Setting up realtime subscription');
+        subscription = ndkInstance.subscribe(
+          { 
+            kinds: [ORGANIZATION],
+            '#t': [data.topic.slug],
+            since: Math.floor(Date.now() / 1000)
+          },
+          { 
+            closeOnEose: false, 
+            groupableDelay: 500 
+          }
+        );
+        
+        subscription.on('event', (event: NDKEvent) => {
+          if (event.kind !== ORGANIZATION) {
+            console.warn('Received non-organization event in realtime:', event.kind, event.id);
+            return;
+          }
+          
+          console.log('Received new organization event:', event.id);
+          organizations.update(orgs => {
+            const exists = orgs.some(e => e.id === event.id);
+            if (!exists) {
+              console.log('Adding new organization:', event.id);
+              return [...orgs, event];
+            }
+            return orgs;
+          });
+        });
+      } catch (err) {
+        console.error('Error setting up realtime subscription:', err);
+        throw new Error(`Failed to setup realtime subscription: ${err.message}`);
+      }
+
+      loadingNostr = false;
     } catch (err) {
-      console.error('Failed to load Nostr data:', err);
-      error = err.message;
-    } finally {
+      console.error('Failed to load organizations:', err);
+      error = `Failed to load organizations: ${err.message}`;
       loadingNostr = false;
     }
-  }
+  });
 
-  // Initialize data loading
-  loadData();
+  onDestroy(() => {
+    if (subscription) {
+      subscription.stop();
+    }
+  });
   
+  let orgsList: NDKEvent[] = $organizations;
+
+  // Subscribe to the organizations store with validation
+  organizations.subscribe(value => {
+    if (Array.isArray(value)) {
+      // Sort organizations by creation date, newest first
+      orgsList = value.sort((a, b) => (b.created_at || 0) - (a.created_at || 0));
+      console.log('Updated organizations list:', orgsList.length, 'items');
+    } else {
+      console.warn('Invalid organizations value:', value);
+      orgsList = [];
+    }
+  });
+
   $: engagementTypes = [...new Set(
-    organizations?.flatMap(org => 
-      org.tags?.filter(t => t[0] === 'engagement').map(t => t[1]) || []
+    orgsList?.flatMap(event => 
+      event.tags?.filter(t => t[0] === 'l' && t[2] === 'engagement').map(t => t[1]) || []
     ) || []
   )];
 
   $: engagementCounts = engagementTypes.reduce<Record<string, number>>((acc, type) => {
-    acc[type] = organizations?.filter(org => 
-      org.tags?.some(t => t[0] === 'engagement' && t[1] === type)
+    acc[type] = orgsList?.filter(event => 
+      event.tags?.some(t => t[0] === 'l' && t[2] === 'engagement' && t[1] === type)
     ).length || 0;
     return acc;
   }, {});
