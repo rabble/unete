@@ -25,9 +25,35 @@ if (typeof localStorage !== 'undefined') {
 export const loginState = writable(false);
 export const isLoggedIn = derived(
   [ndkStore, userProfile, loginState],
-  ([$ndk, $userProfile, $loginState]) => {
-    return $loginState && !!($ndk?.signer && $userProfile?.pubkey);
-  }
+  ([$ndk, $userProfile, $loginState], set) => {
+    // Only run in browser
+    if (typeof window === 'undefined') {
+      set(false);
+      return;
+    }
+
+    // Check if we have a signer and valid user
+    const checkLogin = async () => {
+      try {
+        if ($ndk?.signer) {
+          const user = await $ndk.signer.user();
+          const validLogin = !!user?.pubkey;
+          set(validLogin && $loginState);
+        } else {
+          set(false);
+        }
+      } catch (error) {
+        console.error('Error checking login state:', error);
+        set(false);
+      }
+    };
+
+    checkLogin();
+    
+    // Return cleanup function
+    return () => {};
+  },
+  false // Initial value
 );
 
 export async function checkExistingNostrLogin() {
