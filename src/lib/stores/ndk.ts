@@ -249,6 +249,9 @@ export async function ensureConnection(): Promise<NDK> {
     const startTime = Date.now();
     
     return new Promise<NDK>((resolve, reject) => {
+      const maxRetries = 3; // Maximum number of retry attempts
+      let retryCount = 0;
+      
       const checkConnection = () => {
         const connectedRelays = Array.from(ndkInstance!.pool.relays.values())
           .filter(r => r.status === 1);
@@ -260,13 +263,15 @@ export async function ensureConnection(): Promise<NDK> {
         }
 
         if (Date.now() - startTime > maxWaitTime) {
-          if (ndkInstance) {
-            console.warn('Timeout waiting for relay connection, but returning NDK instance anyway');
-            resolve(ndkInstance);
-          } else {
-            reject(new Error('Timeout waiting for relay connection'));
+          retryCount++;
+          if (retryCount >= maxRetries) {
+            console.error('Max retries reached, giving up on connection');
+            reject(new Error('Failed to connect to any relays after multiple attempts'));
+            return;
           }
-          return;
+          
+          console.warn(`Retrying connection (attempt ${retryCount + 1}/${maxRetries})...`);
+          startTime = Date.now(); // Reset timer for next attempt
         }
 
         setTimeout(checkConnection, 100); // Check again in 100ms
