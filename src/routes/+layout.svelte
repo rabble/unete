@@ -198,12 +198,42 @@
           <!-- Right side navigation items -->
           <div class="flex items-center">
             {#if $isLoggedIn}
-              <button
-                on:click={logout}
-                class="ml-4 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-purple-600 hover:bg-purple-700"
-              >
-                Logout
-              </button>
+              {#await $ndk.signer.user()}
+                <!-- Loading state -->
+                <div class="ml-4 flex items-center space-x-2">
+                  <div class="w-8 h-8 bg-gray-200 rounded-full animate-pulse"></div>
+                  <div class="w-20 h-4 bg-gray-200 rounded animate-pulse"></div>
+                </div>
+              {:then user}
+                <div class="ml-4 flex items-center space-x-2">
+                  {#if user.profile?.picture}
+                    <img 
+                      src={user.profile.picture} 
+                      alt="Profile picture" 
+                      class="w-8 h-8 rounded-full object-cover"
+                    />
+                  {:else}
+                    <div class="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center">
+                      <span class="text-gray-500 text-sm">{user.npub.slice(0, 2)}</span>
+                    </div>
+                  {/if}
+                  <div class="flex flex-col">
+                    <span class="text-sm font-medium">
+                      {user.profile?.name || user.profile?.displayName || user.npub.slice(0, 16) + '...'}
+                    </span>
+                    <button 
+                      on:click={logout}
+                      class="text-xs text-gray-500 hover:text-gray-700"
+                    >
+                      Logout
+                    </button>
+                  </div>
+                </div>
+              {:catch error}
+                <div class="ml-4 text-red-500 text-sm">
+                  Error loading profile
+                </div>
+              {/await}
             {:else}
               <button
                 on:click={async () => {
