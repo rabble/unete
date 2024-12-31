@@ -61,7 +61,7 @@
   }
 
   let filteredOrganizations: NDKEvent[] = [];
-  let filterDirty = true;
+  let currentFilters: Record<string, any> = {};
 
   function sortOrganizations(organizations: NDKEvent[]): NDKEvent[] {
     if (!organizations) return [];
@@ -69,33 +69,41 @@
     return [...organizations].sort((a, b) => b.created_at - a.created_at);
   }
 
-  function applyFilters(organizations: NDKEvent[]) {
-    console.log('Applying filters to organizations');
+  function applyFilters(organizations: NDKEvent[], filters: Record<string, any>) {
+    console.log('Applying filters with criteria:', filters);
     return organizations.filter(event => {
       const org = getOrgContent(event);
-      // Add any custom filtering logic here if needed
+      // Add filter logic based on the filters object
+      // Example: if (filters.category && org.category !== filters.category) return false;
       return true; // Default to showing all organizations
     });
   }
 
-  // Only update filteredOrganizations when explicitly needed
-  function updateFilteredOrganizations() {
-    if (cachedOrganizations && filterDirty) {
-      const sorted = sortOrganizations(cachedOrganizations);
-      filteredOrganizations = applyFilters(sorted);
-      filterDirty = false;
-    }
+  // Call this when filter criteria changes
+  function updateFilters(newFilters: Record<string, any>) {
+    if (!cachedOrganizations) return;
+    
+    // Update current filters
+    currentFilters = { ...currentFilters, ...newFilters };
+    
+    // Apply sorting and filtering
+    const sorted = sortOrganizations(cachedOrganizations);
+    filteredOrganizations = applyFilters(sorted, currentFilters);
   }
 
-  // Initial load
+  // Initial load - show all organizations sorted
   onMount(() => {
-    updateFilteredOrganizations();
+    if (cachedOrganizations) {
+      filteredOrganizations = sortOrganizations(cachedOrganizations);
+    }
   });
 
-  // Manual refresh when needed
+  // Call this when organizations need to be refreshed (e.g., new data loaded)
   function refreshOrganizations() {
-    filterDirty = true;
-    updateFilteredOrganizations();
+    if (cachedOrganizations) {
+      const sorted = sortOrganizations(cachedOrganizations);
+      filteredOrganizations = applyFilters(sorted, currentFilters);
+    }
   }
 
   function getOrgContent(event: NDKEvent): OrganizationContent {
