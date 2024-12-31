@@ -42,8 +42,17 @@
       loading = true;
       error = null;
 
+      console.log('Starting organizations page mount');
+      
       // Ensure we have a connected NDK instance
       const ndkInstance = await ensureConnection();
+      console.log('NDK connection result:', {
+        instance: !!ndkInstance,
+        connected: ndkInstance?.connected,
+        poolSize: ndkInstance?.pool?.relays?.size,
+        relayUrls: Array.from(ndkInstance?.pool?.relays?.keys() || [])
+      });
+      
       if (!ndkInstance) {
         throw new Error('Failed to establish NDK connection');
       }

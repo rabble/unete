@@ -73,12 +73,18 @@ export async function fetchEvents(ndk: NDK): Promise<NDKEvent[]> {
       console.log('NDK connected successfully in fetchEvents');
     }
 
-    console.log('Starting fetchEvents for organizations');
+    console.log('Starting fetchEvents for organizations', {
+      ndkStatus: ndk?.connected,
+      poolStatus: ndk?.pool?.relays?.size,
+      relayUrls: Array.from(ndk?.pool?.relays?.keys() || [])
+    });
+
     const filter = {
       kinds: [ORGANIZATION_KIND]
     };
 
     console.log('Fetching organizations with filter:', {
+      timestamp: new Date().toISOString(),
       timestamp: new Date().toISOString(),
       filter,
       kind: ORGANIZATION_KIND,
@@ -99,7 +105,20 @@ export async function fetchEvents(ndk: NDK): Promise<NDKEvent[]> {
       groupableDelay: 100, // Add small delay for grouping
       limit: 100 // Limit results
     });
-    console.log('Subscription created with filter:', filter);
+    console.log('Subscription created:', {
+      filter,
+      subId: sub.subId,
+      relayCount: ndk?.pool?.relays?.size || 0
+    });
+
+    // Add error handler
+    sub.on('error', (error: any) => {
+      console.error('Subscription error:', {
+        error: error?.message,
+        code: error?.code,
+        relayUrl: error?.relay?.url
+      });
+    });
 
     return new Promise<NDKEvent[]>((resolve, reject) => {
       // Add timeout to prevent hanging
