@@ -2,7 +2,7 @@
   import { onMount, onDestroy } from 'svelte';
   import { writable, get } from 'svelte/store';
   import type { NDKEvent } from '@nostr-dev-kit/ndk';
-  import { ndk } from '$lib/stores/ndk';
+  import { ndk, ensureConnection } from '$lib/stores/ndk';
   import NDK from '@nostr-dev-kit/ndk';
   import { searchFilters } from '$lib/stores/searchStore';
   import { page } from '$app/stores';
@@ -35,24 +35,25 @@
       loading = true;
       error = null;
 
-      // Get the NDK instance from store
-      const ndkInstance = get(ndk);
+      // Ensure we have a connected NDK instance
+      const ndkInstance = await ensureConnection();
       if (!ndkInstance) {
-        throw new Error('NDK instance not found');
+        throw new Error('Failed to establish NDK connection');
       }
 
-      // Wait for connection if not already connected
-      if (!get(ndkConnected)) {
-        let retries = 0;
-        while (retries < 10) {
-          if (get(ndkConnected)) break;
-          await new Promise(resolve => setTimeout(resolve, 300));
-          retries++;
+      // Wait for at least one relay to be connected
+      let connected = false;
+      for (let i = 0; i < 10; i++) {
+        const relays = Array.from(ndkInstance.pool.relays.values());
+        if (relays.some(r => r.status === 1)) {
+          connected = true;
+          break;
         }
+        await new Promise(resolve => setTimeout(resolve, 300));
+      }
 
-        if (!get(ndkConnected)) {
-          throw new Error('Failed to establish NDK connection');
-        }
+      if (!connected) {
+        throw new Error('Failed to connect to any relays');
       }
 
       // Initialize filters from URL params
