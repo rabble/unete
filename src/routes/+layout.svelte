@@ -185,10 +185,32 @@
                     <!-- Loading state -->
                   {:then user}
                     {#if user?.pubkey}
-                      <a href="/dashboard" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Dashboard</a>
+                      <a 
+                        href="/dashboard" 
+                        class="block px-4 py-2 text-gray-700 hover:bg-gray-100"
+                        on:click|preventDefault={async (e) => {
+                          try {
+                            // Ensure we're logged in
+                            const isLoggedIn = await checkLoginStatus();
+                            if (!isLoggedIn) {
+                              await login();
+                              return;
+                            }
+                            // If logged in, proceed to dashboard
+                            window.location.href = '/dashboard';
+                          } catch (error) {
+                            console.error('Error navigating to dashboard:', error);
+                            alert('Please login using the Nostr extension to access the dashboard');
+                          }
+                        }}
+                      >
+                        Dashboard
+                      </a>
                     {/if}
-                  {:catch}
-                    <!-- Error state -->
+                  {:catch error}
+                    <div class="text-red-500 text-sm p-2">
+                      Error loading user: {error.message}
+                    </div>
                   {/await}
                 {/if}
               </div>
