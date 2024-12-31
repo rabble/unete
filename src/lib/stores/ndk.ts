@@ -224,14 +224,47 @@ export async function ensureConnection(): Promise<NDK> {
   
   // If we have an instance and it's connected, return it
   if (ndkInstance && get(ndkConnected)) {
-    console.log('Using existing connected NDK instance');
-    return ndkInstance;
+    // Verify at least one relay is actually connected
+    const connectedRelays = Array.from(ndkInstance.pool.relays.values())
+      .filter(r => r.status === 1);
+    if (connectedRelays.length > 0) {
+      console.log('Using existing connected NDK instance with relays:', 
+        connectedRelays.map(r => r.url)
+      );
+      return ndkInstance;
+    }
   }
 
   console.log('Initializing new NDK connection...');
   
-  // Initialize new NDK instance
-  ndkInstance = await initializeNDK();
+  // Initialize new NDK instance with retries
+  let retries = 3;
+  while (retries > 0) {
+    try {
+      ndkInstance = await initializeNDK();
+      if (!ndkInstance) {
+        throw new Error('Failed to initialize NDK');
+      }
+
+      // Verify connection
+      const connectedRelays = Array.from(ndkInstance.pool.relays.values())
+        .filter(r => r.status === 1);
+      if (connectedRelays.length > 0) {
+        console.log('Successfully connected to NDK with relays:', 
+          connectedRelays.map(r => r.url)
+        );
+        return ndkInstance;
+      }
+    } catch (err) {
+      console.warn('NDK connection attempt failed:', err);
+      retries--;
+      if (retries > 0) {
+        await new Promise(resolve => setTimeout(resolve, 1000)); // Wait 1 second before retry
+      }
+    }
+  }
+
+  throw new Error('Failed to establish NDK connection after multiple attempts');
   if (!ndkInstance) {
     throw new Error('Failed to initialize NDK');
   }
