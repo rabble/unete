@@ -172,6 +172,21 @@
           
           <!-- Right side navigation items -->
           <div class="flex items-center">
+            {#if $isLoggedIn}
+              <button
+                on:click={logout}
+                class="ml-4 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-purple-600 hover:bg-purple-700"
+              >
+                Logout
+              </button>
+            {:else}
+              <button
+                on:click={login}
+                class="ml-4 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-purple-600 hover:bg-purple-700"
+              >
+                Login
+              </button>
+            {/if}
           </div>
         </div>
       </div>
