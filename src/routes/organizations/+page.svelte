@@ -349,7 +349,7 @@
   </div>
 
   <!-- Footer -->
-  <div class="mt-8 pt-8 border-t text-center">
+  <div class="mt-8 pt-8 border-t">
     <button
       on:click={() => showRawData = !showRawData}
       class="text-purple-600 hover:text-purple-800 font-medium focus:outline-none"
