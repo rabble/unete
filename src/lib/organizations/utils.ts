@@ -1,5 +1,8 @@
 import { writable, derived } from 'svelte/store';
-import { ORGANIZATION, type OrganizationContent } from '$lib/nostr/kinds';
+import { type OrganizationContent } from '$lib/nostr/kinds';
+
+// Organization event kind (30818)
+const ORGANIZATION = 30818;
 import NDK, { NDKEvent } from '@nostr-dev-kit/ndk';
 import { LOCATION_OPTIONS, FOCUS_AREAS, ENGAGEMENT_TYPE_OPTIONS } from '$lib/constants';
 
@@ -62,10 +65,11 @@ export async function fetchEvents(ndk: NDK): Promise<NDKEvent[]> {
 
     const filter = {
       kinds: [ORGANIZATION],
-      limit: 100
+      limit: 100,
+      since: 0 // Get all historical events
     };
 
-    console.log('Fetching organizations with filter:', filter);
+    console.log('Fetching organizations with filter:', JSON.stringify(filter));
 
     // Create a subscription to collect events
     const events = new Set<NDKEvent>();
@@ -74,17 +78,27 @@ export async function fetchEvents(ndk: NDK): Promise<NDKEvent[]> {
       groupableDelay: 0 // Disable grouping for initial fetch
     });
 
-    return new Promise<NDKEvent[]>((resolve) => {
+    return new Promise<NDKEvent[]>((resolve, reject) => {
       sub.on('event', (event: NDKEvent) => {
         try {
+          console.log('Received event:', event.id, 'kind:', event.kind);
           const content = JSON.parse(event.content);
-          if (content && content.name) { // Basic validation
-            console.log('Received valid organization event:', event.id);
+          if (content && content.name) {
+            console.log('Valid organization event:', event.id, 'name:', content.name);
             events.add(event);
+          } else {
+            console.warn('Invalid organization content:', event.id, content);
           }
         } catch (e) {
-          console.warn('Skipping invalid organization event:', event.id, e);
+          console.warn('Failed to parse organization event:', event.id, e);
+          console.log('Raw content:', event.content);
         }
+      });
+
+      // Add error handler
+      sub.on('error', (error) => {
+        console.error('Subscription error:', error);
+        reject(error);
       });
 
       sub.on('eose', () => {
