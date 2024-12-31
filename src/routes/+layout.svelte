@@ -14,6 +14,7 @@
   
   let localLoginState = false;
   let profile;
+  let showDebug = false;
   
   async function logout() {
     try {
@@ -80,6 +81,8 @@
               <img src="https://allofus.directory/logo.png" alt="All of Us Logo" class="h-8 w-8 mr-2" />
               <a href="/" class="text-xl font-bold text-purple-600">All of Us Directory</a>
             </div>
+          </div>
+
           <div class="hidden sm:ml-6 sm:flex sm:space-x-8">
             <!-- Organizations Dropdown -->
             <div class="relative group">
@@ -218,110 +221,105 @@
       
       {#if showDebug}
         <h3 class="text-lg font-semibold mb-2">Debug Information</h3>
-      <div class="bg-white rounded-lg shadow p-4">
-        <!-- Basic Status -->
-        <div class="mb-4">
-          <h4 class="font-medium mb-2">System Status:</h4>
-          <div class="text-sm space-y-1">
-            <p>Browser Environment: <span class="font-mono">{browser ? 'Yes' : 'No'}</span></p>
-            <p>window.nostr exists: <span class="font-mono">{browser && window.nostr ? 'Yes' : 'No'}</span></p>
-            {#if browser && window.nostr}
-              <p>window.nostr.user: <span class="font-mono">{JSON.stringify(window.nostr.user)}</span></p>
-            {/if}
-            <p>window.nostrLogin exists: <span class="font-mono">{browser && window.nostrLogin ? 'Yes' : 'No'}</span></p>
-          </div>
-        </div>
-
-        <!-- NDK Status -->
-        <div class="mb-4 pt-4 border-t">
-          <h4 class="font-medium mb-2">NDK Status:</h4>
-          <div class="text-sm space-y-1">
-            <p>NDK Instance: <span class="font-mono">{$ndk && $ndk.pool ? 'Created' : 'Not Created'}</span></p>
-            <p>NDK Connected: <span class="font-mono">{$ndk && $ndk.pool && $ndkConnected ? 'Yes' : 'No'}</span></p>
-            <p>Has NDK Signer: <span class="font-mono">{Boolean($ndk?.signer) ? 'Yes' : 'No'}</span></p>
-            {#if $ndk?.signer}
-              {#await $ndk.signer.user()}
-                <p>Loading signer user...</p>
-              {:then user}
-                <p>Signer NPub: <span class="font-mono">{user.npub}</span></p>
-                <p>Signer Pubkey: <span class="font-mono">{user.pubkey}</span></p>
-              {:catch error}
-                <p class="text-red-500">Error loading signer user: {error.message}</p>
-              {/await}
-            {/if}
-          </div>
-        </div>
-
-        <!-- Nostr Extension Status -->
-        {#if browser && window.nostr}
-          <div class="mb-4 pt-4 border-t">
-            <h4 class="font-medium mb-2">Nostr Extension:</h4>
-            {#await Promise.race([
-              window.nostr.getPublicKey(),
-              new Promise((_, reject) => 
-                setTimeout(() => reject(new Error('Timeout getting public key')), 5000)
-              )
-            ]).catch(e => ({error: e}))}
-              <p class="text-sm">Checking public key...</p>
-            {:then result}
-              {#if result?.error}
-                <p class="text-sm text-red-500">Error getting public key: {result.error.message}</p>
-              {:else}
-                <p class="text-sm">: <span class="font-mono">{result || 'None'}</span></p>
+        <div class="bg-white rounded-lg shadow p-4">
+          <!-- Basic Status -->
+          <div class="mb-4">
+            <h4 class="font-medium mb-2">System Status:</h4>
+            <div class="text-sm space-y-1">
+              <p>Browser Environment: <span class="font-mono">{browser ? 'Yes' : 'No'}</span></p>
+              <p>window.nostr exists: <span class="font-mono">{browser && window.nostr ? 'Yes' : 'No'}</span></p>
+              {#if browser && window.nostr}
+                <p>window.nostr.user: <span class="font-mono">{JSON.stringify(window.nostr.user)}</span></p>
               {/if}
-            {/await}
-          </div>
-        {/if}
-
-
-        <!-- User Profile -->
-        {#if $ndk?.signer}
-          {#await $ndk.signer.user()}
-            <div class="mb-4 pt-4 border-t">
-              <p class="text-sm">Loading user info...</p>
+              <p>window.nostrLogin exists: <span class="font-mono">{browser && window.nostrLogin ? 'Yes' : 'No'}</span></p>
             </div>
-          {:then user}
+          </div>
+
+          <!-- NDK Status -->
+          <div class="mb-4 pt-4 border-t">
+            <h4 class="font-medium mb-2">NDK Status:</h4>
+            <div class="text-sm space-y-1">
+              <p>NDK Instance: <span class="font-mono">{$ndk && $ndk.pool ? 'Created' : 'Not Created'}</span></p>
+              <p>NDK Connected: <span class="font-mono">{$ndk && $ndk.pool && $ndkConnected ? 'Yes' : 'No'}</span></p>
+              <p>Has NDK Signer: <span class="font-mono">{Boolean($ndk?.signer) ? 'Yes' : 'No'}</span></p>
+              {#if $ndk?.signer}
+                {#await $ndk.signer.user()}
+                  <p>Loading signer user...</p>
+                {:then user}
+                  <p>Signer NPub: <span class="font-mono">{user.npub}</span></p>
+                  <p>Signer Pubkey: <span class="font-mono">{user.pubkey}</span></p>
+                {:catch error}
+                  <p class="text-red-500">Error loading signer user: {error.message}</p>
+                {/await}
+              {/if}
+            </div>
+          </div>
+
+          <!-- Nostr Extension Status -->
+          {#if browser && window.nostr}
             <div class="mb-4 pt-4 border-t">
-              <h4 class="font-medium mb-2">User Profile:</h4>
-              {#await user.fetchProfile()}
-                <p class="text-sm">Loading profile data...</p>
-              {:then profile}
-                <div class="bg-gray-50 p-2 rounded mt-1 text-sm">
-                  <p>Name: <span class="font-mono">{profile?.name || 'Not set'}</span></p>
-                  <p>Display Name: <span class="font-mono">{profile?.displayName || 'Not set'}</span></p>
-                  <p>NIP-05: <span class="font-mono">{profile?.nip05 || 'Not set'}</span></p>
-                  <p>About: <span class="font-mono">{profile?.about || 'Not set'}</span></p>
-                </div>
-              {:catch error}
-                <p class="text-sm text-red-500">Error loading profile: {error.message}</p>
+              <h4 class="font-medium mb-2">Nostr Extension:</h4>
+              {#await Promise.race([
+                window.nostr.getPublicKey(),
+                new Promise((_, reject) => 
+                  setTimeout(() => reject(new Error('Timeout getting public key')), 5000)
+                )
+              ]).catch(e => ({error: e}))}
+                <p class="text-sm">Checking public key...</p>
+              {:then result}
+                {#if result?.error}
+                  <p class="text-sm text-red-500">Error getting public key: {result.error.message}</p>
+                {:else}
+                  <p class="text-sm">Public Key: <span class="font-mono">{result || 'None'}</span></p>
+                {/if}
               {/await}
             </div>
-          {:catch error}
-            <div class="mb-4 pt-4 border-t">
-              <p class="text-sm text-red-500">Error loading user: {error.message}</p>
+          {/if}
+
+          <!-- User Profile -->
+          {#if $ndk?.signer}
+            {#await $ndk.signer.user()}
+              <div class="mb-4 pt-4 border-t">
+                <p class="text-sm">Loading user info...</p>
+              </div>
+            {:then user}
+              <div class="mb-4 pt-4 border-t">
+                <h4 class="font-medium mb-2">User Profile:</h4>
+                {#await user.fetchProfile()}
+                  <p class="text-sm">Loading profile data...</p>
+                {:then profile}
+                  <div class="bg-gray-50 p-2 rounded mt-1 text-sm">
+                    <p>Name: <span class="font-mono">{profile?.name || 'Not set'}</span></p>
+                    <p>Display Name: <span class="font-mono">{profile?.displayName || 'Not set'}</span></p>
+                    <p>NIP-05: <span class="font-mono">{profile?.nip05 || 'Not set'}</span></p>
+                    <p>About: <span class="font-mono">{profile?.about || 'Not set'}</span></p>
+                  </div>
+                {:catch error}
+                  <p class="text-sm text-red-500">Error loading profile: {error.message}</p>
+                {/await}
+              </div>
+            {:catch error}
+              <div class="mb-4 pt-4 border-t">
+                <p class="text-sm text-red-500">Error loading user: {error.message}</p>
+              </div>
+            {/await}
+          {:else if !$isLoggedIn}
+            <div class="text-gray-500 pt-4 border-t">
+              <p class="mb-4">Not logged in. User info will appear here when logged in.</p>
+              <button
+                on:click={login}
+                class="bg-purple-600 text-white px-4 py-2 rounded-md hover:bg-purple-700 transition-colors"
+              >
+                Connect with Nostr
+              </button>
             </div>
-          {/await}
-        {:else if !$isLoggedIn}
-          <div class="text-gray-500 pt-4 border-t">
-            <p class="mb-4">Not logged in. User info will appear here when logged in.</p>
-            <button
-              on:click={login}
-              class="bg-purple-600 text-white px-4 py-2 rounded-md hover:bg-purple-700 transition-colors"
-            >
-              Connect with Nostr
-            </button>
-          </div>
-        {:else}
-          <div class="text-gray-500 pt-4 border-t">
-            <p class="mb-4">Loading user information...</p>
-          </div>
-        {/if}
+          {:else}
+            <div class="text-gray-500 pt-4 border-t">
+              <p class="mb-4">Loading user information...</p>
+            </div>
+          {/if}
+        </div>
       {/if}
-      </div>
     </div>
   </div>
 </div>
-
-<script>
-  let showDebug = false;
-</script>
