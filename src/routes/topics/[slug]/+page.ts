@@ -76,6 +76,6 @@ export const load: PageLoad = async ({ params }) => {
         organizations: topicOrganizations,
         allTopics: topicsWithCounts
       };
-    })
+    })()
   };
-}
+};
