@@ -1,3 +1,7 @@
+<script context="module" lang="ts">
+  // Any module-level code can go here if needed
+</script>
+
 <script lang="ts">
   import { onMount, onDestroy } from 'svelte';
   import { ndk, ndkConnected } from '$lib/stores/ndk';
