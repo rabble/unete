@@ -165,6 +165,7 @@
             alt=""
             class="max-h-48 w-auto"
             aria-hidden="true"
+            role="presentation"
           />
         {/if}
       </div>
