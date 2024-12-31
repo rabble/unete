@@ -23,9 +23,16 @@
   let showRawData = false;
   let orgsList: NDKEvent[] = $organizations;
 
-  // Subscribe to the organizations store
+  // Subscribe to the organizations store with validation
   organizations.subscribe(value => {
-    orgsList = value || [];
+    if (Array.isArray(value)) {
+      // Sort organizations by creation date, newest first
+      orgsList = value.sort((a, b) => (b.created_at || 0) - (a.created_at || 0));
+      console.log('Updated organizations list:', orgsList.length, 'items');
+    } else {
+      console.warn('Invalid organizations value:', value);
+      orgsList = [];
+    }
   });
 
   let subscription: NDKSubscription | undefined;

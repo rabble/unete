@@ -70,15 +70,25 @@ export async function fetchEvents(ndk: NDK): Promise<NDKEvent[]> {
     // Create a promise that will resolve with events or timeout
     const fetchPromise = new Promise<NDKEvent[]>((resolve, reject) => {
       const events = new Set<NDKEvent>();
-      const sub = ndk.subscribe(filter, { closeOnEose: true });
+      const sub = ndk.subscribe(filter, { 
+        closeOnEose: true,
+        groupableDelay: 0 // Disable grouping for initial fetch
+      });
 
       sub.on('event', (event: NDKEvent) => {
-        console.log('Received organization event:', event.id);
-        events.add(event);
+        try {
+          const content = JSON.parse(event.content);
+          if (content && content.name) { // Basic validation
+            console.log('Received valid organization event:', event.id);
+            events.add(event);
+          }
+        } catch (e) {
+          console.warn('Skipping invalid organization event:', event.id, e);
+        }
       });
 
       sub.on('eose', () => {
-        console.log('EOSE received, total organizations:', events.size);
+        console.log('EOSE received, total valid organizations:', events.size);
         resolve(Array.from(events));
       });
 
@@ -110,13 +120,25 @@ export async function fetchEvents(ndk: NDK): Promise<NDKEvent[]> {
 
 export function setupRealtimeSubscription(ndk: NDK, callback: (event: NDKEvent) => void) {
   const subscription = ndk.subscribe({
-    kinds: [ORGANIZATION]
+    kinds: [ORGANIZATION],
+    since: Math.floor(Date.now() / 1000) // Only get new events from now
   }, {
     closeOnEose: false,
     groupableDelay: 2000
   });
 
-  subscription.on('event', callback);
+  subscription.on('event', (event: NDKEvent) => {
+    try {
+      const content = JSON.parse(event.content);
+      if (content && content.name) { // Basic validation
+        console.log('Received new organization in realtime:', event.id);
+        callback(event);
+      }
+    } catch (e) {
+      console.warn('Skipping invalid realtime organization event:', event.id, e);
+    }
+  });
+
   console.log('Setup realtime subscription for organizations');
   return subscription;
 }
