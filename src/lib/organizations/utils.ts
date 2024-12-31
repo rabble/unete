@@ -93,7 +93,7 @@ export async function fetchEvents(ndk: NDK): Promise<NDKEvent[]> {
 
     const sub = ndk.subscribe(filter, { 
       closeOnEose: true,
-      groupableDelay: 0, // Disable grouping for initial fetch
+      groupableDelay: 100, // Add small delay for grouping
       limit: 100 // Limit results
     });
 
@@ -188,7 +188,8 @@ export function setupRealtimeSubscription(ndk: NDK, callback: (event: NDKEvent) 
     since: Math.floor(Date.now() / 1000) // Only get new events from now
   }, {
     closeOnEose: false,
-    groupableDelay: 2000
+    groupableDelay: 1000, // Reduced delay for realtime updates
+    groupable: true // Explicitly enable grouping
   });
 
   subscription.on('event', (event: NDKEvent) => {
