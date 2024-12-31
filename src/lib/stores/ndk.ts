@@ -23,22 +23,32 @@ export const ndkState = {
 export async function initializeNDK() {
   if (!browser) return null;
 
+  // If we already have an instance, return it
+  const currentNDK = get(ndkStore);
+  if (currentNDK) {
+    console.log('Using existing NDK instance');
+    return currentNDK;
+  }
+
   try {
-    console.log('Initializing NDK...');
+    console.log('Initializing new NDK instance...');
     
     // Create new NDK instance with explicit connection timeout
     const ndkInstance = new NDK({
       explicitRelayUrls: [
         "wss://nos.lol",
-        "wss://relay.nostr.band",
+        "wss://relay.nostr.band", 
         "wss://relay.current.fyi",
         "wss://nostr.mom"
       ],
-      autoConnect: true // Ensure automatic connection to relays
+      autoConnect: true
     });
 
     // Explicitly connect to relays
     await ndkInstance.connect();
+
+    // Store the instance
+    ndkStore.set(ndkInstance);
 
     // Initialize signer if window.nostr is available
     if (window.nostr) {
