@@ -1,31 +1,4 @@
-import { ORGANIZATION, type OrganizationContent } from '$lib/nostr/kinds';
-import NDK, { NDKEvent } from '@nostr-dev-kit/ndk';
-
 import { writable, derived } from 'svelte/store';
-import { ORGANIZATION, type OrganizationContent } from '$lib/nostr/kinds';
-import NDK, { NDKEvent } from '@nostr-dev-kit/ndk';
-import { LOCATION_OPTIONS, FOCUS_AREAS, ENGAGEMENT_TYPE_OPTIONS } from '$lib/constants';
-
-export const locationOptions = LOCATION_OPTIONS;
-export const focusAreaOptions = FOCUS_AREAS.sort();
-export const engagementTypeOptions = ENGAGEMENT_TYPE_OPTIONS.sort();
-
-// Helper Functions
-export function getOrgContent(event: NDKEvent): OrganizationContent {
-  // ... rest of the function remains the same ...
-}
-
-export function matchesFilter(tags: string[][], key: string, filterSet: Set<string>, mark?: string): boolean {
-  // ... rest of the function remains the same ...
-}
-
-export async function fetchEvents(ndk: NDK): Promise<NDKEvent[]> {
-  // ... rest of the function remains the same ...
-}
-
-export function setupRealtimeSubscription(ndk: NDK, callback: (event: NDKEvent) => void) {
-  // ... rest of the function remains the same ...
-} import { writable, derived } from 'svelte/store';
 import { ORGANIZATION, type OrganizationContent } from '$lib/nostr/kinds';
 import NDK, { NDKEvent } from '@nostr-dev-kit/ndk';
 import { LOCATION_OPTIONS, FOCUS_AREAS, ENGAGEMENT_TYPE_OPTIONS } from '$lib/constants';
