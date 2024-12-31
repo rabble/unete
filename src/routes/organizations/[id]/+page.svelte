@@ -18,17 +18,38 @@
   let showJson = false;
   let rawEvent: any = null;
   let isOwner = false;
+  let hasCachedData = false;
 
   // Load data once on mount
   const loadData = async () => {
     if (!data.promise) return;
     
+    // First check if we have cached data
+    try {
+      const cachedResult = await data.promise.cached;
+      if (cachedResult) {
+        organization = cachedResult.organization;
+        event = cachedResult.event;
+        rawEvent = cachedResult.event;
+        hasCachedData = true;
+        
+        // Check ownership with cached data
+        if ($ndk?.signer && event && $userProfile) {
+          isOwner = $userProfile.pubkey === event.pubkey;
+        }
+      }
+    } catch (e) {
+      console.log('No cached data available');
+    }
+
+    // Now try to get fresh data
     loading = true;
     try {
       const result = await data.promise;
       organization = result.organization;
       event = result.event;
       rawEvent = result.event;
+      hasCachedData = false; // We have fresh data now
 
       // Check ownership using the existing NDK signer and userProfile
       if ($ndk?.signer && event && $userProfile) {
@@ -160,7 +181,7 @@
       </button>
     </div>
   {/if}
-  {#if loading}
+  {#if loading && !hasCachedData}
     <div class="text-center">
       <div class="inline-block animate-spin rounded-full h-8 w-8 border-4 border-purple-500 border-t-transparent"></div>
       <p class="mt-2 text-gray-600">Loading organization details...</p>
