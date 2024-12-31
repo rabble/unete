@@ -45,51 +45,9 @@
 
       console.log('Starting organizations page mount');
       
-      // Start NDK connection and initial fetch in parallel
-      const [ndkInstance, initialEvents] = await Promise.all([
-        ensureConnection(),
-        // Start initial fetch immediately with timeout
-        new Promise<NDKEvent[]>(async (resolve, reject) => {
-          try {
-            // Get current NDK instance while waiting for connection
-            const currentNDK = get(ndkStore);
-            if (!currentNDK) {
-              throw new Error('NDK not initialized');
-            }
-
-            // Start subscription with timeout
-            const timeout = setTimeout(() => {
-              reject(new Error('Initial fetch timeout'));
-            }, 5000); // 5 second timeout
-
-            const sub = currentNDK.subscribe(
-              { kinds: [ORGANIZATION], limit: 100 },
-              { closeOnEose: true, groupableDelay: 100 }
-            );
-
-            const events: NDKEvent[] = [];
-            
-            sub.on('event', (event) => {
-              if (event.kind === ORGANIZATION) {
-                events.push(event);
-              }
-            });
-
-            sub.on('eose', () => {
-              clearTimeout(timeout);
-              resolve(events);
-            });
-
-            sub.on('error', (err) => {
-              clearTimeout(timeout);
-              reject(err);
-            });
-          } catch (err) {
-            reject(err);
-          }
-        })
-      ]);
-
+      // Start NDK connection
+      const ndkInstance = await ensureConnection();
+      
       console.log('NDK connection result:', {
         instance: !!ndkInstance,
         connected: ndkInstance.connected,
@@ -97,10 +55,7 @@
         relayUrls: Array.from(ndkInstance.pool?.relays?.keys() || [])
       });
 
-      console.log('Initial events loaded:', initialEvents.length);
-      organizations.set(initialEvents);
-
-      // Initialize filters from URL params in parallel
+      // Initialize filters from URL params
       const params = $page.url.searchParams;
       searchFilters.set({
         locations: params.getAll('locations') || [],
@@ -112,23 +67,20 @@
       
       // Load initial events with timeout
       try {
-        const orgEventKind = ORGANIZATION;
-        
-        // Start initial fetch immediately with timeout
         const initialFetch = new Promise<NDKEvent[]>((resolve, reject) => {
           const timeout = setTimeout(() => {
             reject(new Error('Initial fetch timeout'));
           }, 5000); // 5 second timeout
 
           const sub = ndkInstance.subscribe(
-            { kinds: [orgEventKind], limit: 100 },
+            { kinds: [ORGANIZATION], limit: 100 },
             { closeOnEose: true, groupableDelay: 100 }
           );
 
           const events: NDKEvent[] = [];
           
           sub.on('event', (event) => {
-            if (event.kind === orgEventKind) {
+            if (event.kind === ORGANIZATION) {
               events.push(event);
             }
           });
@@ -151,8 +103,8 @@
         organizations.set(events);
         
         // Start realtime subscription after initial load
-        realtimeSubscription = ndkInstance.subscribe(
-          { kinds: [orgEventKind], since: Math.floor(Date.now() / 1000) },
+        subscription = ndkInstance.subscribe(
+          { kinds: [ORGANIZATION], since: Math.floor(Date.now() / 1000) },
           { closeOnEose: false, groupableDelay: 100 }
         );
       } catch (err) {
