@@ -293,7 +293,7 @@
         {@const org = getOrgContent(event)}
         <a 
           href="/organizations/{event.id}" 
-          class="block bg-white rounded-lg shadow-lg p-4 hover:shadow-xl transition-shadow h-[280px] flex flex-col"
+          class="block bg-white rounded-lg shadow-lg p-4 hover:shadow-xl transition-shadow min-h-[280px] flex flex-col"
           data-sveltekit-preload-data
         >
           <div class="flex items-start justify-between gap-4 mb-2">
@@ -307,9 +307,9 @@
             {/if}
           </div>
 
-          <p class="text-gray-700 mb-4 line-clamp-2 text-sm">{org.description}</p>
+          <p class="text-gray-700 mb-4 line-clamp-3 text-sm">{org.description}</p>
           
-          <div class="space-y-2 mt-auto">
+          <div class="space-y-2 mt-auto overflow-auto">
             <div>
               <h3 class="text-sm font-semibold mb-1">Focus Areas:</h3>
               <div class="flex flex-wrap gap-1">
