@@ -85,7 +85,6 @@ export async function fetchEvents(ndk: NDK): Promise<NDKEvent[]> {
 
     console.log('Fetching organizations with filter:', {
       timestamp: new Date().toISOString(),
-      timestamp: new Date().toISOString(),
       filter,
       kind: ORGANIZATION_KIND,
       kindHex: ORGANIZATION_KIND.toString(16)
