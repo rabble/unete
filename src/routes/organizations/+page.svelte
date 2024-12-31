@@ -1,9 +1,6 @@
-<script context="module" lang="ts">
-  // Any module-level code can go here if needed
-</script>
-
 <script lang="ts">
   import { onMount, onDestroy } from 'svelte';
+  import { writable } from 'svelte/store';
   import { ndk, ndkConnected } from '$lib/stores/ndk';
   import { searchFilters } from '$lib/stores/searchStore';
   import { page } from '$app/stores';
@@ -18,94 +15,37 @@
     setupRealtimeSubscription
   } from '$lib/organizations/utils';
 
-  let organizations: NDKEvent[] = [];
-  let allOrganizations: NDKEvent[] = [];
+  let organizations = writable<NDKEvent[]>([]);
   let loading = true;
   let error: string | null = null;
   let showRawData = false;
+  let orgsList: NDKEvent[] = [];
 
-  onMount(async () => {
-    try {
-      // Ensure NDK connection is established
-      if (!$ndk || !$ndkConnected) {
-        await ndk.connect();
-      }
-
-      // Initialize filters and load organizations
-      const params = $page.url.searchParams;
-      searchFilters.set({
-        locations: params.getAll('locations') || [],
-        focusAreas: params.getAll('focusAreas') || [],
-        engagementTypes: params.getAll('engagementTypes') || []
-      });
-      
-      await loadOrganizations();
-    } catch (err) {
-      console.error('Failed to initialize:', err);
-      error = `Failed to initialize: ${err.message}`;
-    }
+  // Subscribe to the organizations store
+  organizations.subscribe(value => {
+    orgsList = value || [];
   });
 
-  onDestroy(() => {
-    // Clean up any subscriptions if needed
-  });
-
-  let filteredOrganizations: NDKEvent[] = [];
-  let filtersInitialized = false;
-
-  // Update filtered organizations when filters or allOrganizations change
-  $: if (allOrganizations.length > 0) {
-    const filters = $searchFilters;
-    const locationSet = new Set(filters.locations || []);
-    const focusAreaSet = new Set(filters.focusAreas || []);
-    const engagementTypeSet = new Set(filters.engagementTypes || []);
-    
-    filteredOrganizations = allOrganizations.filter(event => (
-      matchesFilter(event.tags, 'l', locationSet, 'location') &&
-      matchesFilter(event.tags, 't', focusAreaSet) &&
-      matchesFilter(event.tags, 'l', engagementTypeSet, 'engagement')
-    ));
-  }
-
-  // Update filtered organizations when filters or allOrganizations change
-  $: {
-    if (allOrganizations.length > 0) {
-      const filters = $searchFilters;
-      const locationSet = new Set(filters.locations || []);
-      const focusAreaSet = new Set(filters.focusAreas || []);
-      const engagementTypeSet = new Set(filters.engagementTypes || []);
-      
-      filteredOrganizations = allOrganizations.filter(event => (
-        matchesFilter(event.tags, 'l', locationSet, 'location') &&
-        matchesFilter(event.tags, 't', focusAreaSet) &&
-        matchesFilter(event.tags, 'l', engagementTypeSet, 'engagement')
-      ));
-    }
+  // Watch for NDK connection
+  $: if ($ndkConnected && $ndk) {
+    loadOrganizations();
   }
 
   async function loadOrganizations() {
     try {
       loading = true;
       error = null;
-      
-      const events = await fetchEvents($ndk);
-      allOrganizations = events.sort((a, b) => {
-        const orgA = getOrgContent(a);
-        const orgB = getOrgContent(b);
-        return orgA.name.localeCompare(orgB.name);
+
+      // Initialize filters from URL params
+      const params = $page.url.searchParams;
+      searchFilters.set({
+        locations: params.getAll('locations') || [],
+        focusAreas: params.getAll('focusAreas') || [],
+        engagementTypes: params.getAll('engagementTypes') || []
       });
 
-      // Setup realtime updates
-      setupRealtimeSubscription($ndk, (event) => {
-        const exists = allOrganizations.some(e => e.id === event.id);
-        if (!exists) {
-          allOrganizations = [...allOrganizations, event].sort((a, b) => {
-            const orgA = getOrgContent(a);
-            const orgB = getOrgContent(b);
-            return orgA.name.localeCompare(orgB.name);
-          });
-        }
-      });
+      const events = await fetchEvents($ndk);
+      organizations.set(events);
 
       loading = false;
     } catch (err) {
@@ -113,6 +53,40 @@
       error = `Failed to load organizations: ${err.message}`;
       loading = false;
     }
+  }
+
+  // Filter organizations reactively
+  $: filteredOrganizations = orgsList.filter(event => {
+    const filters = $searchFilters;
+    
+    const locationSet = new Set(filters.locations || []);
+    const focusAreaSet = new Set(filters.focusAreas || []);
+    const engagementTypeSet = new Set(filters.engagementTypes || []);
+    
+    return (
+      matchesFilter(event.tags, 'l', locationSet, 'location') &&
+      matchesFilter(event.tags, 't', focusAreaSet) &&
+      matchesFilter(event.tags, 'l', engagementTypeSet, 'engagement')
+    );
+  });
+
+  // Add this function to handle form submission
+  function handleSubmit() {
+    // Update URL with current filters
+    const params = new URLSearchParams();
+    
+    if ($searchFilters.locations.length) {
+      $searchFilters.locations.forEach(loc => params.append('locations', loc));
+    }
+    if ($searchFilters.focusAreas.length) {
+      $searchFilters.focusAreas.forEach(area => params.append('focusAreas', area));
+    }
+    if ($searchFilters.engagementTypes.length) {
+      $searchFilters.engagementTypes.forEach(type => params.append('engagementTypes', type));
+    }
+
+    // Update the URL without triggering a page reload
+    window.history.replaceState({}, '', `?${params.toString()}`);
   }
 </script>
 
@@ -187,11 +161,11 @@
 
   <!-- Organizations List -->
   <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-    {#if loading && filteredOrganizations.length === 0}
+    {#if loading}
       <div class="col-span-full flex justify-center items-center py-12">
         <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
       </div>
-    {:else if filteredOrganizations.length === 0}
+    {:else if !orgsList || orgsList.length === 0}
       <div class="col-span-full text-center py-12">
         <p class="text-gray-600">No organizations found matching your criteria.</p>
       </div>
@@ -283,10 +257,9 @@
   <div class="mt-8 border-t pt-8">
     <h3 class="text-xl font-semibold mb-4">Debug: All Loaded Organizations</h3>
     <div class="bg-gray-100 p-4 rounded-lg">
-      <p class="mb-2">Total organizations loaded: {allOrganizations.length}</p>
       <p class="mb-2">Last updated: {new Date().toLocaleTimeString()}</p>
       <div class="space-y-4">
-        {#each allOrganizations as event}
+        {#each orgsList as event}
           {@const org = getOrgContent(event)}
           <div class="bg-white p-4 rounded shadow">
             <p class="font-bold">{org.name}</p>

@@ -10,24 +10,33 @@ export const engagementTypeOptions = ENGAGEMENT_TYPE_OPTIONS.sort();
 export function getOrgContent(event: NDKEvent): OrganizationContent {
   try {
     if (!event?.content) {
-      console.error('Event has no content:', event);
-      throw new Error('Event has no content');
+      console.warn('Event has no content:', event);
+      return {
+        name: 'Unknown Organization',
+        category: 'Unknown',
+        description: 'No content available',
+        picture: null
+      };
     }
     const content = JSON.parse(event.content);
-    if (!content.name || !content.category || !content.description) {
-      console.error('Missing required organization fields:', content);
-      throw new Error('Missing required organization fields');
+    if (!content.name) {
+      console.warn('Missing organization name:', content);
+      content.name = 'Unnamed Organization';
+    }
+    if (!content.category) {
+      content.category = 'Uncategorized';
+    }
+    if (!content.description) {
+      content.description = 'No description available';
     }
     return content;
   } catch (e) {
     console.error('Failed to parse organization content:', e, 'Event:', event);
     return {
-      name: 'Unknown Organization',
-      category: 'Unknown',
-      description: 'Invalid organization data',
-      focusAreas: event?.tags?.filter(t => t[0] === 't').map(t => t[1]) || [],
-      locations: event?.tags?.filter(t => t[0] === 'l' && t[2] === 'location').map(t => t[1]) || [],
-      engagementTypes: event?.tags?.filter(t => t[0] === 'l' && t[2] === 'engagement').map(t => t[1]) || []
+      name: 'Invalid Organization',
+      category: 'Error',
+      description: 'Failed to load organization data',
+      picture: null
     };
   }
 }
