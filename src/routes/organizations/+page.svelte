@@ -1,215 +1,43 @@
 <script lang="ts">
   import { onMount, onDestroy } from 'svelte';
-  import { ORGANIZATION, type OrganizationContent, ORGANIZATION_TAGS } from '$lib/nostr/kinds';
-  import NDK, { NDKEvent } from '@nostr-dev-kit/ndk';
-  import { searchFilters } from '$lib/stores/searchStore';
   import { ndk, ndkConnected } from '$lib/stores/ndk';
-  import SearchField from '$lib/components/SearchField.svelte';
-  import Select from 'svelte-select';
+  import { searchFilters } from '$lib/stores/searchStore';
   import { page } from '$app/stores';
-  import { getTopics } from '$lib/topics';
-  import { Avatar, RelayList } from '@nostr-dev-kit/ndk-svelte-components';
+  import Select from 'svelte-select';
+  import { 
+    locationOptions, 
+    focusAreaOptions, 
+    engagementTypeOptions,
+    getOrgContent,
+    matchesFilter,
+    fetchEvents,
+    setupRealtimeSubscription
+  } from '$lib/organizations/utils';
 
-  // Store for organizations
   let organizations: NDKEvent[] = [];
+  let allOrganizations: NDKEvent[] = [];
   let loading = true;
   let error: string | null = null;
   let showRawData = false;
 
-  // Filter state
-  let selectedLocations: string[] = [];
-
-  // Toggle selection helper function
-  function toggleSelection(array: string[], item: string) {
-    const index = array.indexOf(item);
-    if (index === -1) {
-      array.push(item);
-    } else {
-      array.splice(index, 1);
-    }
-    array = [...array]; // Trigger reactivity
-  }
-  let selectedFocusAreas: string[] = [];
-  let selectedEngagementTypes: string[] = [];
-
-  const locationOptions = [
-    'National',
-    'International',
-    'USA',
-    'Canada',
-    'UK', 
-    'California',
-    'New York',
-    'Florida',
-    'Texas',
-    'Massachusetts',
-    'Washington D.C.',
-    'Southern U.S.',
-    'Border regions'
-  ];
-  
-  const focusAreaOptions = [
-    'Climate Justice',
-    'Community',
-    'Democracy',
-    'Economic Democracy',
-    'Education',
-    'Feminism',
-    'Food',
-    'Healthcare',
-    'Housing',
-    'Immigration',
-    'Indigenous',
-    'International',
-    'LGBTQIA+',
-    'Palestine Solidarity',
-    'Racial Justice',
-    'Reproductive Justice',
-    'Workplace Justice',
-    'Youth'
-  ].sort();
-
-  const engagementTypeOptions = [
-    'In-person',
-    'Online', 
-    'Hybrid',
-    'Construction',
-    'Cooking',
-    'Driving/transporting',
-    'Editing',
-    'Event/protest planning & logistics',
-    'Fundraising',
-    'Legal',
-    'Medical',
-    'Messaging and Narrative (arts/media/graphics)',
-    'Outreach',
-    'Participate in trainings',
-    'Research',
-    'Strike Support',
-    'Sanctuary support', 
-    'Tech support (programming, etc.)',
-    'Translation',
-    'Writing'
-  ].sort();
-
-  // Store all fetched organizations
-  let allOrganizations: NDKEvent[] = [];
-
-  async function fetchEvents() {
-    if (!$ndk || !$ndkConnected) {
-      console.error('NDK status:', { ndk: Boolean($ndk), connected: $ndkConnected });
-      throw new Error('NDK not initialized or connected');
-    }
-
-    console.log('Starting fetchEvents with NDK:', {
-      hasPool: Boolean($ndk.pool),
-      relayCount: $ndk.pool?.relays?.size || 0,
-      relayUrls: Array.from($ndk.pool?.relays?.keys() || [])
-    });
-
-    return new Promise((resolve, reject) => {
-      const events = new Set<NDKEvent>();
-      const filter = {
-        kinds: [ORGANIZATION],
-        since: 0,
-        limit: 100
-      };
-      
-      console.log('Creating subscription with filter:', filter);
-      const sub = $ndk.subscribe(filter, { 
-        closeOnEose: true,  // Close on EOSE to ensure we get a complete set
-        groupableDelay: 1000 // Increase groupable delay
-      });
-
-      sub.on('event', (event: NDKEvent) => {
-        console.log('Received event:', {
-          id: event.id,
-          kind: event.kind,
-          pubkey: event.pubkey,
-          content: event.content ? event.content.substring(0, 100) + '...' : 'No content',
-          tags: event.tags
-        });
-        
-        try {
-          const content = getOrgContent(event);
-          console.log('Parsed organization:', {
-            name: content.name,
-            category: content.category
-          });
-          events.add(event);
-        } catch (e) {
-          console.error('Failed to parse event:', e);
-        }
-        
-        // Log before and after updating allOrganizations
-        console.log('Before update:', {
-          eventsSize: events.size,
-          allOrganizationsLength: allOrganizations.length
-        });
-        
-        allOrganizations = Array.from(events).sort((a, b) => {
-          const orgA = getOrgContent(a);
-          const orgB = getOrgContent(b);
-          return orgA.name.localeCompare(orgB.name);
-        });
-        
-        console.log('After update:', {
-          eventsSize: events.size,
-          allOrganizationsLength: allOrganizations.length,
-          firstThreeOrgs: allOrganizations.slice(0, 3).map(org => getOrgContent(org).name)
-        });
-      });
-
-      sub.on('eose', () => {
-        console.log(`EOSE received, got ${events.size} events`);
-        if (events.size > 0) {
-          resolve(Array.from(events));
-        } else {
-          reject(new Error('No events received before EOSE'));
-        }
-      });
-
-      // Set timeout for entire operation
-      setTimeout(() => {
-        if (events.size === 0) {
-          reject(new Error('No events received within timeout'));
-        }
-      }, 15000);
-    });
-  }
-
-  let debugInterval: number;
-
   onMount(async () => {
-    // Set up debug refresh interval
-    debugInterval = setInterval(() => {
-      // Force a reactive update
-      allOrganizations = allOrganizations;
-    }, 1000);
     try {
       loading = true;
       error = null;
 
-      // Wait for NDK to be initialized and connected
-      const connectionPromise = new Promise((resolve, reject) => {
-        const timeout = setTimeout(() => {
-          reject(new Error('Timeout waiting for NDK initialization'));
-        }, 15000);
-
+      // Wait for NDK connection
+      await new Promise<void>((resolve, reject) => {
+        const timeout = setTimeout(() => reject(new Error('NDK connection timeout')), 15000);
         const checkConnection = () => {
           if ($ndk && $ndkConnected) {
             clearTimeout(timeout);
-            resolve($ndk);
+            resolve();
             return;
           }
           setTimeout(checkConnection, 100);
         };
-
         checkConnection();
       });
-
-      const ndkInstance = await connectionPromise;
-      console.log('Using connected NDK instance:', ndkInstance);
 
       // Set initial filters from URL params
       const params = $page.url.searchParams;
@@ -219,74 +47,15 @@
         engagementTypes: params.getAll('engagementTypes') || []
       });
 
-      console.log('Fetching organizations...');
-      const events = await fetchEvents();
-      
-      if (!events || events.length === 0) {
-        console.warn('No events returned from fetchEvents');
-        allOrganizations = [];
-        return;
-      }
-      
-      console.log('Fetch complete, received events:', events);
-      console.log('Number of events:', events.size);
-      
-      // Log first few events for debugging
-      const firstFew = Array.from(events).slice(0, 3);
-      console.log('Sample events:', firstFew.map(e => {
-        try {
-          return {
-            id: e.id,
-            kind: e.kind,
-            tags: e.tags,
-            created_at: e.created_at,
-            content: JSON.parse(e.content)
-          };
-        } catch (err) {
-          console.error('Failed to parse event content:', err, e);
-          return {
-            id: e.id,
-            kind: e.kind,
-            tags: e.tags,
-            created_at: e.created_at,
-            content: 'Failed to parse'
-          };
-        }
-      }));
-      
-      // Convert Set to Array and sort
-      allOrganizations = Array.from(events).sort((a, b) => {
+      const events = await fetchEvents($ndk);
+      allOrganizations = events.sort((a, b) => {
         const orgA = getOrgContent(a);
         const orgB = getOrgContent(b);
         return orgA.name.localeCompare(orgB.name);
       });
-      
-      console.log('Processed organizations:', allOrganizations.length);
-      
-      // Set up subscription for real-time updates
-      console.log('Setting up real-time subscription...');
-      const subscription = $ndk.subscribe({
-        kinds: [ORGANIZATION],
-        since: Math.floor(Date.now() / 1000) - 3600, // Last hour for real-time
-        limit: 50
-      }, {
-        closeOnEose: false,
-        groupableDelay: 2000
-      });
 
-      // Log subscription details
-      console.log('Real-time subscription created:', {
-        filter: subscription.filter,
-        opts: subscription.opts,
-        relayCount: $ndk.pool?.relays?.size || 0
-      });
-
-      subscription.on('event', (event) => {
-        console.log('Received real-time event:', {
-          id: event.id,
-          kind: event.kind,
-          pubkey: event.pubkey
-        });
+      // Setup realtime updates
+      setupRealtimeSubscription($ndk, (event) => {
         const exists = allOrganizations.some(e => e.id === event.id);
         if (!exists) {
           allOrganizations = [...allOrganizations, event].sort((a, b) => {
@@ -297,125 +66,28 @@
         }
       });
 
+      loading = false;
     } catch (err) {
       console.error('Failed to load organizations:', err);
-      console.error('Error details:', {
-        name: err.name,
-        message: err.message,
-        stack: err.stack,
-        ndk: $ndk ? 'initialized' : 'null',
-        ndkPool: $ndk?.pool ? 'initialized' : 'null',
-        relayCount: $ndk?.pool?.relays?.size || 0
-      });
       error = `Failed to load organizations: ${err.message}`;
-    } finally {
       loading = false;
     }
   });
 
-  onDestroy(() => {
-    if (debugInterval) {
-      clearInterval(debugInterval);
-    }
-  });
-
-  function getOrgContent(event: NDKEvent): OrganizationContent {
-    try {
-      if (!event?.content) {
-        console.error('Event has no content:', event);
-        throw new Error('Event has no content');
-      }
-      const content = JSON.parse(event.content);
-      if (!content.name || !content.category || !content.description) {
-        console.error('Missing required organization fields:', content);
-        throw new Error('Missing required organization fields');
-      }
-      return content;
-    } catch (e) {
-      console.error('Failed to parse organization content:', e, 'Event:', event);
-      return {
-        name: 'Unknown Organization',
-        category: 'Unknown',
-        description: 'Invalid organization data',
-        focusAreas: event?.tags?.filter(t => t[0] === 't').map(t => t[1]) || [],
-        locations: event?.tags?.filter(t => t[0] === 'l' && t[2] === 'location').map(t => t[1]) || [],
-        engagementTypes: event?.tags?.filter(t => t[0] === 'l' && t[2] === 'engagement').map(t => t[1]) || []
-      };
-    }
-  }
-
-  function handleSubmit() {
-    const queryParams = new URLSearchParams();
-    
-    $searchFilters.locations.forEach(loc => 
-      queryParams.append('locations', loc));
-    $searchFilters.focusAreas.forEach(area => 
-      queryParams.append('focusAreas', area));
-    $searchFilters.engagementTypes.forEach(type => 
-      queryParams.append('engagementTypes', type));
-    
-    window.history.pushState({}, '', `?${queryParams.toString()}`);
-  }
-
-  // Filter organizations in memory based on selected criteria
+  // Filter organizations reactively
   $: filteredOrganizations = allOrganizations.filter(event => {
-    const org = getOrgContent(event);
     const filters = $searchFilters;
     
-    // Log the event being filtered
-    console.log('Filtering event:', {
-      id: event.id,
-      name: org.name,
-      tags: event.tags,
-      filters: filters
-    });
+    const locationSet = new Set(filters.locations || []);
+    const focusAreaSet = new Set(filters.focusAreas || []);
+    const engagementTypeSet = new Set(filters.engagementTypes || []);
     
-    // Filter by locations (using 'l' tags with 'location' mark)
-    const locationMatch = !filters.locations?.length || 
-      event.tags
-        .filter(t => t[0] === 'l' && t[2] === 'location')
-        .some(t => filters.locations.includes(t[1]));
-    
-    // Filter by focus areas (using 't' tags)
-    const focusMatch = !filters.focusAreas?.length ||
-      event.tags
-        .filter(t => t[0] === 't')
-        .some(t => filters.focusAreas.includes(t[1]));
-    
-    // Filter by engagement types (using 'l' tags with 'engagement' mark)
-    const engagementMatch = !filters.engagementTypes?.length ||
-      event.tags
-        .filter(t => t[0] === 'l' && t[2] === 'engagement')
-        .some(t => filters.engagementTypes.includes(t[1]));
-    
-    // Log the match results
-    console.log('Filter results:', {
-      name: org.name,
-      locationMatch,
-      focusMatch,
-      engagementMatch,
-      passed: locationMatch && focusMatch && engagementMatch
-    });
-    
-    return locationMatch && focusMatch && engagementMatch;
+    return (
+      matchesFilter(event.tags, 'l', locationSet, 'location') &&
+      matchesFilter(event.tags, 't', focusAreaSet) &&
+      matchesFilter(event.tags, 'l', engagementTypeSet, 'engagement')
+    );
   });
-
-  // Add logging to the reactive statement
-  $: {
-    console.log('Reactive statement triggered:', {
-      allOrganizationsLength: allOrganizations.length,
-      filteredOrganizationsLength: filteredOrganizations?.length,
-      filters: $searchFilters
-    });
-    
-    if (filteredOrganizations) {
-      console.log('First 3 filtered organizations:', filteredOrganizations.slice(0, 3).map(event => ({
-        id: event.id,
-        content: getOrgContent(event),
-        tags: event.tags
-      })));
-    }
-  }
 </script>
 
 <div class="max-w-7xl mx-auto px-4 py-12">
@@ -488,13 +160,13 @@
   </form>
 
   <!-- Organizations List -->
-  <div class="space-y-8">
-    {#if loading}
-      <div class="flex justify-center items-center py-12">
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    {#if loading && filteredOrganizations.length === 0}
+      <div class="col-span-full flex justify-center items-center py-12">
         <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
       </div>
     {:else if filteredOrganizations.length === 0}
-      <div class="text-center py-12">
+      <div class="col-span-full text-center py-12">
         <p class="text-gray-600">No organizations found matching your criteria.</p>
       </div>
     {:else}
@@ -502,55 +174,53 @@
         {@const org = getOrgContent(event)}
         <a 
           href="/organizations/{event.id}" 
-          class="block bg-white rounded-lg shadow-lg p-6 hover:shadow-xl transition-shadow"
+          class="block bg-white rounded-lg shadow-lg p-4 hover:shadow-xl transition-shadow h-[280px] flex flex-col"
           data-sveltekit-preload-data
         >
-          <div class="flex items-start gap-4">
+          <div class="flex items-start justify-between gap-4 mb-2">
+            <h2 class="text-xl font-bold truncate flex-1">{org.name}</h2>
             {#if org.picture}
               <img 
                 src={org.picture} 
                 alt={org.name}
-                class="w-24 h-24 object-cover rounded-lg"
+                class="w-16 h-16 object-cover rounded-lg flex-shrink-0"
               />
             {/if}
-            <div class="flex-1">
-              <h2 class="text-2xl font-bold mb-2">{org.name}</h2>
-              <p class="text-purple-600 font-medium mb-4">{org.category}</p>
-              <p class="text-gray-700 mb-6">{org.description}</p>
-              
-              <div class="space-y-4">
-                <div>
-                  <h3 class="font-semibold mb-2">Focus Areas:</h3>
-                  <div class="flex flex-wrap gap-2">
-                    {#each event.tags.filter(t => t[0] === 't') as [_, area]}
-                      <span class="bg-purple-100 text-purple-800 px-3 py-1 rounded-full text-sm">
-                        {area}
-                      </span>
-                    {/each}
-                  </div>
-                </div>
-              
-                <div>
-                  <h3 class="font-semibold mb-2">Locations:</h3>
-                  <div class="flex flex-wrap gap-2">
-                    {#each event.tags.filter(t => t[0] === 'l' && t[2] === 'location') as [_, location]}
-                      <span class="bg-gray-100 text-gray-800 px-3 py-1 rounded-full text-sm">
-                        {location}
-                      </span>
-                    {/each}
-                  </div>
-                </div>
+          </div>
 
-                <div>
-                  <h3 class="font-semibold mb-2">Engagement Types:</h3>
-                  <div class="flex flex-wrap gap-2">
-                    {#each event.tags.filter(t => t[0] === 'l' && t[2] === 'engagement') as [_, type]}
-                      <span class="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm">
-                        {type}
-                      </span>
-                    {/each}
-                  </div>
-                </div>
+          <p class="text-gray-700 mb-4 line-clamp-2 text-sm">{org.description}</p>
+          
+          <div class="space-y-2 mt-auto">
+            <div>
+              <h3 class="text-sm font-semibold mb-1">Focus Areas:</h3>
+              <div class="flex flex-wrap gap-1">
+                {#each event.tags.filter(t => t[0] === 't').slice(0, 3) as [_, area]}
+                  <span class="bg-purple-100 text-purple-800 px-2 py-0.5 rounded-full text-xs">
+                    {area}
+                  </span>
+                {/each}
+              </div>
+            </div>
+          
+            <div>
+              <h3 class="text-sm font-semibold mb-1">Locations:</h3>
+              <div class="flex flex-wrap gap-1">
+                {#each event.tags.filter(t => t[0] === 'l' && t[2] === 'location').slice(0, 2) as [_, location]}
+                  <span class="bg-gray-100 text-gray-800 px-2 py-0.5 rounded-full text-xs">
+                    {location}
+                  </span>
+                {/each}
+              </div>
+            </div>
+
+            <div>
+              <h3 class="text-sm font-semibold mb-1">Engagement Types:</h3>
+              <div class="flex flex-wrap gap-1">
+                {#each event.tags.filter(t => t[0] === 'l' && t[2] === 'engagement').slice(0, 2) as [_, type]}
+                  <span class="bg-green-100 text-green-800 px-2 py-0.5 rounded-full text-xs">
+                    {type}
+                  </span>
+                {/each}
               </div>
             </div>
           </div>
