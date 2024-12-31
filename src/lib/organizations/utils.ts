@@ -66,11 +66,7 @@ export async function fetchEvents(ndk: NDK): Promise<NDKEvent[]> {
     };
 
     // Use explicit relay URLs for better reliability
-    const events = await ndk.fetchEvents(filter, {}, [
-      'wss://relay.nos.social',
-      'wss://relay.damus.io',
-      'wss://relay.nostr.band'
-    ]);
+    const events = await ndk.fetchEvents(filter);
 
     if (!events) {
       throw new Error('No events received from relays');
@@ -90,11 +86,7 @@ export function setupRealtimeSubscription(ndk: NDK, callback: (event: NDKEvent) 
   }, {
     closeOnEose: false,
     groupableDelay: 2000
-  }, [
-    'wss://relay.nos.social',
-    'wss://relay.damus.io',
-    'wss://relay.nostr.band'
-  ]);
+  });
 
   subscription.on('event', callback);
   console.log('Setup realtime subscription for organizations');
