@@ -37,8 +37,7 @@ export async function initializeNDK() {
     const ndkInstance = new NDK({
       explicitRelayUrls: [
         "wss://nos.lol",
-        "wss://relay.nostr.band", 
-        "wss://relay.current.fyi",
+        "wss://relay.nostr.band",
         "wss://nostr.mom"
       ],
       autoConnect: true
