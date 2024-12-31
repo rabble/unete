@@ -41,20 +41,23 @@
         throw new Error('Failed to establish NDK connection');
       }
 
-      // Wait for at least one relay to be connected
-      let connected = false;
-      for (let i = 0; i < 10; i++) {
-        const relays = Array.from(ndkInstance.pool.relays.values());
-        if (relays.some(r => r.status === 1)) {
-          connected = true;
-          break;
-        }
-        await new Promise(resolve => setTimeout(resolve, 300));
-      }
-
-      if (!connected) {
-        throw new Error('Failed to connect to any relays');
-      }
+      // Wait for connection to be ready
+      await new Promise<void>((resolve, reject) => {
+        const checkConnection = () => {
+          if (get(ndkConnected)) {
+            resolve();
+          } else {
+            setTimeout(checkConnection, 100);
+          }
+        };
+        
+        // Add timeout
+        setTimeout(() => {
+          reject(new Error('Connection timeout'));
+        }, 5000);
+        
+        checkConnection();
+      });
 
       // Initialize filters from URL params
       const params = $page.url.searchParams;
