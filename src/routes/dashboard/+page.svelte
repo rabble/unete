@@ -1,5 +1,6 @@
 <script lang="ts">
   import { onMount } from 'svelte';
+  import { page } from '$app/stores';
   import type { NDKEvent, NDKUser } from '@nostr-dev-kit/ndk';
   import { NDKNip07Signer } from '@nostr-dev-kit/ndk';
   import { ndk, initNostrLogin } from '$lib/stores/ndk';
@@ -7,6 +8,9 @@
   import { ORGANIZATION, GROUP_MEMBERS, type OrganizationContent } from '$lib/nostr/kinds';
   import { initializeUser } from '$lib/nostr/ndk-utils';
   import { getUserGroups, type GroupMetadata, createGroupInvite } from '$lib/nostr/groups';
+
+  // Get notice from URL params if present
+  $: notice = $page.url.searchParams.get('notice');
 
   let user: NDKUser | undefined;
   let profile: { name?: string; about?: string; picture?: string; } | undefined;
@@ -178,12 +182,6 @@
   });
 </script>
 
-<script lang="ts">
-  import { page } from '$app/stores';
-  
-  // Get notice from URL params if present
-  $: notice = $page.url.searchParams.get('notice');
-</script>
 
 <div class="max-w-7xl mx-auto px-4 py-12">
   <h1 class="text-4xl font-bold text-center mb-8">Dashboard</h1>
