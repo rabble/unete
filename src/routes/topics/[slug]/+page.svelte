@@ -5,7 +5,7 @@
   import { writable, get } from 'svelte/store';
   import type { NDKEvent } from '@nostr-dev-kit/ndk';
   import { ndk, ensureConnection, ndkConnected } from '$lib/stores/ndk';
-  import { ORGANIZATION } from '$lib/nostr/kinds';
+  import { ORGANIZATION, ORGANIZATION_TAGS } from '$lib/nostr/kinds';
   import { searchFilters } from '$lib/stores/searchStore';
   import { page } from '$app/stores';
 
@@ -246,42 +246,43 @@
           </div>
         {:else}
           <div class="space-y-8">
-            {#each organizations as org}
+            {#each orgsList as event}
+              {@const org = JSON.parse(event.content)}
               <div class="bg-white rounded-lg shadow-lg p-6">
-                <a href="/organizations/{org.id}" class="block">
+                <a href="/organizations/{event.id}" class="block">
                   <h3 class="text-2xl font-semibold mb-2">{org.name}</h3>
                   {#if org.category}
                     <p class="text-purple-600 mb-4">{org.category}</p>
                   {/if}
                   <p class="text-gray-700 mb-6">{org.description}</p>
                   
-                  {#if org.focusAreas?.length > 0}
+                  {#if event.tags.filter(t => t[0] === ORGANIZATION_TAGS.FOCUS_AREA).length > 0}
                     <div class="mb-4">
                       <h4 class="font-semibold mb-2">Focus Areas:</h4>
                       <div class="flex flex-wrap">
-                        {#each org.focusAreas as area}
+                        {#each event.tags.filter(t => t[0] === ORGANIZATION_TAGS.FOCUS_AREA) as [_, area]}
                           <TagLink type="topic" value={area} />
                         {/each}
                       </div>
                     </div>
                   {/if}
 
-                  {#if org.engagementTypes?.length > 0}
+                  {#if event.tags.filter(t => t[0] === ORGANIZATION_TAGS.ENGAGEMENT).length > 0}
                     <div class="mb-4">
                       <h4 class="font-semibold mb-2">Ways to Engage:</h4>
                       <div class="flex flex-wrap">
-                        {#each org.engagementTypes as type}
+                        {#each event.tags.filter(t => t[0] === ORGANIZATION_TAGS.ENGAGEMENT) as [_, type]}
                           <TagLink type="engagement" value={type} />
                         {/each}
                       </div>
                     </div>
                   {/if}
                   
-                  {#if org.locations?.length > 0}
+                  {#if event.tags.filter(t => t[0] === ORGANIZATION_TAGS.LOCATION).length > 0}
                     <div>
                       <h4 class="font-semibold mb-2">Locations:</h4>
                       <div class="flex flex-wrap">
-                        {#each org.locations as location}
+                        {#each event.tags.filter(t => t[0] === ORGANIZATION_TAGS.LOCATION) as [_, location]}
                           <TagLink type="location" value={location} />
                         {/each}
                       </div>
