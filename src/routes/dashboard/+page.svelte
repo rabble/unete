@@ -1,7 +1,8 @@
 <script lang="ts">
-  import { onMount } from 'svelte';
+  import { onMount, onDestroy } from 'svelte';
   import { page } from '$app/stores';
-  import type { NDKEvent, NDKUser } from '@nostr-dev-kit/ndk';
+  import type { NDKEvent, NDKUser, NDKRelay } from '@nostr-dev-kit/ndk';
+  import { writable } from 'svelte/store';
   import { NDKNip07Signer } from '@nostr-dev-kit/ndk';
   import { ndk, initNostrLogin, ensureConnection, ndkConnected } from '$lib/stores/ndk';
   import { get } from 'svelte/store';
@@ -13,8 +14,12 @@
   // Get notice from URL params if present
   $: notice = $page.url.searchParams.get('notice');
 
+  // Create a store for relay status
+  const relayStatus = writable<Map<string, boolean>>(new Map());
+  
   let user: NDKUser | undefined;
   let profile: { name?: string; about?: string; picture?: string; } | undefined;
+  let unsubscribeHandlers: (() => void)[] = [];
   let userEvents: NDKEvent[] | null = null;
   let cachedOrganizations: NDKEvent[] | null = null;
   let filterTimeout: ReturnType<typeof setTimeout> | null = null;
@@ -132,6 +137,12 @@
 
 
   onMount(async () => {
+    
+  });
+
+  onDestroy(() => {
+    // Cleanup relay listeners
+    unsubscribeHandlers.forEach(handler => handler());
     try {
       loading = true;
       error = null;
@@ -172,6 +183,45 @@
         userProfile.set(user);
       } else {
         throw new Error('Please login using the Nostr extension');
+      }
+
+      // Setup relay status monitoring
+      if (ndkInstance.pool) {
+        // Initialize current status
+        const initialStatus = new Map();
+        ndkInstance.pool.relays.forEach((relay, url) => {
+          initialStatus.set(url, relay.status === 1);
+        });
+        relayStatus.set(initialStatus);
+
+        // Setup listeners for each relay
+        ndkInstance.pool.relays.forEach((relay, url) => {
+          const connectHandler = () => {
+            relayStatus.update(status => {
+              const newStatus = new Map(status);
+              newStatus.set(url, true);
+              return newStatus;
+            });
+          };
+
+          const disconnectHandler = () => {
+            relayStatus.update(status => {
+              const newStatus = new Map(status);
+              newStatus.set(url, false);
+              return newStatus;
+            });
+          };
+
+          relay.on('connect', connectHandler);
+          relay.on('disconnect', disconnectHandler);
+          relay.on('error', disconnectHandler);
+
+          unsubscribeHandlers.push(() => {
+            relay.off('connect', connectHandler);
+            relay.off('disconnect', disconnectHandler);
+            relay.off('error', disconnectHandler);
+          });
+        });
       }
 
       // Only fetch organizations if we haven't already
@@ -259,9 +309,9 @@
     <div class="mb-8 bg-white rounded-lg shadow-lg p-6">
       <h2 class="text-xl font-semibold mb-4">Connected Relays</h2>
       <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
-        {#each Array.from($ndk.pool.relays.entries()) as [url, relay]}
+        {#each Array.from($relayStatus) as [url, connected]}
           <div class="flex items-center gap-2 p-2 bg-gray-50 rounded">
-            <div class={`w-2 h-2 rounded-full ${relay.connected ? 'bg-green-500' : 'bg-red-500'}`}></div>
+            <div class={`w-2 h-2 rounded-full ${connected ? 'bg-green-500' : 'bg-red-500'}`}></div>
             <span class="text-sm font-mono">{url}</span>
           </div>
         {/each}
