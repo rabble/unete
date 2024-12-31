@@ -501,7 +501,7 @@
           on:click={() => showRawData = !showRawData}
           class="bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2 px-6 rounded-lg text-lg"
         >
-          {showRawData ? 'Hide' : 'Show'} Raw Nostr Data
+          {showRawData ? 'Hide' : 'Show'} Raw Database Data
         </button>
         
         {#if showRawData}
