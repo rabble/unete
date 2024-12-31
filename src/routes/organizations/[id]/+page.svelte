@@ -19,9 +19,28 @@
   let rawEvent: any = null;
   let isOwner = false;
   let hasCachedData = false;
+  let relayStatus = 'Checking relay connections...';
+  let connectedRelays: string[] = [];
+  let disconnectedRelays: string[] = [];
+
+  // Check relay connections
+  const checkRelays = async () => {
+    if (!$ndk) return;
+    
+    const status = await $ndk.checkRelayConnections();
+    connectedRelays = status.connected;
+    disconnectedRelays = status.disconnected;
+    
+    if (connectedRelays.length > 0) {
+      relayStatus = `Connected to ${connectedRelays.length} relay(s): ${connectedRelays.join(', ')}`;
+    } else {
+      relayStatus = 'Not connected to any relays';
+    }
+  };
 
   // Load data once on mount
   const loadData = async () => {
+    await checkRelays();
     if (!data.promise) return;
     
     // First check if we have cached data
@@ -513,6 +532,32 @@
       </div>
     </div>
   
+  <!-- Relay Status -->
+  <div class="mt-8 bg-gray-50 p-6 rounded-lg">
+    <h3 class="text-xl font-bold mb-4">Relay Connection Status</h3>
+    <p class="mb-2">{relayStatus}</p>
+    {#if connectedRelays.length > 0}
+      <div class="mb-4">
+        <h4 class="font-semibold">Connected Relays:</h4>
+        <ul class="list-disc list-inside">
+          {#each connectedRelays as relay}
+            <li class="text-green-600">{relay}</li>
+          {/each}
+        </ul>
+      </div>
+    {/if}
+    {#if disconnectedRelays.length > 0}
+      <div class="mb-4">
+        <h4 class="font-semibold">Disconnected Relays:</h4>
+        <ul class="list-disc list-inside">
+          {#each disconnectedRelays as relay}
+            <li class="text-red-600">{relay}</li>
+          {/each}
+        </ul>
+      </div>
+    {/if}
+  </div>
+
   <!-- Raw Data Display -->
   <div class="mt-8 flex flex-col items-center border-t pt-8">
     <h3 class="text-xl font-semibold mb-4">Developer Tools</h3>
