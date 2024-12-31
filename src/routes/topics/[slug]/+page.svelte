@@ -15,7 +15,21 @@
       loadingNostr = true;
       error = null;
       const result = await data.promise;
-      organizations = result.organizations || [];
+      
+      // Filter organizations that match the current topic
+      organizations = (result.organizations || []).filter(org => {
+        // Check both focusAreas array and tags for matches
+        const focusAreas = org.focusAreas || [];
+        const tagFocusAreas = (org.tags || [])
+          .filter(t => t[0] === 'f')
+          .map(t => t[1]);
+          
+        const allFocusAreas = [...new Set([...focusAreas, ...tagFocusAreas])];
+        return allFocusAreas.some(area => 
+          area.toLowerCase() === data.topic.title.toLowerCase()
+        );
+      });
+      
       allTopics = result.allTopics || data.allTopics;
     } catch (err) {
       console.error('Failed to load Nostr data:', err);
