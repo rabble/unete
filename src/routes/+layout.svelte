@@ -9,6 +9,7 @@
   import { NDKNip07Signer } from '@nostr-dev-kit/ndk';
   import { ndkStore as ndk, ndkConnected, initializeNDK, initNostrLogin, ensureConnection } from '$lib/stores/ndk';
   import { isLoggedIn, loginState, checkExistingNostrLogin } from '$lib/stores/userProfile';
+  import { checkLoginStatus } from '$lib/auth';
   import '../app.css';
   import { browser } from '$app/environment';
   
