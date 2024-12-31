@@ -45,15 +45,60 @@
 
       console.log('Starting organizations page mount');
       
-      // Get connected NDK instance directly from ensureConnection
-      const ndkInstance = await ensureConnection();
-      
+      // Start NDK connection and initial fetch in parallel
+      const [ndkInstance, initialEvents] = await Promise.all([
+        ensureConnection(),
+        // Start initial fetch immediately with timeout
+        new Promise<NDKEvent[]>(async (resolve, reject) => {
+          try {
+            // Get current NDK instance while waiting for connection
+            const currentNDK = get(ndkStore);
+            if (!currentNDK) {
+              throw new Error('NDK not initialized');
+            }
+
+            // Start subscription with timeout
+            const timeout = setTimeout(() => {
+              reject(new Error('Initial fetch timeout'));
+            }, 5000); // 5 second timeout
+
+            const sub = currentNDK.subscribe(
+              { kinds: [ORGANIZATION], limit: 100 },
+              { closeOnEose: true, groupableDelay: 100 }
+            );
+
+            const events: NDKEvent[] = [];
+            
+            sub.on('event', (event) => {
+              if (event.kind === ORGANIZATION) {
+                events.push(event);
+              }
+            });
+
+            sub.on('eose', () => {
+              clearTimeout(timeout);
+              resolve(events);
+            });
+
+            sub.on('error', (err) => {
+              clearTimeout(timeout);
+              reject(err);
+            });
+          } catch (err) {
+            reject(err);
+          }
+        })
+      ]);
+
       console.log('NDK connection result:', {
         instance: !!ndkInstance,
         connected: ndkInstance.connected,
         poolSize: ndkInstance.pool?.relays?.size,
         relayUrls: Array.from(ndkInstance.pool?.relays?.keys() || [])
       });
+
+      console.log('Initial events loaded:', initialEvents.length);
+      organizations.set(initialEvents);
 
       // Initialize filters from URL params in parallel
       const params = $page.url.searchParams;
