@@ -265,28 +265,6 @@ export async function ensureConnection(): Promise<NDK> {
   }
 
   throw new Error('Failed to establish NDK connection after multiple attempts');
-  if (!ndkInstance) {
-    throw new Error('Failed to initialize NDK');
-  }
-
-  // Wait for connection with timeout
-  const timeout = 10000; // 10 seconds
-  const startTime = Date.now();
-  
-  return new Promise<NDK>((resolve, reject) => {
-    const checkConnection = () => {
-      if (get(ndkConnected)) {
-        console.log('NDK connection established');
-        resolve(ndkInstance!);
-      } else if (Date.now() - startTime > timeout) {
-        reject(new Error('Connection timeout'));
-      } else {
-        setTimeout(checkConnection, 100);
-      }
-    };
-    
-    checkConnection();
-  });
 }
 
 // Create event cache store
