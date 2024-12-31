@@ -1,6 +1,6 @@
 import type { PageLoad } from './$types';
 import { getStores } from '$app/stores';
-import { ndk, getCachedEvents } from '$lib/stores/ndk';
+import { ndk, getCachedEvents, ensureConnection } from '$lib/stores/ndk';
 import { ORGANIZATION, ORGANIZATION_TAGS } from '$lib/nostr/kinds';
 
 export const ssr = false;
