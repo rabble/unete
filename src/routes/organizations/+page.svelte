@@ -33,8 +33,14 @@
       loading = true;
       error = null;
 
+      // Get the connected NDK instance
+      const connectedNDK = get(ndk);
+      if (!connectedNDK) {
+        throw new Error('NDK connection failed');
+      }
+
       // Ensure NDK is connected
-      await ndkConnected.waitForConnection();
+      await connectedNDK.connect();
 
       // Initialize filters from URL params
       const params = $page.url.searchParams;
