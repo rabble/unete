@@ -41,31 +41,50 @@ const processEvent = (event: NDKEvent) => {
 export const load: PageLoad = async ({ params }) => {
   const { id } = params;
 
-  // Check rate limit
-  const now = Date.now();
-  if (now - lastFetchTime < RATE_LIMIT_DELAY) {
-    // Return only cached data if we're rate limited
-    const cachedEvents = await getCachedEvents({
-      kinds: [ORGANIZATION],
-      ids: [id],
-      limit: 1,
-      since: 0
-    });
+  try {
+    // Always get fresh data first
+    const ndkInstance = await ensureConnection();
     
-    const cachedEvent = Array.from(cachedEvents)[0];
-    if (cachedEvent) {
+    // Fetch with a short timeout
+    const fetchWithTimeout = (timeout: number) => {
+      return new Promise<NDKEvent[]>((resolve, reject) => {
+        const timer = setTimeout(() => {
+          reject(new Error('Fetch timeout'));
+        }, timeout);
+
+        ndkInstance.fetchEvents({
+          kinds: [ORGANIZATION],
+          ids: [id],
+          limit: 1
+        }).then(events => {
+          clearTimeout(timer);
+          resolve(Array.from(events));
+        }).catch(err => {
+          clearTimeout(timer);
+          reject(err);
+        });
+      });
+    };
+
+    // Try to get fresh data with 2 second timeout
+    let freshEvent: NDKEvent | undefined;
+    try {
+      const events = await fetchWithTimeout(2000);
+      freshEvent = events[0];
+    } catch (err) {
+      console.log('Fresh data fetch failed, falling back to cache:', err);
+    }
+
+    // If we got fresh data, return it
+    if (freshEvent) {
+      const processed = processEvent(freshEvent);
       return {
-        initialData: processEvent(cachedEvent),
-        promise: Promise.resolve(processEvent(cachedEvent))
+        initialData: processed,
+        promise: Promise.resolve(processed)
       };
     }
-    throw new Error('Please wait a moment before refreshing');
-  }
-  
-  lastFetchTime = now;
 
-  try {
-    // Get cached data first
+    // Fall back to cached data
     const cachedEvents = await getCachedEvents({
       kinds: [ORGANIZATION],
       ids: [id],
@@ -74,35 +93,14 @@ export const load: PageLoad = async ({ params }) => {
     });
     
     const cachedEvent = Array.from(cachedEvents)[0];
-    const initialData = cachedEvent ? processEvent(cachedEvent) : null;
+    if (!cachedEvent) {
+      throw new Error('Organization not found');
+    }
 
-    // Return both initial data and promise for fresh data
+    const processed = processEvent(cachedEvent);
     return {
-      initialData,
-      promise: new Promise((resolve, reject) => {
-        // Add slight delay to prevent rate limiting
-        setTimeout(() => {
-          const ndkInstance = ndk.subscribe(value => {
-            if (!value) {
-              reject(new Error('NDK not initialized'));
-              return;
-            }
-            
-            value.fetchEvents({
-              kinds: [ORGANIZATION],
-              ids: [id],
-              limit: 1
-            }).then(events => {
-              const eventsArray = Array.from(events);
-              if (eventsArray.length === 0) {
-                reject(new Error('Organization not found'));
-                return;
-              }
-              resolve(processEvent(eventsArray[0]));
-            }).catch(reject);
-          });
-        }, 500);
-      })
+      initialData: processed,
+      promise: Promise.resolve(processed)
     };
   } catch (err) {
     console.error('Failed to load organization:', err);
