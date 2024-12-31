@@ -157,8 +157,6 @@
                 <a href="/contact" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Contact</a>
                 {#if isLoggedIn}
                   <a href="/dashboard" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Dashboard</a>
-                {:else}
-                  <a href="/dashboard" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Login</a>
                 {/if}
               </div>
             </div>
