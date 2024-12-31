@@ -200,6 +200,14 @@
 
   <div class="grid grid-cols-1 gap-8">
 
+    <!-- Debug Section -->
+    <div class="bg-gray-100 p-4 rounded-lg mb-8">
+      <h3 class="font-bold mb-2">Debug Info:</h3>
+      <pre class="text-sm">Loading: {loading}</pre>
+      <pre class="text-sm">User Events: {JSON.stringify(userEvents, null, 2)}</pre>
+      <pre class="text-sm">Cached Organizations: {JSON.stringify(cachedOrganizations, null, 2)}</pre>
+    </div>
+
     <!-- Your Organizations -->
     <div class="bg-white rounded-lg shadow-lg p-6">
       <div class="flex justify-between items-center mb-6">
@@ -212,17 +220,11 @@
         </a>
       </div>
       
-      {#if loading}
+      {#if loading || userEvents === null}
         <div class="flex justify-center py-8">
           <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"></div>
         </div>
-      {:else if userEvents === null}
-        <div class="flex justify-center py-8">
-          <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"></div>
-        </div>
-      {:else if userEvents.length === 0}
-        <p class="text-gray-600 text-center py-8">You haven't created any organizations yet.</p>
-      {:else}
+      {:else if userEvents && userEvents.length > 0}
         <div class="space-y-6">
           {#each userEvents as event}
             {@const org = getOrgContent(event)}
