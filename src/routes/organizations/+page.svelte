@@ -313,7 +313,7 @@
             <div>
               <h3 class="text-sm font-semibold mb-1">Focus Areas:</h3>
               <div class="flex flex-wrap gap-1">
-                {#each event.tags.filter(t => t[0] === ORGANIZATION_TAGS.FOCUS_AREA) as [_, area]}
+                {#each event.tags.filter(t => t[0] === ORGANIZATION_TAGS.FOCUS_AREA).slice(0, 5) as [_, area]}
                   <span class="bg-purple-100 text-purple-800 px-2 py-0.5 rounded-full text-xs">
                     {area}
                   </span>
@@ -324,7 +324,7 @@
             <div>
               <h3 class="text-sm font-semibold mb-1">Locations:</h3>
               <div class="flex flex-wrap gap-1">
-                {#each event.tags.filter(t => t[0] === ORGANIZATION_TAGS.LOCATION) as [_, location]}
+                {#each event.tags.filter(t => t[0] === ORGANIZATION_TAGS.LOCATION).slice(0, 5) as [_, location]}
                   <span class="bg-gray-100 text-gray-800 px-2 py-0.5 rounded-full text-xs">
                     {location}
                   </span>
@@ -335,7 +335,7 @@
             <div>
               <h3 class="text-sm font-semibold mb-1">Engagement Types:</h3>
               <div class="flex flex-wrap gap-1">
-                {#each event.tags.filter(t => t[0] === ORGANIZATION_TAGS.ENGAGEMENT) as [_, type]}
+                {#each event.tags.filter(t => t[0] === ORGANIZATION_TAGS.ENGAGEMENT).slice(0, 5) as [_, type]}
                   <span class="bg-green-100 text-green-800 px-2 py-0.5 rounded-full text-xs">
                     {type}
                   </span>
