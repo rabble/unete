@@ -33,8 +33,12 @@ export async function initializeNDK() {
         "wss://relay.nostr.band",
         "wss://relay.current.fyi",
         "wss://nostr.mom"
-      ]
+      ],
+      autoConnect: true // Ensure automatic connection to relays
     });
+
+    // Explicitly connect to relays
+    await ndkInstance.connect();
 
     // Initialize signer if window.nostr is available
     if (window.nostr) {
@@ -82,16 +86,25 @@ export async function initializeNDK() {
 
     // Wait for at least one relay to connect with better error handling
     let connected = false;
-    for (let i = 0; i < 10; i++) {
+    const maxAttempts = 10;
+    const delay = 300;
+  
+    for (let i = 0; i < maxAttempts; i++) {
       const relays = Array.from(ndkInstance.pool.relays.values());
       if (relays.some(r => r.status === 1)) {
         connected = true;
         break;
       }
-      await new Promise(resolve => setTimeout(resolve, 300));
+      await new Promise(resolve => setTimeout(resolve, delay));
     }
 
     if (!connected) {
+      console.error('Failed to connect to any relays. Current relay status:',
+        Array.from(ndkInstance.pool.relays.values()).map(r => ({
+          url: r.url,
+          status: r.status
+        }))
+      );
       throw new Error('Failed to connect to any relays');
     }
 
