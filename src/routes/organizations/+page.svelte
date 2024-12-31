@@ -372,28 +372,5 @@
     {/if}
   </div>
 
-  <!-- Debug: All Organizations -->
-  <div class="mt-8 border-t pt-8">
-    <h3 class="text-xl font-semibold mb-4">Debug: All Loaded Organizations</h3>
-    <div class="bg-gray-100 p-4 rounded-lg">
-      <p class="mb-2">Last updated: {new Date().toLocaleTimeString()}</p>
-      <div class="space-y-4">
-        {#each orgsList as event}
-          {@const org = getOrgContent(event)}
-          <div class="bg-white p-4 rounded shadow">
-            <p class="font-bold">{org.name}</p>
-            <p class="text-sm text-gray-600">ID: {event.id}</p>
-            <p class="text-sm text-gray-600">Category: {org.category}</p>
-            <div class="text-sm">
-              <p class="font-semibold mt-2">Tags:</p>
-              <pre class="bg-gray-50 p-2 rounded mt-1 text-xs overflow-x-auto">
-                {JSON.stringify(event.tags, null, 2)}
-              </pre>
-            </div>
-          </div>
-        {/each}
-      </div>
-    </div>
-  </div>
 
 </div>
