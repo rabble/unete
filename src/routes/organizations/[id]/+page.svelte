@@ -162,8 +162,9 @@
         {#if organization.picture}
           <img
             src={organization.picture}
-            alt={organization.name}
+            alt=""
             class="max-h-48 w-auto"
+            aria-hidden="true"
           />
         {/if}
       </div>
