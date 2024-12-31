@@ -44,17 +44,30 @@
 
       console.log('Starting organizations page mount');
       
-      // Ensure we have a connected NDK instance
-      const ndkInstance = await ensureConnection();
-      console.log('NDK connection result:', {
-        instance: !!ndkInstance,
-        connected: ndkInstance?.connected,
-        poolSize: ndkInstance?.pool?.relays?.size,
-        relayUrls: Array.from(ndkInstance?.pool?.relays?.keys() || [])
-      });
-      
-      if (!ndkInstance) {
-        throw new Error('Failed to establish NDK connection');
+      // Ensure we have a connected NDK instance with timeout
+      let ndkInstance;
+      try {
+        const connectionTimeout = 10000; // 10 seconds
+        ndkInstance = await Promise.race([
+          ensureConnection(),
+          new Promise((_, reject) => 
+            setTimeout(() => reject(new Error('NDK connection timeout')), connectionTimeout)
+          )
+        ]);
+        
+        console.log('NDK connection result:', {
+          instance: !!ndkInstance,
+          connected: ndkInstance?.connected,
+          poolSize: ndkInstance?.pool?.relays?.size,
+          relayUrls: Array.from(ndkInstance?.pool?.relays?.keys() || [])
+        });
+        
+        if (!ndkInstance) {
+          throw new Error('Failed to establish NDK connection');
+        }
+      } catch (err) {
+        console.error('NDK connection failed:', err);
+        throw new Error(`Failed to connect to NDK: ${err.message}`);
       }
 
       // Wait for connection to be ready with retries
