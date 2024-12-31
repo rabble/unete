@@ -24,33 +24,57 @@
   let error: string | null = null;
   let showRawData = false;
 
-  onMount(async () => {
+  onMount(() => {
+    // Just initialize the connection check
+    const checkConnection = () => {
+      if ($ndk && $ndkConnected) {
+        return;
+      }
+      setTimeout(checkConnection, 100);
+    };
+    checkConnection();
+  });
+
+  onDestroy(() => {
+    // Clean up any subscriptions if needed
+  });
+
+  let filteredOrganizations: NDKEvent[] = [];
+  let filtersInitialized = false;
+
+  // Initialize filters and first load
+  $: if ($ndkConnected && !filtersInitialized) {
+    filtersInitialized = true;
+    const params = $page.url.searchParams;
+    searchFilters.set({
+      locations: params.getAll('locations') || [],
+      focusAreas: params.getAll('focusAreas') || [],
+      engagementTypes: params.getAll('engagementTypes') || []
+    });
+    loadOrganizations();
+  }
+
+  // Update filtered organizations when filters or allOrganizations change
+  $: {
+    if (allOrganizations.length > 0) {
+      const filters = $searchFilters;
+      const locationSet = new Set(filters.locations || []);
+      const focusAreaSet = new Set(filters.focusAreas || []);
+      const engagementTypeSet = new Set(filters.engagementTypes || []);
+      
+      filteredOrganizations = allOrganizations.filter(event => (
+        matchesFilter(event.tags, 'l', locationSet, 'location') &&
+        matchesFilter(event.tags, 't', focusAreaSet) &&
+        matchesFilter(event.tags, 'l', engagementTypeSet, 'engagement')
+      ));
+    }
+  }
+
+  async function loadOrganizations() {
     try {
       loading = true;
       error = null;
-
-      // Wait for NDK connection
-      await new Promise<void>((resolve, reject) => {
-        const timeout = setTimeout(() => reject(new Error('NDK connection timeout')), 15000);
-        const checkConnection = () => {
-          if ($ndk && $ndkConnected) {
-            clearTimeout(timeout);
-            resolve();
-            return;
-          }
-          setTimeout(checkConnection, 100);
-        };
-        checkConnection();
-      });
-
-      // Set initial filters from URL params
-      const params = $page.url.searchParams;
-      searchFilters.set({
-        locations: params.getAll('locations') || [],
-        focusAreas: params.getAll('focusAreas') || [],
-        engagementTypes: params.getAll('engagementTypes') || []
-      });
-
+      
       const events = await fetchEvents($ndk);
       allOrganizations = events.sort((a, b) => {
         const orgA = getOrgContent(a);
@@ -76,22 +100,7 @@
       error = `Failed to load organizations: ${err.message}`;
       loading = false;
     }
-  });
-
-  // Filter organizations reactively
-  $: filteredOrganizations = allOrganizations.filter(event => {
-    const filters = $searchFilters;
-    
-    const locationSet = new Set(filters.locations || []);
-    const focusAreaSet = new Set(filters.focusAreas || []);
-    const engagementTypeSet = new Set(filters.engagementTypes || []);
-    
-    return (
-      matchesFilter(event.tags, 'l', locationSet, 'location') &&
-      matchesFilter(event.tags, 't', focusAreaSet) &&
-      matchesFilter(event.tags, 'l', engagementTypeSet, 'engagement')
-    );
-  });
+  }
 </script>
 
 <div class="max-w-7xl mx-auto px-4 py-12">
