@@ -69,13 +69,17 @@
 
       // Load initial events
       const events = await fetchEvents(ndkInstance);
+      console.log('Initial events loaded:', events.length);
       organizations.set(events);
 
       // Setup realtime subscription
       subscription = setupRealtimeSubscription(ndkInstance, (event: NDKEvent) => {
+        console.log('Received realtime event:', event.id);
         organizations.update(orgs => {
           // Check if event already exists
-          if (!orgs.some(e => e.id === event.id)) {
+          const exists = orgs.some(e => e.id === event.id);
+          if (!exists) {
+            console.log('Adding new organization:', event.id);
             return [...orgs, event];
           }
           return orgs;

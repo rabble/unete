@@ -65,18 +65,46 @@ export async function fetchEvents(ndk: NDK): Promise<NDKEvent[]> {
       limit: 100
     };
 
-    // Use explicit relay URLs for better reliability
-    const events = await ndk.fetchEvents(filter);
+    console.log('Fetching organizations with filter:', filter);
 
-    if (!events) {
-      throw new Error('No events received from relays');
+    // Create a promise that will resolve with events or timeout
+    const fetchPromise = new Promise<NDKEvent[]>((resolve, reject) => {
+      const events = new Set<NDKEvent>();
+      const sub = ndk.subscribe(filter, { closeOnEose: true });
+
+      sub.on('event', (event: NDKEvent) => {
+        console.log('Received organization event:', event.id);
+        events.add(event);
+      });
+
+      sub.on('eose', () => {
+        console.log('EOSE received, total organizations:', events.size);
+        resolve(Array.from(events));
+      });
+
+      // Add error handling
+      sub.on('error', (error: any) => {
+        console.error('Subscription error:', error);
+        reject(error);
+      });
+    });
+
+    // Race between fetch and timeout
+    const events = await Promise.race([
+      fetchPromise,
+      new Promise((_, reject) => setTimeout(() => reject(new Error('Fetch timeout')), 10000))
+    ]) as NDKEvent[];
+
+    if (!events || events.length === 0) {
+      console.warn('No organization events received from relays');
+      return [];
     }
 
-    console.log('Fetched organization events:', events.size);
-    return Array.from(events);
+    console.log('Successfully fetched organizations:', events.length);
+    return events;
   } catch (err) {
     console.error('Error in fetchEvents:', err);
-    throw new Error(`Failed to fetch events: ${err.message}`);
+    return []; // Return empty array instead of throwing
   }
 }
 
