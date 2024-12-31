@@ -300,6 +300,7 @@
       <button
         on:click={() => showDebug = !showDebug}
         class="bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2 px-4 rounded-lg mb-4"
+        style="display: none;"
       >
         {showDebug ? 'Hide' : 'Show'} Debug Information
       </button>
