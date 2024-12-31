@@ -140,7 +140,7 @@
     
   });
 
-  onDestroy(() => {
+  onDestroy(async () => {
     // Cleanup relay listeners
     unsubscribeHandlers.forEach(handler => handler());
     try {
