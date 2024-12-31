@@ -24,15 +24,26 @@
   let error: string | null = null;
   let showRawData = false;
 
-  onMount(() => {
-    // Just initialize the connection check
-    const checkConnection = () => {
-      if ($ndk && $ndkConnected) {
-        return;
+  onMount(async () => {
+    try {
+      // Ensure NDK connection is established
+      if (!$ndk || !$ndkConnected) {
+        await ndk.connect();
       }
-      setTimeout(checkConnection, 100);
-    };
-    checkConnection();
+
+      // Initialize filters and load organizations
+      const params = $page.url.searchParams;
+      searchFilters.set({
+        locations: params.getAll('locations') || [],
+        focusAreas: params.getAll('focusAreas') || [],
+        engagementTypes: params.getAll('engagementTypes') || []
+      });
+      
+      await loadOrganizations();
+    } catch (err) {
+      console.error('Failed to initialize:', err);
+      error = `Failed to initialize: ${err.message}`;
+    }
   });
 
   onDestroy(() => {
@@ -42,16 +53,18 @@
   let filteredOrganizations: NDKEvent[] = [];
   let filtersInitialized = false;
 
-  // Initialize filters and first load
-  $: if ($ndkConnected && !filtersInitialized) {
-    filtersInitialized = true;
-    const params = $page.url.searchParams;
-    searchFilters.set({
-      locations: params.getAll('locations') || [],
-      focusAreas: params.getAll('focusAreas') || [],
-      engagementTypes: params.getAll('engagementTypes') || []
-    });
-    loadOrganizations();
+  // Update filtered organizations when filters or allOrganizations change
+  $: if (allOrganizations.length > 0) {
+    const filters = $searchFilters;
+    const locationSet = new Set(filters.locations || []);
+    const focusAreaSet = new Set(filters.focusAreas || []);
+    const engagementTypeSet = new Set(filters.engagementTypes || []);
+    
+    filteredOrganizations = allOrganizations.filter(event => (
+      matchesFilter(event.tags, 'l', locationSet, 'location') &&
+      matchesFilter(event.tags, 't', focusAreaSet) &&
+      matchesFilter(event.tags, 'l', engagementTypeSet, 'engagement')
+    ));
   }
 
   // Update filtered organizations when filters or allOrganizations change
