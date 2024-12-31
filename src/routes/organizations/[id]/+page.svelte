@@ -233,6 +233,16 @@
         {/if}
       </div>
     </div>
+    
+    <!-- Footer -->
+    <div class="mt-8 pt-8 border-t text-center">
+      <button
+        on:click={() => showRawData = !showRawData}
+        class="text-purple-600 hover:text-purple-800 font-medium focus:outline-none"
+      >
+        {showRawData ? 'Hide' : 'Show'} Raw Database Data
+      </button>
+    </div>
 
       <div class="p-8">
         <!-- Basic Info -->
@@ -497,12 +507,6 @@
             No user logged in. Profile will appear here when logged in.
           </div>
         {/if}
-        <button
-          on:click={() => showRawData = !showRawData}
-          class="bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2 px-6 rounded-lg text-lg"
-        >
-          {showRawData ? 'Hide' : 'Show'} Raw Database Data
-        </button>
         
         {#if showRawData}
           <div class="mt-4 w-full max-w-4xl bg-gray-900 text-gray-100 p-6 rounded-lg overflow-x-auto">
