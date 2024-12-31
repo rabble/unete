@@ -17,11 +17,15 @@
   let allTopics = data.allTopics;
   let subscription: NDKSubscription | undefined;
 
-  // Create NDK filter for topic
+  // Create NDK filter for topic using full tag name
   function createTopicFilter(topicSlug: string) {
+    // Find the full topic title from the topics array
+    const topic = data.allTopics.find(t => t.slug === topicSlug);
+    const tag = topic?.title || topicSlug;
+    
     return {
       kinds: [ORGANIZATION],
-      '#t': [topicSlug],
+      '#t': [tag],
       limit: 100
     };
   }
@@ -98,7 +102,7 @@
         subscription = ndkInstance.subscribe(
           { 
             kinds: [ORGANIZATION],
-            '#t': [data.topic.slug],
+            '#t': [data.topic.title],
             since: Math.floor(Date.now() / 1000)
           },
           { 
