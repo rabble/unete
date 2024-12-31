@@ -101,10 +101,15 @@
         engagementTypes: params.getAll('engagementTypes') || []
       });
 
-      console.log('Starting initial events load');
+      console.log('Starting initial events load at', new Date().toISOString());
       // Load initial events
       try {
+        console.log('Calling fetchEvents with NDK instance:', {
+          connected: ndkInstance.connected,
+          relays: Array.from(ndkInstance.pool.relays.keys())
+        });
         const events = await fetchEvents(ndkInstance);
+        console.log('fetchEvents returned', events?.length, 'events');
         if (!events || !Array.isArray(events)) {
           throw new Error('fetchEvents returned invalid data');
         }
@@ -123,6 +128,7 @@
 
       // Setup realtime subscription
       try {
+        console.log('Setting up realtime subscription at', new Date().toISOString());
         subscription = setupRealtimeSubscription(ndkInstance, (event: NDKEvent) => {
           console.log('Received realtime event:', event.id);
           console.debug('Event details:', {
