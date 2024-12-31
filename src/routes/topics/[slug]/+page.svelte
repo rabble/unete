@@ -25,8 +25,18 @@
           .map(t => t[1]);
           
         const allFocusAreas = [...new Set([...focusAreas, ...tagFocusAreas])];
+        
+        // Normalize topic variations
+        const topicVariations = {
+          'climate': ['climate', 'climate justice', 'climate change', 'climate action'],
+          // Add other topic variations here as needed
+        };
+        
+        const currentTopic = data.topic.title.toLowerCase();
+        const variations = topicVariations[currentTopic] || [currentTopic];
+        
         return allFocusAreas.some(area => 
-          area.toLowerCase() === data.topic.title.toLowerCase()
+          variations.includes(area.toLowerCase())
         );
       });
       
