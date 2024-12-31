@@ -48,23 +48,41 @@
         throw new Error('Failed to establish NDK connection');
       }
 
-      // Wait for connection to be ready
-      await new Promise<void>((resolve, reject) => {
-        const checkConnection = () => {
-          if (get(ndkConnected)) {
-            resolve();
-          } else {
-            setTimeout(checkConnection, 100);
+      // Wait for connection to be ready with retries
+      let retries = 0;
+      const maxRetries = 3;
+      
+      while (retries < maxRetries) {
+        try {
+          await new Promise<void>((resolve, reject) => {
+            const checkConnection = () => {
+              if (get(ndkConnected)) {
+                resolve();
+              } else {
+                setTimeout(checkConnection, 1000); // Check every second
+              }
+            };
+            
+            // Add timeout per attempt
+            setTimeout(() => {
+              reject(new Error('Connection timeout'));
+            }, 10000); // 10 second timeout per attempt
+            
+            checkConnection();
+          });
+          
+          // If we get here, connection succeeded
+          break;
+        } catch (err) {
+          retries++;
+          console.warn(`Connection attempt ${retries} failed:`, err);
+          if (retries === maxRetries) {
+            throw new Error('Failed to connect after multiple attempts');
           }
-        };
-        
-        // Add timeout
-        setTimeout(() => {
-          reject(new Error('Connection timeout'));
-        }, 5000);
-        
-        checkConnection();
-      });
+          // Wait before retrying
+          await new Promise(resolve => setTimeout(resolve, 2000));
+        }
+      }
 
       // Initialize filters from URL params
       const params = $page.url.searchParams;

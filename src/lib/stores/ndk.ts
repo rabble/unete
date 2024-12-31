@@ -113,9 +113,12 @@ export async function initializeNDK() {
         ndkConnected.set(false);
         // Start background reconnection attempts
         setTimeout(() => waitForConnection(), 5000); // Try again in 5 seconds
+        return false;
       }
       
-      return finalConnectedRelays.length > 0;
+      console.log('Connected to relays:', finalConnectedRelays.map(r => r.url));
+      ndkConnected.set(true);
+      return true;
     };
 
     // Wait for connections
