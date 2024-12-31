@@ -40,119 +40,31 @@
 
   // Load data once on mount
   const loadData = async () => {
+    loading = true; // Set loading at start
     await checkRelays();
-    if (!data.promise) return;
-    
-    // First check if we have cached data
-    try {
-      const cachedResult = await data.promise.cached;
-      if (cachedResult) {
-        organization = cachedResult.organization;
-        event = cachedResult.event;
-        rawEvent = cachedResult.event;
-        hasCachedData = true;
-        
-        // Check ownership with cached data
-        if ($ndk?.signer && event) {
-          // Wait for user profile to load if needed
-          if (!$userProfile) {
-            await new Promise(resolve => {
-              const unsubscribe = $userProfile.subscribe(profile => {
-                if (profile) {
-                  isOwner = profile.pubkey === event.pubkey;
-                  unsubscribe();
-                  resolve();
-                }
-              });
-            });
-          } else {
-            isOwner = $userProfile.pubkey === event.pubkey;
-          }
-        }
-      }
-    } catch (e) {
-      console.log('No cached data available');
+    if (!data.promise) {
+      loading = false; // Reset if no promise
+      return;
     }
-
-    // Now try to get fresh data
-    loading = true;
+    
     try {
       const result = await data.promise;
       organization = result.organization;
       event = result.event;
       rawEvent = result.event;
-      hasCachedData = false; // We have fresh data now
-
+      
       // Check ownership using the existing NDK signer
-      if ($ndk?.signer && event) {
-        console.log('Checking ownership - NDK signer and event available');
-        // Wait for user profile to load if needed
-        if (!$userProfile) {
-          await new Promise(resolve => {
-            const unsubscribe = $userProfile.subscribe(profile => {
-              if (profile) {
-                isOwner = profile.pubkey === event.pubkey;
-                console.log('Is owner?', isOwner, {
-                  userPubkey: profile.pubkey,
-                  eventPubkey: event.pubkey
-                });
-                unsubscribe();
-                resolve();
-              }
-            });
-          });
-        } else {
-          isOwner = $userProfile.pubkey === event.pubkey;
-          console.log('Is owner?', isOwner, {
-            userPubkey: $userProfile.pubkey,
-            eventPubkey: event.pubkey
-          });
-        }
-      } else {
-        console.log('Cannot check ownership:', {
-          hasSigner: !!$ndk?.signer,
-          hasEvent: !!event
+      if ($ndk?.signer && event && $userProfile) {
+        isOwner = $userProfile.pubkey === event.pubkey;
+        console.log('Is owner?', isOwner, {
+          userPubkey: $userProfile.pubkey,
+          eventPubkey: event.pubkey
         });
-        isOwner = false;
       }
     } catch (e) {
-      if (e.message.includes('Rate limit exceeded')) {
-        console.warn('Relay rate limit exceeded, trying other relays:', e);
-        // Try fetching again after a short delay
-        setTimeout(async () => {
-          try {
-            const result = await data.promise;
-            organization = result.organization;
-            event = result.event;
-            rawEvent = result.event;
-            
-            // Check ownership after retry
-            if ($ndk?.signer && event && $userProfile) {
-              console.log('Checking ownership - NDK signer and event available');
-              isOwner = $userProfile.pubkey === event.pubkey;
-              console.log('Is owner?', isOwner, {
-                userPubkey: $userProfile.pubkey,
-                eventPubkey: event.pubkey
-              });
-            } else {
-              console.log('Cannot check ownership:', {
-                hasSigner: !!$ndk?.signer,
-                hasEvent: !!event,
-                hasUserProfile: !!$userProfile
-              });
-              isOwner = false;
-            }
-          } catch (retryError) {
-            error = retryError instanceof Error ? retryError.message : 'Failed to load organization';
-          } finally {
-            loading = false;
-          }
-        }, 2000);
-        return;
-      }
       error = e instanceof Error ? e.message : 'Failed to load organization';
     } finally {
-      loading = false;
+      loading = false; // Always reset loading when done
     }
   };
 
@@ -532,31 +444,6 @@
       </div>
     </div>
   
-  <!-- Relay Status -->
-  <div class="mt-8 bg-gray-50 p-6 rounded-lg">
-    <h3 class="text-xl font-bold mb-4">Relay Connection Status</h3>
-    <p class="mb-2">{relayStatus}</p>
-    {#if connectedRelays.length > 0}
-      <div class="mb-4">
-        <h4 class="font-semibold">Connected Relays:</h4>
-        <ul class="list-disc list-inside">
-          {#each connectedRelays as relay}
-            <li class="text-green-600">{relay}</li>
-          {/each}
-        </ul>
-      </div>
-    {/if}
-    {#if disconnectedRelays.length > 0}
-      <div class="mb-4">
-        <h4 class="font-semibold">Disconnected Relays:</h4>
-        <ul class="list-disc list-inside">
-          {#each disconnectedRelays as relay}
-            <li class="text-red-600">{relay}</li>
-          {/each}
-        </ul>
-      </div>
-    {/if}
-  </div>
 
   <!-- Raw Data Display -->
   <div class="mt-8 flex flex-col items-center border-t pt-8">
