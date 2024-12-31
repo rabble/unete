@@ -10,7 +10,7 @@
 
   let user: NDKUser | undefined;
   let profile: { name?: string; about?: string; picture?: string; } | undefined;
-  let userEvents: NDKEvent[] = [];
+  let userEvents: NDKEvent[] | null = null;
   let loading = true;
   let error: string | null = null;
   let userGroups: GroupMetadata[] = [];
@@ -94,18 +94,23 @@
         throw new Error('Please login using the Nostr extension');
       }
 
-      // Fetch both organizations and groups if we have a user
-      if (user?.pubkey) {
-        const [events, groups] = await Promise.all([
-          $ndk.fetchEvents({
-            authors: [user.pubkey],
-            kinds: [ORGANIZATION]
-          }),
-          getUserGroups($ndk)
-        ]);
-        
-        userEvents = Array.from(events).sort((a, b) => b.created_at - a.created_at);
-        userGroups = groups;
+      // Only fetch organizations if we haven't already
+      if (user?.pubkey && userEvents === null) {
+        try {
+          const [events, groups] = await Promise.all([
+            $ndk.fetchEvents({
+              authors: [user.pubkey],
+              kinds: [ORGANIZATION]
+            }),
+            getUserGroups($ndk)
+          ]);
+          
+          userEvents = Array.from(events).sort((a, b) => b.created_at - a.created_at);
+          userGroups = groups;
+        } catch (err) {
+          console.error('Error fetching organizations:', err);
+          error = 'Failed to load organizations';
+        }
       }
     } catch (err) {
       console.error('Error loading dashboard:', err);
@@ -188,6 +193,10 @@
       </div>
       
       {#if loading}
+        <div class="flex justify-center py-8">
+          <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"></div>
+        </div>
+      {:else if userEvents === null}
         <div class="flex justify-center py-8">
           <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"></div>
         </div>
