@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onMount, onDestroy } from 'svelte';
-  import { writable } from 'svelte/store';
+  import { writable, get } from 'svelte/store';
+  import type { NDKEvent } from '@nostr-dev-kit/ndk';
   import { ndk, ndkConnected } from '$lib/stores/ndk';
   import { searchFilters } from '$lib/stores/searchStore';
   import { page } from '$app/stores';
@@ -15,18 +16,18 @@
     setupRealtimeSubscription
   } from '$lib/organizations/utils';
 
-  let organizations = writable<NDKEvent[]>([]);
+  const organizations = writable<NDKEvent[]>([]);
   let loading = true;
   let error: string | null = null;
   let showRawData = false;
-  let orgsList: NDKEvent[] = [];
+  let orgsList: NDKEvent[] = $organizations;
 
   // Subscribe to the organizations store
   organizations.subscribe(value => {
     orgsList = value || [];
   });
 
-  let subscription: any;
+  let subscription: NDKSubscription | undefined;
 
   onMount(async () => {
     try {
@@ -49,12 +50,6 @@
         focusAreas: params.getAll('focusAreas') || [],
         engagementTypes: params.getAll('engagementTypes') || []
       });
-
-      // Get the connected NDK instance
-      const connectedNDK = get(ndk);
-      if (!connectedNDK) {
-        throw new Error('NDK connection failed');
-      }
 
       // Load initial events
       const events = await fetchEvents(connectedNDK);
@@ -86,7 +81,7 @@
   });
 
   // Filter organizations reactively
-  $: filteredOrganizations = orgsList.filter(event => {
+  $: filteredOrganizations: NDKEvent[] = orgsList.filter(event => {
     const filters = $searchFilters;
     
     const locationSet = new Set(filters.locations || []);
