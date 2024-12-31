@@ -38,53 +38,22 @@
       // Get the NDK instance from store
       const ndkInstance = get(ndk);
       if (!ndkInstance) {
-        // If no instance exists, create a new one
-        const newNdk = new NDK({
-          explicitRelayUrls: [
-            'wss://relay.nos.social',
-            'wss://relay.damus.io', 
-            'wss://relay.nostr.band'
-          ]
-        });
-        ndk.set(newNdk);
-        await newNdk.connect();
-        console.log('Created and connected new NDK instance');
-      } else if (!ndkInstance.connected) {
-        // If instance exists but isn't connected
-        await ndkInstance.connect();
-        console.log('Reconnected existing NDK instance');
-      }
-
-      // Get the final connected instance
-      const connectedNdk = get(ndk);
-      if (!connectedNdk) {
         throw new Error('NDK instance not found');
       }
 
-      // Wait for at least one relay to be connected
-      let retries = 0;
-      while (retries < 10) {
-        const connectedRelays = Array.from(connectedNdk.pool.relays.values())
-          .filter(relay => relay.status === 1);
-        
-        if (connectedRelays.length > 0) {
-          console.log('Connected to relays:', connectedRelays.map(r => r.url));
-          break;
+      // Wait for connection if not already connected
+      if (!get(ndkConnected)) {
+        let retries = 0;
+        while (retries < 10) {
+          if (get(ndkConnected)) break;
+          await new Promise(resolve => setTimeout(resolve, 300));
+          retries++;
         }
-        
-        await new Promise(resolve => setTimeout(resolve, 300));
-        retries++;
-      }
 
-      const finalConnectedRelays = Array.from(connectedNdk.pool.relays.values())
-        .filter(relay => relay.status === 1);
-        
-      if (finalConnectedRelays.length === 0) {
-        throw new Error('Failed to connect to any relays after multiple attempts');
+        if (!get(ndkConnected)) {
+          throw new Error('Failed to establish NDK connection');
+        }
       }
-
-      console.log('NDK connection fully established with relays:', 
-        finalConnectedRelays.map(r => r.url));
 
       // Initialize filters from URL params
       const params = $page.url.searchParams;

@@ -34,16 +34,56 @@
   });
 
   onMount(async () => {
-    if (browser) {
-      // Initialize NDK
-      const ndkInstance = await initializeNDK();
-      if (!ndkInstance) {
-        console.error('Failed to initialize NDK');
-        return;
-      }
+    if (!browser) return;
+
+    try {
+      // Initialize NDK with retries
+      let retries = 0;
+      let ndkInstance;
       
+      while (retries < 3) {
+        try {
+          ndkInstance = await initializeNDK();
+          if (ndkInstance) break;
+        } catch (err) {
+          console.warn(`NDK initialization attempt ${retries + 1} failed:`, err);
+          if (retries === 2) throw err;
+          await new Promise(resolve => setTimeout(resolve, 1000 * (retries + 1)));
+        }
+        retries++;
+      }
+
+      if (!ndkInstance) {
+        throw new Error('Failed to initialize NDK after multiple attempts');
+      }
+
       // Check for existing login
       await checkExistingNostrLogin();
+
+      // Set up connection monitoring
+      ndkInstance.pool.on('relay:connect', (relay) => {
+        console.log('Connected to relay:', relay.url);
+        ndkConnected.set(true);
+      });
+
+      ndkInstance.pool.on('relay:disconnect', (relay) => {
+        console.log('Disconnected from relay:', relay.url);
+        // Update connection status if all relays are disconnected
+        const connectedRelays = Array.from(ndkInstance.pool.relays.values())
+          .filter(r => r.status === 1);
+        if (connectedRelays.length === 0) {
+          ndkConnected.set(false);
+        }
+      });
+
+      // Initial connection check
+      const connectedRelays = Array.from(ndkInstance.pool.relays.values())
+        .filter(r => r.status === 1);
+      ndkConnected.set(connectedRelays.length > 0);
+
+    } catch (err) {
+      console.error('Failed to initialize NDK:', err);
+      ndkConnected.set(false);
     }
   });
 
