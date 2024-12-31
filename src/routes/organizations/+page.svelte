@@ -33,6 +33,9 @@
       loading = true;
       error = null;
 
+      // Ensure NDK is connected
+      await ndkConnected.waitForConnection();
+
       // Initialize filters from URL params
       const params = $page.url.searchParams;
       searchFilters.set({
@@ -41,12 +44,18 @@
         engagementTypes: params.getAll('engagementTypes') || []
       });
 
+      // Get the connected NDK instance
+      const connectedNDK = get(ndk);
+      if (!connectedNDK) {
+        throw new Error('NDK connection failed');
+      }
+
       // Load initial events
-      const events = await fetchEvents($ndk);
+      const events = await fetchEvents(connectedNDK);
       organizations.set(events);
 
       // Setup realtime subscription
-      subscription = setupRealtimeSubscription($ndk, (event: NDKEvent) => {
+      subscription = setupRealtimeSubscription(connectedNDK, (event: NDKEvent) => {
         organizations.update(orgs => {
           // Check if event already exists
           if (!orgs.some(e => e.id === event.id)) {
