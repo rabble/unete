@@ -2,7 +2,8 @@
   import { onMount, onDestroy } from 'svelte';
   import { writable, get } from 'svelte/store';
   import type { NDKEvent } from '@nostr-dev-kit/ndk';
-  import { ndk, ndkConnected } from '$lib/stores/ndk';
+  import { ndk } from '$lib/stores/ndk';
+  import NDK from '@nostr-dev-kit/ndk';
   import { searchFilters } from '$lib/stores/searchStore';
   import { page } from '$app/stores';
   import Select from 'svelte-select';
@@ -37,17 +38,31 @@
       // Get the NDK instance from store
       const ndkInstance = get(ndk);
       if (!ndkInstance) {
-        throw new Error('NDK instance not found');
-      }
-
-      // Ensure NDK is connected
-      if (!ndkInstance.connected) {
+        // If no instance exists, create a new one
+        const newNdk = new NDK({
+          explicitRelayUrls: [
+            'wss://relay.nos.social',
+            'wss://relay.damus.io', 
+            'wss://relay.nostr.band'
+          ]
+        });
+        ndk.set(newNdk);
+        await newNdk.connect();
+        console.log('Created and connected new NDK instance');
+      } else if (!ndkInstance.connected) {
+        // If instance exists but isn't connected
         await ndkInstance.connect();
-        console.log('NDK connected successfully');
+        console.log('Reconnected existing NDK instance');
       }
 
-      // Wait briefly to ensure connection is established
-      await new Promise(resolve => setTimeout(resolve, 500));
+      // Get the final connected instance
+      const connectedNdk = get(ndk);
+      if (!connectedNdk?.connected) {
+        throw new Error('Failed to establish NDK connection');
+      }
+
+      // Wait briefly to ensure connection is fully established
+      await new Promise(resolve => setTimeout(resolve, 300));
 
       // Initialize filters from URL params
       const params = $page.url.searchParams;
@@ -58,11 +73,11 @@
       });
 
       // Load initial events
-      const events = await fetchEvents(ndkInstance);
+      const events = await fetchEvents(connectedNdk);
       organizations.set(events);
 
       // Setup realtime subscription
-      subscription = setupRealtimeSubscription(ndkInstance, (event: NDKEvent) => {
+      subscription = setupRealtimeSubscription(connectedNdk, (event: NDKEvent) => {
         organizations.update(orgs => {
           // Check if event already exists
           if (!orgs.some(e => e.id === event.id)) {
