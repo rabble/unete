@@ -4,6 +4,7 @@ import { TOPICS, type TopicsContent, TOPICS_TAGS } from './nostr/kinds'
 
 export interface Topic {
   slug: string;
+  urlSlug: string;
   title: string;
   count?: number;
   description: string;
@@ -14,6 +15,7 @@ export interface Topic {
 export const topics: Topic[] = [
   {
     slug: 'climate',
+    urlSlug: 'climate-justice',
     title: 'Climate Justice',
     count: 29,
     description: 'The climate justice movement addresses the disproportionate impact of climate change on marginalized communities, emphasizing equitable solutions.',

@@ -20,7 +20,7 @@
   // Create NDK filter for topic using full tag name
   function createTopicFilter(topicSlug: string) {
     // Find the full topic title from the topics array
-    const topic = data.allTopics.find(t => t.slug === topicSlug);
+    const topic = data.allTopics.find(t => t.slug === topicSlug || t.urlSlug === topicSlug);
     const tag = topic?.title || topicSlug;
     
     return {
