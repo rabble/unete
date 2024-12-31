@@ -43,9 +43,9 @@ export const load: PageLoad = async ({ params }) => {
 
   try {
     // Always get fresh data first
-    const ndkInstance = await ensureConnection();
+    const ndkInstance = ndk;
     
-    // Fetch with a short timeout
+    // Fetch with a short timeout (no signer needed)
     const fetchWithTimeout = (timeout: number) => {
       return new Promise<NDKEvent[]>((resolve, reject) => {
         const timer = setTimeout(() => {
