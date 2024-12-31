@@ -12,12 +12,25 @@ declare global {
   }
 }
 
-// Create auth store
-export const authStore = writable({
-  isLoggedIn: false,
-  userInfo: null,
-  checkingLogin: false
-});
+// Get initial state from localStorage if available
+const storedSession = typeof localStorage !== 'undefined' 
+  ? localStorage.getItem('nostr-session')
+  : null;
+
+const initialAuthState = storedSession 
+  ? {
+      isLoggedIn: true,
+      userInfo: JSON.parse(storedSession),
+      checkingLogin: false
+    }
+  : {
+      isLoggedIn: false,
+      userInfo: null,
+      checkingLogin: false
+    };
+
+// Create auth store with initial state
+export const authStore = writable(initialAuthState);
 
 // Log auth store changes
 authStore.subscribe(state => {
