@@ -53,6 +53,7 @@
         cachedOrganizations = Array.from(events);
         refreshOrganizations();
         userGroups = groups;
+        loading = false; // Update loading state
       }
     } catch (err) {
       console.error('Login failed:', err);
@@ -95,6 +96,7 @@
   onMount(() => {
     if (cachedOrganizations) {
       filteredOrganizations = sortOrganizations(cachedOrganizations);
+      loading = false; // Update loading state
     }
   });
 
@@ -103,6 +105,7 @@
     if (cachedOrganizations) {
       const sorted = sortOrganizations(cachedOrganizations);
       filteredOrganizations = applyFilters(sorted, currentFilters);
+      loading = false; // Update loading state
     }
   }
 
