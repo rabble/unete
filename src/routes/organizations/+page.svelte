@@ -65,11 +65,11 @@
       });
 
       // Load initial events
-      const events = await fetchEvents(connectedNdk);
+      const events = await fetchEvents(ndkInstance);
       organizations.set(events);
 
       // Setup realtime subscription
-      subscription = setupRealtimeSubscription(connectedNdk, (event: NDKEvent) => {
+      subscription = setupRealtimeSubscription(ndkInstance, (event: NDKEvent) => {
         organizations.update(orgs => {
           // Check if event already exists
           if (!orgs.some(e => e.id === event.id)) {
