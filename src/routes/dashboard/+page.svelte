@@ -50,8 +50,9 @@
           getUserGroups($ndk)
         ]);
         
-        userEvents = await filterOrganizations(Array.from(events));
+        userEvents = filterOrganizations(Array.from(events));
         userGroups = groups;
+        cachedOrganizations = userEvents; // Update cache
       }
     } catch (err) {
       console.error('Login failed:', err);
@@ -67,13 +68,8 @@
       clearTimeout(filterTimeout);
     }
     
-    // Return a debounced version of the filtered organizations
-    return new Promise(resolve => {
-      filterTimeout = setTimeout(() => {
-        const filtered = organizations.sort((a, b) => b.created_at - a.created_at);
-        resolve(filtered);
-      }, 100); // 100ms debounce
-    });
+    // Sort organizations by creation date (newest first)
+    return organizations.sort((a, b) => b.created_at - a.created_at);
   }
 
   function getOrgContent(event: NDKEvent): OrganizationContent {
@@ -122,7 +118,7 @@
           });
           
           cachedOrganizations = Array.from(events);
-          userEvents = cachedOrganizations.sort((a, b) => b.created_at - a.created_at);
+          userEvents = filterOrganizations(cachedOrganizations);
           
           // Fetch groups separately to avoid blocking the initial render
           getUserGroups($ndk).then(groups => {
