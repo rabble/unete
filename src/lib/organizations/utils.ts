@@ -49,27 +49,39 @@ export function matchesFilter(tags: string[][], key: string, filterSet: Set<stri
 }
 
 export async function fetchEvents(ndk: NDK): Promise<NDKEvent[]> {
-  if (!ndk) {
-    throw new Error('NDK not initialized or connected');
+  try {
+    if (!ndk) {
+      throw new Error('NDK instance not found');
+    }
+
+    // Ensure NDK is connected
+    if (!ndk.connected) {
+      await ndk.connect();
+      console.log('NDK connected successfully in fetchEvents');
+    }
+
+    const filter = {
+      kinds: [ORGANIZATION],
+      limit: 100
+    };
+
+    // Use explicit relay URLs for better reliability
+    const events = await ndk.fetchEvents(filter, {}, [
+      'wss://relay.nos.social',
+      'wss://relay.damus.io',
+      'wss://relay.nostr.band'
+    ]);
+
+    if (!events) {
+      throw new Error('No events received from relays');
+    }
+
+    console.log('Fetched organization events:', events.size);
+    return Array.from(events);
+  } catch (err) {
+    console.error('Error in fetchEvents:', err);
+    throw new Error(`Failed to fetch events: ${err.message}`);
   }
-
-  // Ensure NDK is connected
-  await ndk.connect();
-
-  const filter = {
-    kinds: [ORGANIZATION],
-    limit: 100
-  };
-
-  // Use explicit relay URLs for better reliability
-  const events = await ndk.fetchEvents(filter, {}, [
-    'wss://relay.nos.social',
-    'wss://relay.damus.io',
-    'wss://relay.nostr.band'
-  ]);
-
-  console.log('Fetched organization events:', events.size);
-  return Array.from(events);
 }
 
 export function setupRealtimeSubscription(ndk: NDK, callback: (event: NDKEvent) => void) {

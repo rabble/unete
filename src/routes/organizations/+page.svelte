@@ -34,14 +34,20 @@
       loading = true;
       error = null;
 
-      // Get the connected NDK instance
-      const connectedNDK = get(ndk);
-      if (!connectedNDK) {
-        throw new Error('NDK connection failed');
+      // Get the NDK instance from store
+      const ndkInstance = get(ndk);
+      if (!ndkInstance) {
+        throw new Error('NDK instance not found');
       }
 
       // Ensure NDK is connected
-      await connectedNDK.connect();
+      if (!ndkInstance.connected) {
+        await ndkInstance.connect();
+        console.log('NDK connected successfully');
+      }
+
+      // Wait briefly to ensure connection is established
+      await new Promise(resolve => setTimeout(resolve, 500));
 
       // Initialize filters from URL params
       const params = $page.url.searchParams;
@@ -52,11 +58,11 @@
       });
 
       // Load initial events
-      const events = await fetchEvents(connectedNDK);
+      const events = await fetchEvents(ndkInstance);
       organizations.set(events);
 
       // Setup realtime subscription
-      subscription = setupRealtimeSubscription(connectedNDK, (event: NDKEvent) => {
+      subscription = setupRealtimeSubscription(ndkInstance, (event: NDKEvent) => {
         organizations.update(orgs => {
           // Check if event already exists
           if (!orgs.some(e => e.id === event.id)) {
