@@ -37,8 +37,8 @@
       loadingNostr = true;
       error = null;
 
-      // Get NDK instance (no signer needed)
-      const ndkInstance = ndk;
+      // Ensure NDK is connected
+      const ndkInstance = await ensureConnection();
       
       console.log('NDK connection result:', {
         instance: !!ndkInstance,
