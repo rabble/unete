@@ -40,8 +40,22 @@
         
         // Normalize topic variations
         const topicVariations = {
-          'climate': ['climate', 'climate justice', 'climate change', 'climate action'],
-          // Add other topic variations here as needed
+          'climate': ['climate', 'climate justice', 'climate change', 'climate action', 'environment', 'environmental justice', 'sustainability'],
+          'community': ['community', 'community organizing', 'mutual aid', 'local organizing', 'grassroots'],
+          'democracy': ['democracy', 'direct democracy', 'participatory democracy', 'political reform', 'governance'],
+          'economic': ['economic democracy', 'cooperatives', 'worker ownership', 'solidarity economy', 'economic justice'],
+          'feminism': ['feminism', 'gender equality', 'women\'s rights', 'gender justice', 'feminist movement'],
+          'food': ['food', 'food justice', 'food sovereignty', 'agriculture', 'sustainable food'],
+          'healthcare': ['healthcare', 'health justice', 'universal healthcare', 'medical care', 'public health'],
+          'housing': ['housing', 'housing justice', 'affordable housing', 'tenant rights', 'homelessness'],
+          'immigration': ['immigration', 'immigrant rights', 'migration', 'refugee rights', 'border justice'],
+          'indigenous': ['indigenous', 'native rights', 'tribal sovereignty', 'first nations', 'indigenous justice'],
+          'lgbtqia': ['lgbtqia+', 'lgbtq', 'queer', 'gender diversity', 'sexual orientation'],
+          'palestine': ['palestine', 'palestinian solidarity', 'middle east', 'israel-palestine', 'gaza'],
+          'racial': ['racial justice', 'anti-racism', 'black lives matter', 'racial equity', 'civil rights'],
+          'reproductive': ['reproductive justice', 'abortion rights', 'birth control', 'family planning', 'women\'s health'],
+          'workplace': ['workplace justice', 'labor rights', 'unions', 'worker rights', 'employment'],
+          'youth': ['youth', 'young people', 'students', 'teenagers', 'youth empowerment']
         };
         
         const currentTopic = data.topic.title.toLowerCase();
