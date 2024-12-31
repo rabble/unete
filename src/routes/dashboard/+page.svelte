@@ -60,28 +60,34 @@
     }
   }
 
-  function filterOrganizations(organizations: NDKEvent[]): NDKEvent[] {
+  let filteredOrganizations: NDKEvent[] = [];
+
+  function sortOrganizations(organizations: NDKEvent[]): NDKEvent[] {
     if (!organizations) return [];
-    
-    // Clear any existing timeout
+    return organizations.sort((a, b) => b.created_at - a.created_at);
+  }
+
+  function applyFilters(organizations: NDKEvent[]) {
     if (filterTimeout) {
       clearTimeout(filterTimeout);
     }
     
-    // Sort organizations by creation date (newest first)
-    const sorted = organizations.sort((a, b) => b.created_at - a.created_at);
-    
-    // Apply filtering with debounce
     filterTimeout = setTimeout(() => {
       console.log('Applying filters to organizations');
-      return sorted.filter(event => {
+      filteredOrganizations = organizations.filter(event => {
         const org = getOrgContent(event);
         // Add any custom filtering logic here if needed
         return true; // Default to showing all organizations
       });
     }, 100); // 100ms debounce
-    
-    return sorted;
+  }
+
+  // Watch for changes to cachedOrganizations
+  $: {
+    if (cachedOrganizations) {
+      const sorted = sortOrganizations(cachedOrganizations);
+      applyFilters(sorted);
+    }
   }
 
   function getOrgContent(event: NDKEvent): OrganizationContent {
@@ -232,13 +238,13 @@
         </a>
       </div>
       
-      {#if loading || userEvents === null}
+      {#if loading || filteredOrganizations.length === 0}
         <div class="flex justify-center py-8">
           <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"></div>
         </div>
-      {:else if userEvents && userEvents.length > 0}
+      {:else if filteredOrganizations.length > 0}
         <div class="space-y-6">
-          {#each userEvents as event}
+          {#each filteredOrganizations as event}
             {@const org = getOrgContent(event)}
             <div class="border rounded-lg p-4 hover:bg-gray-50">
               <div class="flex justify-between items-start mb-4">
