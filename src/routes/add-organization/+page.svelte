@@ -87,7 +87,22 @@
     try {
       const ndkInstance = await ensureConnection();
       if (!ndkInstance) {
-        throw new Error('Failed to initialize NDK');
+        throw new Error('Failed to establish NDK connection');
+      }
+
+      // Wait for at least one relay to be connected
+      let connected = false;
+      for (let i = 0; i < 10; i++) {
+        const relays = Array.from(ndkInstance.pool.relays.values());
+        if (relays.some(r => r.status === 1)) {
+          connected = true;
+          break;
+        }
+        await new Promise(resolve => setTimeout(resolve, 300));
+      }
+
+      if (!connected) {
+        throw new Error('Failed to connect to any relays');
       }
       
       // Initialize Nostr login after NDK is ready

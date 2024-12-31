@@ -76,16 +76,27 @@
 
   onMount(async () => {
     try {
-      ndk = new NDK({
-        explicitRelayUrls: [
-          'wss://relay.nos.social',
-          'wss://relay.damus.io',
-          'wss://relay.nostr.band',
-        ],
-        signer: new NDKNip07Signer(),
-      });
+      // Use the centralized NDK connection handling
+      const ndkInstance = await ensureConnection();
+      if (!ndkInstance) {
+        throw new Error('Failed to establish NDK connection');
+      }
+      ndk = ndkInstance;
 
-      await ndk.connect();
+      // Wait for at least one relay to be connected
+      let connected = false;
+      for (let i = 0; i < 10; i++) {
+        const relays = Array.from(ndk.pool.relays.values());
+        if (relays.some(r => r.status === 1)) {
+          connected = true;
+          break;
+        }
+        await new Promise(resolve => setTimeout(resolve, 300));
+      }
+
+      if (!connected) {
+        throw new Error('Failed to connect to any relays');
+      }
       
       // Initialize Nostr login
       await initNostrLogin();
