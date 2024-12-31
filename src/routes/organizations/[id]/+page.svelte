@@ -17,7 +17,6 @@
   let error: string | null = null;
   let showJson = false;
   let rawEvent: any = null;
-  let showRawData = false;
   let isOwner = false;
 
   // Load data once on mount
@@ -234,28 +233,6 @@
       </div>
     </div>
     
-    <!-- Footer -->
-    <div class="mt-8 pt-8 border-t">
-      <button
-        on:click={() => showRawData = !showRawData}
-        class="text-purple-600 hover:text-purple-800 font-medium focus:outline-none"
-      >
-        {showRawData ? 'Hide' : 'Show'} Raw Database Data
-      </button>
-      
-      {#if showRawData}
-        <div class="mt-4 w-full max-w-4xl bg-gray-900 text-gray-100 p-6 rounded-lg overflow-x-auto">
-          <pre>{JSON.stringify({
-            id: event?.id,
-            pubkey: event?.pubkey,
-            kind: event?.kind,
-            tags: event?.tags,
-            content: organization,
-            created_at: event?.created_at
-          }, null, 2)}</pre>
-        </div>
-      {/if}
-    </div>
 
       <div class="p-8">
         <!-- Basic Info -->
