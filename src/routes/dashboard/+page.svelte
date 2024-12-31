@@ -135,14 +135,7 @@
     }
   }
 
-
   onMount(async () => {
-    
-  });
-
-  onDestroy(async () => {
-    // Cleanup relay listeners
-    unsubscribeHandlers.forEach(handler => handler());
     try {
       loading = true;
       error = null;
@@ -224,8 +217,8 @@
         });
       }
 
-      // Only fetch organizations if we haven't already
-      if (user?.pubkey && cachedOrganizations === null) {
+      // Only fetch organizations if we have a user
+      if (user?.pubkey) {
         try {
           const events = await ndkInstance.fetchEvents({
             authors: [user.pubkey],
@@ -233,7 +226,7 @@
           });
           
           cachedOrganizations = Array.from(events);
-          refreshOrganizations();
+          refreshOrganizations(); // This will update filteredOrganizations
           
           // Fetch groups separately to avoid blocking the initial render
           getUserGroups(ndkInstance).then(groups => {
@@ -243,9 +236,6 @@
           console.error('Error fetching organizations:', err);
           error = 'Failed to load organizations';
         }
-      } else if (cachedOrganizations) {
-        // Use cached organizations if available
-        userEvents = cachedOrganizations.sort((a, b) => b.created_at - a.created_at);
       }
     } catch (err) {
       console.error('Error loading dashboard:', err);
@@ -253,6 +243,12 @@
     } finally {
       loading = false;
     }
+  });
+
+  // Move cleanup to onDestroy
+  onDestroy(() => {
+    // Cleanup relay listeners
+    unsubscribeHandlers.forEach(handler => handler());
   });
 </script>
 

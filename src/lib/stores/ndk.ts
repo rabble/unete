@@ -362,14 +362,16 @@ export async function checkExistingNostrLogin() {
       const user = await ndkInstance.signer.user();
       if (user?.pubkey) {
         await user.fetchProfile();
-        ndkConnected.set(true);
-        loginState.set(true);
+        userProfile.set(user);
+        localStorage.setItem('userProfile', user.pubkey);
         return true;
       }
     }
     return false;
   } catch (error) {
     console.error('Error checking existing login:', error);
+    userProfile.set(null);
+    localStorage.removeItem('userProfile');
     return false;
   }
 }
@@ -394,11 +396,13 @@ export async function initNostrLogin() {
     }
 
     await user.fetchProfile();
-    ndkConnected.set(true);
-    loginState.set(true);
+    userProfile.set(user);
+    localStorage.setItem('userProfile', user.pubkey);
     return true;
   } catch (error) {
     console.error('Error initializing Nostr login:', error);
+    userProfile.set(null);
+    localStorage.removeItem('userProfile');
     throw error;
   }
 }

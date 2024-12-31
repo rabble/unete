@@ -36,16 +36,18 @@ export const isLoggedIn = derived(
     const checkLogin = async () => {
       try {
         if ($ndk?.signer) {
-          // Get user from signer
           const user = await $ndk.signer.user();
           
-          // Verify we have a valid pubkey
           if (user?.pubkey) {
-            // Check if this matches our stored profile
+            // Check both storage locations for compatibility
             const storedPubkey = localStorage.getItem('userProfile');
-            const validLogin = storedPubkey === user.pubkey;
+            const storedSession = localStorage.getItem('nostr-session');
+            const sessionData = storedSession ? JSON.parse(storedSession) : null;
             
-            // Update login state if needed
+            // Valid if either storage location matches
+            const validLogin = storedPubkey === user.pubkey || 
+                             sessionData?.pubkey === user.pubkey;
+            
             if (validLogin !== $loginState) {
               loginState.set(validLogin);
             }
