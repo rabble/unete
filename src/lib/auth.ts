@@ -92,8 +92,9 @@ export async function checkLoginStatus() {
       localStorage.setItem('nostr-session', JSON.stringify(userInfo));
       
       // Set up NDK signer if logged in
-      ndk.signer = new NDKNip07Signer();
-      await ndk.connect();
+      const signer = new NDKNip07Signer();
+      ndk.signer = signer;
+      await signer.blockUntilReady();
     } else {
       // Clear any existing session
       localStorage.removeItem('nostr-session');
