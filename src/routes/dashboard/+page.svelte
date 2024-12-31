@@ -178,8 +178,21 @@
   });
 </script>
 
+<script lang="ts">
+  import { page } from '$app/stores';
+  
+  // Get notice from URL params if present
+  $: notice = $page.url.searchParams.get('notice');
+</script>
+
 <div class="max-w-7xl mx-auto px-4 py-12">
   <h1 class="text-4xl font-bold text-center mb-8">Dashboard</h1>
+
+  {#if notice}
+    <div class="bg-green-50 border-l-4 border-green-400 p-4 mb-6">
+      <p class="text-green-700">{notice}</p>
+    </div>
+  {/if}
 
   {#if error}
     <div class="bg-red-50 border-l-4 border-red-400 p-4 mb-6">
