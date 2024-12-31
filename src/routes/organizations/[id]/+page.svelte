@@ -34,8 +34,21 @@
         hasCachedData = true;
         
         // Check ownership with cached data
-        if ($ndk?.signer && event && $userProfile) {
-          isOwner = $userProfile.pubkey === event.pubkey;
+        if ($ndk?.signer && event) {
+          // Wait for user profile to load if needed
+          if (!$userProfile) {
+            await new Promise(resolve => {
+              const unsubscribe = $userProfile.subscribe(profile => {
+                if (profile) {
+                  isOwner = profile.pubkey === event.pubkey;
+                  unsubscribe();
+                  resolve();
+                }
+              });
+            });
+          } else {
+            isOwner = $userProfile.pubkey === event.pubkey;
+          }
         }
       }
     } catch (e) {
@@ -51,19 +64,35 @@
       rawEvent = result.event;
       hasCachedData = false; // We have fresh data now
 
-      // Check ownership using the existing NDK signer and userProfile
-      if ($ndk?.signer && event && $userProfile) {
+      // Check ownership using the existing NDK signer
+      if ($ndk?.signer && event) {
         console.log('Checking ownership - NDK signer and event available');
-        isOwner = $userProfile.pubkey === event.pubkey;
-        console.log('Is owner?', isOwner, {
-          userPubkey: $userProfile.pubkey,
-          eventPubkey: event.pubkey
-        });
+        // Wait for user profile to load if needed
+        if (!$userProfile) {
+          await new Promise(resolve => {
+            const unsubscribe = $userProfile.subscribe(profile => {
+              if (profile) {
+                isOwner = profile.pubkey === event.pubkey;
+                console.log('Is owner?', isOwner, {
+                  userPubkey: profile.pubkey,
+                  eventPubkey: event.pubkey
+                });
+                unsubscribe();
+                resolve();
+              }
+            });
+          });
+        } else {
+          isOwner = $userProfile.pubkey === event.pubkey;
+          console.log('Is owner?', isOwner, {
+            userPubkey: $userProfile.pubkey,
+            eventPubkey: event.pubkey
+          });
+        }
       } else {
         console.log('Cannot check ownership:', {
           hasSigner: !!$ndk?.signer,
-          hasEvent: !!event,
-          hasUserProfile: !!$userProfile
+          hasEvent: !!event
         });
         isOwner = false;
       }
