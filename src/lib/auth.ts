@@ -19,6 +19,11 @@ export const authStore = writable({
   checkingLogin: false
 });
 
+// Log auth store changes
+authStore.subscribe(state => {
+  console.log('Auth store updated:', state);
+});
+
 // Check login status
 export async function checkLoginStatus() {
   // Prevent multiple simultaneous checks

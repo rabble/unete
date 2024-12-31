@@ -57,16 +57,37 @@
 
   async function login() {
     try {
-      if (browser) {
-        const ndkInstance = get(ndk);
-        if (!ndkInstance) {
-          throw new Error('NDK not initialized');
-        }
-        await initNostrLogin();
+      if (!browser) {
+        console.log('Login only available in browser environment');
+        return;
+      }
+
+      console.log('Starting login process...');
+      
+      const ndkInstance = get(ndk);
+      if (!ndkInstance) {
+        throw new Error('NDK not initialized');
+      }
+
+      console.log('Initializing Nostr login...');
+      await initNostrLogin();
+
+      console.log('Checking login status...');
+      const isLoggedIn = await checkLoginStatus();
+
+      if (!isLoggedIn) {
+        console.log('No existing login found, launching Nostr login UI');
+        document.dispatchEvent(new CustomEvent('nlLaunch', {
+          detail: {
+            startScreen: 'welcome-login'
+          }
+        }));
+      } else {
+        console.log('User already logged in');
       }
     } catch (error) {
       console.error('Login failed:', error);
-      alert(error.message);
+      alert(`Login failed: ${error.message}`);
     }
   }
 </script>
@@ -184,10 +205,20 @@
               </button>
             {:else}
               <button
-                on:click={login}
-                class="ml-4 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-purple-600 hover:bg-purple-700"
+                on:click={async () => {
+                  console.log('Login button clicked');
+                  try {
+                    await login();
+                    // Force a page reload to ensure all components update
+                    window.location.reload();
+                  } catch (error) {
+                    console.error('Login error:', error);
+                    alert(`Login error: ${error.message}`);
+                  }
+                }}
+                class="ml-4 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-purple-600 hover:bg-purple-700 transition-colors"
               >
-                Login
+                {localLoginState ? 'Logging in...' : 'Login'}
               </button>
             {/if}
           </div>
