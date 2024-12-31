@@ -9,34 +9,41 @@
   let loadingNostr = true;
   let error = null;
 
+  // Create NDK filter for topic
+  function createTopicFilter(topicSlug: string) {
+    return {
+      kinds: [31312], // Organization kind
+      '#t': [topicSlug], // Topic tag
+      limit: 100 // Limit results
+    };
+  }
+
   // Load data once when component mounts
   async function loadData() {
     try {
       console.log('Starting data load...');
       loadingNostr = true;
       error = null;
+      
+      // Create filter for current topic
+      const filter = createTopicFilter(data.topic.slug);
+      console.log('NDK filter:', filter);
+      
+      // Fetch organizations directly with topic filter
       const result = await data.promise;
-      console.log('Data promise resolved:', result);
-
-      if (!result.organizations) {
-        console.warn('No organizations found in result');
-      } else {
-        console.log(`Processing ${result.organizations.length} organizations`);
-      }
-
-      // Filter organizations that match the current topic
-      organizations = (result.organizations || []).filter(org => {
-        console.group('Processing organization:', org.name);
-        console.log('Organization ID:', org.id);
-        
-        // Check both focusAreas array and tags for matches
-        const focusAreas = org.focusAreas || [];
-        const tagFocusAreas = (org.tags || [])
-          .filter(t => t[0] === 'f')
-          .map(t => t[1]);
-          
-        const allFocusAreas = [...new Set([...focusAreas, ...tagFocusAreas])];
-        console.log('All focus areas:', allFocusAreas);
+      const orgEvents = await ndk.fetchEvents(filter);
+      
+      console.log(`Found ${orgEvents.size} organizations matching topic`);
+      
+      // Convert NDK events to organization objects
+      organizations = Array.from(orgEvents).map(event => {
+        const content = JSON.parse(event.content) as OrganizationContent;
+        return {
+          id: event.id,
+          ...content,
+          tags: event.tags
+        };
+      });
         
         // Normalize topic variations
         const topicVariations = {
