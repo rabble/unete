@@ -79,9 +79,10 @@ export async function checkLoginStatus() {
     const storedSession = localStorage.getItem('nostr-session');
     let userInfo = storedSession ? JSON.parse(storedSession) : null;
     
-    // If no stored session, check with nostrLogin
-    if (!userInfo) {
-      userInfo = window.nostrLogin?.getCurrentUser();
+    // If no stored session, check with nostr extension
+    if (!userInfo && window.nostr) {
+      const pubkey = await window.nostr.getPublicKey();
+      userInfo = { pubkey };
     }
 
     const isLoggedIn = !!userInfo;
