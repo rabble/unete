@@ -60,13 +60,8 @@ export async function initializeNDK() {
       }
     }
 
-    // Set up connection with timeout
-    const connectionPromise = Promise.race([
-      ndkInstance.connect(),
-      new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('NDK connection timeout')), 5000)
-      )
-    ]);
+    // Connect to relays
+    await ndkInstance.connect();
 
     // Log relay pool status
     ndkInstance.pool.on('relay:connect', (relay) => {
