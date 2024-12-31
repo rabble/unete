@@ -30,6 +30,30 @@ export const isLoggedIn = derived(
   }
 );
 
+export async function checkExistingNostrLogin() {
+  if (typeof localStorage === 'undefined') return false;
+  
+  const storedPubkey = localStorage.getItem('userProfile');
+  if (!storedPubkey) return false;
+  
+  const ndkInstance = ndk.get();
+  if (!ndkInstance?.signer) return false;
+  
+  try {
+    const user = await ndkInstance.signer.user();
+    if (user?.pubkey === storedPubkey) {
+      await user.fetchProfile();
+      userProfile.set(user);
+      loginState.set(true);
+      return true;
+    }
+  } catch (e) {
+    console.error('Error checking existing Nostr login:', e);
+  }
+  
+  return false;
+}
+
 export async function fetchUserProfile() {
   const ndkInstance = ndk.get();
   if (!ndkInstance?.signer) return null;
