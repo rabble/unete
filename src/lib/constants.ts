@@ -1,21 +1,32 @@
 export const FOCUS_AREAS = [
   'Climate Justice',
-  'Community Organizing',
+  'Community',
+  'Democracy',
+  'Economic Democracy',
   'Economic Justice',
   'Education',
   'Electoral Politics',
   'Feminism',
+  'Food',
+  'Healthcare',
+  'Housing',
   'Housing Justice',
   'Immigration',
+  'Indigenous',
   'Indigenous Rights',
+  'International',
   'International Solidarity',
+  'LGBTQIA+',
   'LGBTQIA+ Rights',
   'Palestine Solidarity',
   'Racial Justice',
+  'Reproductive Justice',
   'Reproductive Rights',
+  'Workplace Justice',
   'Workplace Organizing',
+  'Youth',
   'Youth Organizing'
-];
+].filter((value, index, self) => self.indexOf(value) === index); // Remove duplicates
 
 export const LOCATION_OPTIONS = [
   'National',

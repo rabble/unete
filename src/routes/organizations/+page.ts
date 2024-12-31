@@ -3,30 +3,11 @@ import { ORGANIZATION, type OrganizationContent } from '$lib/nostr/kinds';
 import NDK, { NDKEvent } from '@nostr-dev-kit/ndk';
 
 // Constants
-export const locationOptions = [
-  'National', 'International', 'USA', 'Canada', 'UK', 
-  'California', 'New York', 'Florida', 'Texas', 
-  'Massachusetts', 'Washington D.C.', 'Southern U.S.', 
-  'Border regions'
-];
+import { LOCATION_OPTIONS, FOCUS_AREAS, ENGAGEMENT_TYPE_OPTIONS } from '$lib/constants';
 
-export const focusAreaOptions = [
-  'Climate Justice', 'Community', 'Democracy', 'Economic Democracy',
-  'Education', 'Feminism', 'Food', 'Healthcare', 'Housing',
-  'Immigration', 'Indigenous', 'International', 'LGBTQIA+',
-  'Palestine Solidarity', 'Racial Justice', 'Reproductive Justice',
-  'Workplace Justice', 'Youth'
-].sort();
-
-export const engagementTypeOptions = [
-  'In-person', 'Online', 'Hybrid', 'Construction', 'Cooking',
-  'Driving/transporting', 'Editing', 'Event/protest planning & logistics',
-  'Fundraising', 'Legal', 'Medical', 
-  'Messaging and Narrative (arts/media/graphics)', 'Outreach',
-  'Participate in trainings', 'Research', 'Strike Support',
-  'Sanctuary support', 'Tech support (programming, etc.)',
-  'Translation', 'Writing'
-].sort();
+export const locationOptions = LOCATION_OPTIONS;
+export const focusAreaOptions = FOCUS_AREAS.sort();
+export const engagementTypeOptions = ENGAGEMENT_TYPE_OPTIONS.sort();
 
 // Helper Functions
 export function getOrgContent(event: NDKEvent): OrganizationContent {

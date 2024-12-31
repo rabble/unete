@@ -5,9 +5,9 @@
   import { page } from '$app/stores';
   import Select from 'svelte-select';
   import { 
-    locationOptions, 
-    focusAreaOptions, 
-    engagementTypeOptions,
+    LOCATION_OPTIONS as locationOptions,
+    FOCUS_AREAS as focusAreaOptions,
+    ENGAGEMENT_TYPE_OPTIONS as engagementTypeOptions,
     getOrgContent,
     matchesFilter,
     fetchEvents,
