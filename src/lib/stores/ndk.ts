@@ -68,50 +68,87 @@ export async function initializeNDK() {
     // Connect to relays
     await ndkInstance.connect();
 
-    // Track all relay connections
-    const relayConnections = new Map<string, number>();
+    // Track relay connections and status
+    const relayConnections = new Map<string, {count: number, status: number}>();
+
+    // Initialize status for all configured relays
+    ndkInstance.pool.relays.forEach((relay, url) => {
+      relayConnections.set(url, {count: 0, status: relay.status});
+    });
 
     // Log relay pool status with connection counts
     ndkInstance.pool.on('relay:connect', (relay) => {
-      const count = (relayConnections.get(relay.url) || 0) + 1;
-      relayConnections.set(relay.url, count);
+      const current = relayConnections.get(relay.url) || {count: 0, status: 0};
+      const newCount = current.count + 1;
+      relayConnections.set(relay.url, {count: newCount, status: 1});
+      
       console.log('Connected to relay:', {
         url: relay.url,
-        connectionCount: count,
+        connectionCount: newCount,
         timestamp: new Date().toISOString(),
-        totalConnections: relayConnections,
-        activeConnections: Array.from(ndkInstance.pool.relays.values())
-          .filter(r => r.status === 1)
-          .map(r => r.url)
+        activeRelays: Array.from(relayConnections.entries())
+          .filter(([_, data]) => data.status === 1)
+          .map(([url, data]) => ({
+            url,
+            connections: data.count
+          }))
       });
+
+      // Update connected state if we have any active connections
+      const hasActiveConnections = Array.from(relayConnections.values())
+        .some(data => data.status === 1);
+      ndkConnected.set(hasActiveConnections);
     });
 
     ndkInstance.pool.on('relay:disconnect', (relay) => {
-      const count = (relayConnections.get(relay.url) || 1) - 1;
-      if (count <= 0) {
-        relayConnections.delete(relay.url);
-      } else {
-        relayConnections.set(relay.url, count);
-      }
+      const current = relayConnections.get(relay.url);
+      if (!current) return;
+
+      const newCount = Math.max(0, current.count - 1);
+      relayConnections.set(relay.url, {count: newCount, status: newCount > 0 ? 1 : 0});
+      
       console.log('Disconnected from relay:', {
         url: relay.url,
-        remainingConnections: count,
+        remainingConnections: newCount,
         status: relay.status,
         timestamp: new Date().toISOString(),
-        totalConnections: relayConnections,
-        activeConnections: Array.from(ndkInstance.pool.relays.values())
-          .filter(r => r.status === 1)
-          .map(r => r.url)
+        activeRelays: Array.from(relayConnections.entries())
+          .filter(([_, data]) => data.status === 1)
+          .map(([url, data]) => ({
+            url,
+            connections: data.count
+          }))
       });
+
+      // Update connected state
+      const hasActiveConnections = Array.from(relayConnections.values())
+        .some(data => data.status === 1);
+      ndkConnected.set(hasActiveConnections);
     });
 
     ndkInstance.pool.on('relay:error', (relay, error) => {
+      const current = relayConnections.get(relay.url);
+      if (current) {
+        relayConnections.set(relay.url, {...current, status: 0});
+      }
+      
       console.error('Relay error:', {
         url: relay.url,
         error: error,
-        connectionCount: relayConnections.get(relay.url) || 0,
-        timestamp: new Date().toISOString()
+        connectionState: relayConnections.get(relay.url),
+        timestamp: new Date().toISOString(),
+        activeRelays: Array.from(relayConnections.entries())
+          .filter(([_, data]) => data.status === 1)
+          .map(([url, data]) => ({
+            url,
+            connections: data.count
+          }))
       });
+
+      // Update connected state
+      const hasActiveConnections = Array.from(relayConnections.values())
+        .some(data => data.status === 1);
+      ndkConnected.set(hasActiveConnections);
     });
 
     // Update store immediately with instance
