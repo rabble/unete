@@ -81,7 +81,7 @@
   });
 
   // Filter organizations reactively
-  $: filteredOrganizations: NDKEvent[] = orgsList.filter(event => {
+  $: filteredOrganizations = orgsList.filter(event => {
     const filters = $searchFilters;
     
     const locationSet = new Set(filters.locations || []);
