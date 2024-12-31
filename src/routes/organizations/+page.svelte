@@ -103,23 +103,52 @@
 
       console.log('Starting initial events load');
       // Load initial events
-      const events = await fetchEvents(ndkInstance);
-      console.log('Initial events loaded:', events.length, 'at', new Date().toISOString());
-      organizations.set(events);
+      try {
+        const events = await fetchEvents(ndkInstance);
+        if (!events || !Array.isArray(events)) {
+          throw new Error('fetchEvents returned invalid data');
+        }
+        console.log('Initial events loaded:', events.length, 'at', new Date().toISOString());
+        console.debug('First event:', events[0] ? {
+          id: events[0].id,
+          kind: events[0].kind,
+          tags: events[0].tags,
+          content: events[0].content
+        } : null);
+        organizations.set(events);
+      } catch (err) {
+        console.error('Error fetching events:', err);
+        throw new Error(`Failed to fetch events: ${err.message}`);
+      }
 
       // Setup realtime subscription
-      subscription = setupRealtimeSubscription(ndkInstance, (event: NDKEvent) => {
-        console.log('Received realtime event:', event.id);
-        organizations.update(orgs => {
-          // Check if event already exists
-          const exists = orgs.some(e => e.id === event.id);
-          if (!exists) {
-            console.log('Adding new organization:', event.id);
-            return [...orgs, event];
-          }
-          return orgs;
+      try {
+        subscription = setupRealtimeSubscription(ndkInstance, (event: NDKEvent) => {
+          console.log('Received realtime event:', event.id);
+          console.debug('Event details:', {
+            id: event.id,
+            kind: event.kind,
+            tags: event.tags,
+            content: event.content
+          });
+          organizations.update(orgs => {
+            // Check if event already exists
+            const exists = orgs.some(e => e.id === event.id);
+            if (!exists) {
+              console.log('Adding new organization:', event.id);
+              return [...orgs, event];
+            }
+            return orgs;
+          });
         });
-      });
+        if (!subscription) {
+          throw new Error('Failed to setup realtime subscription');
+        }
+        console.log('Realtime subscription established');
+      } catch (err) {
+        console.error('Error setting up realtime subscription:', err);
+        throw new Error(`Failed to setup realtime subscription: ${err.message}`);
+      }
 
       loading = false;
     } catch (err) {
