@@ -155,8 +155,16 @@
                 <a href="/testimonials" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Testimonials</a>
                 <a href="/get-started" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Join All Of Us</a>
                 <a href="/contact" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Contact</a>
-                {#if isLoggedIn}
-                  <a href="/dashboard" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Dashboard</a>
+                {#if $ndk?.signer}
+                  {#await $ndk.signer.user()}
+                    <!-- Loading state -->
+                  {:then user}
+                    {#if user?.pubkey}
+                      <a href="/dashboard" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Dashboard</a>
+                    {/if}
+                  {:catch}
+                    <!-- Error state -->
+                  {/await}
                 {/if}
               </div>
             </div>
