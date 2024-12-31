@@ -12,12 +12,23 @@
   // Load data once when component mounts
   async function loadData() {
     try {
+      console.log('Starting data load...');
       loadingNostr = true;
       error = null;
       const result = await data.promise;
-      
+      console.log('Data promise resolved:', result);
+
+      if (!result.organizations) {
+        console.warn('No organizations found in result');
+      } else {
+        console.log(`Processing ${result.organizations.length} organizations`);
+      }
+
       // Filter organizations that match the current topic
       organizations = (result.organizations || []).filter(org => {
+        console.group('Processing organization:', org.name);
+        console.log('Organization ID:', org.id);
+        
         // Check both focusAreas array and tags for matches
         const focusAreas = org.focusAreas || [];
         const tagFocusAreas = (org.tags || [])
@@ -25,6 +36,7 @@
           .map(t => t[1]);
           
         const allFocusAreas = [...new Set([...focusAreas, ...tagFocusAreas])];
+        console.log('All focus areas:', allFocusAreas);
         
         // Normalize topic variations
         const topicVariations = {
@@ -34,13 +46,23 @@
         
         const currentTopic = data.topic.title.toLowerCase();
         const variations = topicVariations[currentTopic] || [currentTopic];
+        console.log('Current topic:', currentTopic);
+        console.log('Topic variations:', variations);
         
-        return allFocusAreas.some(area => 
-          variations.includes(area.toLowerCase())
-        );
+        const matches = allFocusAreas.some(area => {
+          const match = variations.includes(area.toLowerCase());
+          console.log(`Checking "${area}": ${match}`);
+          return match;
+        });
+        
+        console.log('Organization matches topic:', matches);
+        console.groupEnd();
+        return matches;
       });
       
+      console.log(`Found ${organizations.length} matching organizations`);
       allTopics = result.allTopics || data.allTopics;
+      console.log('All topics:', allTopics);
     } catch (err) {
       console.error('Failed to load Nostr data:', err);
       error = err.message;
