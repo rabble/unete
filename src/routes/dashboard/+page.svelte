@@ -11,6 +11,7 @@
   let user: NDKUser | undefined;
   let profile: { name?: string; about?: string; picture?: string; } | undefined;
   let userEvents: NDKEvent[] | null = null;
+  let cachedOrganizations: NDKEvent[] | null = null;
   let loading = true;
   let error: string | null = null;
   let userGroups: GroupMetadata[] = [];
@@ -95,7 +96,7 @@
       }
 
       // Only fetch organizations if we haven't already
-      if (user?.pubkey && userEvents === null) {
+      if (user?.pubkey && cachedOrganizations === null) {
         try {
           const [events, groups] = await Promise.all([
             $ndk.fetchEvents({
@@ -105,12 +106,16 @@
             getUserGroups($ndk)
           ]);
           
-          userEvents = Array.from(events).sort((a, b) => b.created_at - a.created_at);
+          cachedOrganizations = Array.from(events);
+          userEvents = cachedOrganizations.sort((a, b) => b.created_at - a.created_at);
           userGroups = groups;
         } catch (err) {
           console.error('Error fetching organizations:', err);
           error = 'Failed to load organizations';
         }
+      } else if (cachedOrganizations) {
+        // Use cached organizations if available
+        userEvents = cachedOrganizations.sort((a, b) => b.created_at - a.created_at);
       }
     } catch (err) {
       console.error('Error loading dashboard:', err);
