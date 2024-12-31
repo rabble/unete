@@ -55,8 +55,20 @@ export async function fetchEvents(ndk: NDK): Promise<NDKEvent[]> {
       throw new Error('NDK instance not found');
     }
 
+    // Log NDK instance details
+    console.log('NDK instance details:', {
+      connected: ndk.connected,
+      hasPool: !!ndk.pool,
+      relayCount: ndk.pool?.relays.size,
+      relayUrls: Array.from(ndk.pool?.relays.keys() || []),
+      activeRelays: Array.from(ndk.pool?.relays.values() || [])
+        .filter(r => r.status === 1)
+        .map(r => r.url)
+    });
+
     // Ensure NDK is connected
     if (!ndk.connected) {
+      console.log('NDK not connected, attempting connection...');
       await ndk.connect();
       console.log('NDK connected successfully in fetchEvents');
     }
@@ -65,10 +77,20 @@ export async function fetchEvents(ndk: NDK): Promise<NDKEvent[]> {
       kinds: [ORGANIZATION_KIND]
     };
 
-    console.log('Fetching organizations with filter:', JSON.stringify(filter));
+    console.log('Fetching organizations with filter:', {
+      filter,
+      kind: ORGANIZATION_KIND,
+      kindHex: ORGANIZATION_KIND.toString(16)
+    });
 
     // Create a subscription to collect events
     const events = new Set<NDKEvent>();
+    console.log('Creating subscription with options:', {
+      closeOnEose: true,
+      groupableDelay: 0,
+      limit: 100
+    });
+
     const sub = ndk.subscribe(filter, { 
       closeOnEose: true,
       groupableDelay: 0, // Disable grouping for initial fetch
@@ -76,30 +98,73 @@ export async function fetchEvents(ndk: NDK): Promise<NDKEvent[]> {
     });
 
     return new Promise<NDKEvent[]>((resolve, reject) => {
+      // Add timeout to prevent hanging
+      const timeout = setTimeout(() => {
+        console.warn('Subscription timeout after 10s');
+        if (events.size > 0) {
+          console.log('Resolving with partial events:', events.size);
+          resolve(Array.from(events));
+        } else {
+          reject(new Error('Subscription timeout with no events'));
+        }
+      }, 10000);
       sub.on('event', (event: NDKEvent) => {
         try {
-          console.log('Received event:', event.id, 'kind:', event.kind);
+          console.log('Received event:', {
+            id: event.id,
+            kind: event.kind,
+            pubkey: event.pubkey,
+            created_at: event.created_at,
+            tags: event.tags
+          });
+          
           const content = JSON.parse(event.content);
+          console.log('Parsed content:', {
+            name: content?.name,
+            category: content?.category,
+            hasDescription: !!content?.description,
+            contentKeys: Object.keys(content || {})
+          });
+          
           if (content && content.name) {
-            console.log('Valid organization event:', event.id, 'name:', content.name);
+            console.log('Valid organization event:', {
+              id: event.id,
+              name: content.name,
+              category: content.category
+            });
             events.add(event);
           } else {
-            console.warn('Invalid organization content:', event.id, content);
+            console.warn('Invalid organization content:', {
+              id: event.id,
+              content: content,
+              rawContent: event.content
+            });
           }
         } catch (e) {
-          console.warn('Failed to parse organization event:', event.id, e);
-          console.log('Raw content:', event.content);
+          console.warn('Failed to parse organization event:', {
+            id: event.id,
+            error: e.message,
+            rawContent: event.content
+          });
         }
       });
 
       // Add error handler
       sub.on('error', (error) => {
-        console.error('Subscription error:', error);
+        console.error('Subscription error:', {
+          message: error.message,
+          stack: error.stack,
+          name: error.name
+        });
         reject(error);
       });
 
       sub.on('eose', () => {
-        console.log('EOSE received, total valid organizations:', events.size);
+        clearTimeout(timeout); // Clear timeout on EOSE
+        console.log('EOSE received:', {
+          totalEvents: events.size,
+          eventIds: Array.from(events).map(e => e.id)
+        });
         resolve(Array.from(events));
       });
     });
