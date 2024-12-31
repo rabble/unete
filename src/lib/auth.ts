@@ -37,6 +37,17 @@ authStore.subscribe(state => {
   console.log('Auth store updated:', state);
 });
 
+// Check login status after a short delay to allow extension to load
+if (typeof window !== 'undefined') {
+  setTimeout(async () => {
+    try {
+      await checkLoginStatus();
+    } catch (error) {
+      console.error('Error checking login status after page load:', error);
+    }
+  }, 500); // 500ms delay to allow extension to initialize
+}
+
 // Check login status
 export async function checkLoginStatus() {
   // Prevent multiple simultaneous checks
@@ -45,6 +56,20 @@ export async function checkLoginStatus() {
   
   if (currentState.checkingLogin) {
     return currentState.isLoggedIn;
+  }
+
+  // Wait for window.nostr to be available
+  if (typeof window !== 'undefined' && !window.nostr) {
+    await new Promise(resolve => {
+      const checkNostr = () => {
+        if (window.nostr) {
+          resolve(true);
+        } else {
+          setTimeout(checkNostr, 100);
+        }
+      };
+      checkNostr();
+    });
   }
 
   authStore.update(s => ({ ...s, checkingLogin: true }));
