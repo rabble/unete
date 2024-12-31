@@ -183,7 +183,7 @@
     const engagementTypeSet = new Set(filters.engagementTypes || []);
     
     return (
-      matchesFilter(event.tags, 'l', locationSet, 'location') &&
+      matchesFilter(event.tags, ORGANIZATION_TAGS.LOCATION, locationSet) &&
       matchesFilter(event.tags, 't', focusAreaSet) &&
       matchesFilter(event.tags, 'l', engagementTypeSet, 'engagement')
     );
@@ -324,7 +324,7 @@
             <div>
               <h3 class="text-sm font-semibold mb-1">Locations:</h3>
               <div class="flex flex-wrap gap-1">
-                {#each event.tags.filter(t => t[0] === 'l' && t[2] === 'location').slice(0, 2) as [_, location]}
+                {#each event.tags.filter(t => t[0] === ORGANIZATION_TAGS.LOCATION).slice(0, 2) as [_, location]}
                   <span class="bg-gray-100 text-gray-800 px-2 py-0.5 rounded-full text-xs">
                     {location}
                   </span>
