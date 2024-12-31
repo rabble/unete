@@ -36,22 +36,47 @@ export const isLoggedIn = derived(
     const checkLogin = async () => {
       try {
         if ($ndk?.signer) {
+          // Get user from signer
           const user = await $ndk.signer.user();
-          const validLogin = !!user?.pubkey;
-          set(validLogin && $loginState);
-        } else {
-          set(false);
+          
+          // Verify we have a valid pubkey
+          if (user?.pubkey) {
+            // Check if this matches our stored profile
+            const storedPubkey = localStorage.getItem('userProfile');
+            const validLogin = storedPubkey === user.pubkey;
+            
+            // Update login state if needed
+            if (validLogin !== $loginState) {
+              loginState.set(validLogin);
+            }
+            
+            set(validLogin);
+            return;
+          }
+        }
+        
+        // If we get here, we're not logged in
+        set(false);
+        if ($loginState) {
+          loginState.set(false);
         }
       } catch (error) {
         console.error('Error checking login state:', error);
         set(false);
+        if ($loginState) {
+          loginState.set(false);
+        }
       }
     };
 
+    // Initial check
     checkLogin();
     
-    // Return cleanup function
-    return () => {};
+    // Set up periodic checks every 5 seconds
+    const interval = setInterval(checkLogin, 5000);
+    
+    // Cleanup interval on destroy
+    return () => clearInterval(interval);
   },
   false // Initial value
 );
@@ -62,21 +87,33 @@ export async function checkExistingNostrLogin() {
   const storedPubkey = localStorage.getItem('userProfile');
   if (!storedPubkey) return false;
   
-  const ndkInstance = ndk.get();
-  if (!ndkInstance?.signer) return false;
+  const ndkInstance = get(ndkStore);
+  if (!ndkInstance) return false;
   
   try {
-    const user = await ndkInstance.signer.user();
-    if (user?.pubkey === storedPubkey) {
-      await user.fetchProfile();
-      userProfile.set(user);
-      loginState.set(true);
-      return true;
+    // Initialize signer if window.nostr exists
+    if (window.nostr && !ndkInstance.signer) {
+      ndkInstance.signer = new NDKNip07Signer();
+    }
+    
+    if (ndkInstance.signer) {
+      const user = await ndkInstance.signer.user();
+      if (user?.pubkey === storedPubkey) {
+        await user.fetchProfile();
+        userProfile.set(user);
+        loginState.set(true);
+        return true;
+      }
     }
   } catch (e) {
     console.error('Error checking existing Nostr login:', e);
   }
   
+  // If we get here, clear invalid login state
+  loginState.set(false);
+  if (typeof localStorage !== 'undefined') {
+    localStorage.removeItem('userProfile');
+  }
   return false;
 }
 
