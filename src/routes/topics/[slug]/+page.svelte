@@ -44,6 +44,12 @@
           tags: event.tags
         };
       });
+    } catch (err) {
+      console.error('Failed to load Nostr data:', err);
+      error = err.message;
+    } finally {
+      loadingNostr = false;
+    }
         
         // Normalize topic variations
         const topicVariations = {
