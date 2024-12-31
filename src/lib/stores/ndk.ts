@@ -218,47 +218,65 @@ export async function ensureNDKConnection() {
 }
 
 // Function to ensure connection (now uses initializeNDK)
-export async function ensureConnection() {
+export async function ensureConnection(): Promise<NDK> {
   try {
-    const currentNDK = get(ndkStore);
-    if (!currentNDK || !get(ndkConnected)) {
-      console.log('Initializing new NDK connection...');
-      const ndk = await initializeNDK();
-      if (!ndk) {
-        throw new Error('Failed to initialize NDK');
-      }
-      
-      // Check connection status
-      const connectedRelays = Array.from(ndk.pool.relays.values())
-        .filter(r => r.status === 1);
-      if (connectedRelays.length > 0) {
-        ndkConnected.set(true);
-      }
-      if (!ndk) {
-        throw new Error('Failed to initialize NDK');
-      }
-      
-      // Wait for connection with timeout
-      await Promise.race([
-        new Promise((resolve) => {
-          const checkConnection = () => {
-            if (get(ndkConnected)) {
-              resolve(true);
-            } else {
-              setTimeout(checkConnection, 100);
-            }
-          };
-          checkConnection();
-        }),
-        new Promise((_, reject) => 
-          setTimeout(() => reject(new Error('Connection timeout')), 5000)
-        )
-      ]);
-      
-      return ndk;
+    // Get current NDK instance
+    let ndkInstance = get(ndkStore);
+    
+    // If we have an instance and it's connected, return it
+    if (ndkInstance && get(ndkConnected)) {
+      console.log('Using existing connected NDK instance');
+      return ndkInstance;
     }
-    console.log('Using existing NDK connection');
-    return currentNDK;
+
+    console.log('Initializing new NDK connection...');
+    
+    // Initialize new NDK instance
+    ndkInstance = await initializeNDK();
+    if (!ndkInstance) {
+      throw new Error('Failed to initialize NDK');
+    }
+
+    // Wait for connection with timeout and retries
+    const maxAttempts = 3;
+    const timeout = 10000; // 10 seconds per attempt
+    
+    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+      try {
+        console.log(`Connection attempt ${attempt}/${maxAttempts}`);
+        
+        // Wait for connection with timeout
+        await Promise.race([
+          new Promise<void>((resolve, reject) => {
+            const checkConnection = () => {
+              if (get(ndkConnected)) {
+                console.log('NDK connection established');
+                resolve();
+              } else {
+                setTimeout(checkConnection, 100);
+              }
+            };
+            checkConnection();
+          }),
+          new Promise((_, reject) => 
+            setTimeout(() => reject(new Error('Connection timeout')), timeout)
+          )
+        ]);
+
+        // If we get here, connection succeeded
+        return ndkInstance;
+      } catch (err) {
+        console.warn(`Connection attempt ${attempt} failed:`, err);
+        if (attempt === maxAttempts) {
+          throw new Error(`Failed to connect after ${maxAttempts} attempts`);
+        }
+        // Wait before retrying
+        await new Promise(resolve => setTimeout(resolve, 2000));
+      }
+    }
+
+    // This should never be reached
+    throw new Error('Unexpected error in ensureConnection');
   } catch (error) {
     console.error('Error in ensureConnection:', error);
     throw error;
