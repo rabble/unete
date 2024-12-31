@@ -104,17 +104,18 @@ export async function initializeNDK() {
         }
       }
       
-      // After all attempts, do a final check
+      // After all attempts, check status and keep trying
       const finalConnectedRelays = Array.from(ndkInstance.pool.relays.values())
         .filter(relay => relay.status === 1);
         
       if (finalConnectedRelays.length === 0) {
-        console.error('Failed to connect to any relays after all attempts');
+        console.warn('No relays connected after attempts, will keep trying in background');
         ndkConnected.set(false);
-        throw new Error('Failed to connect to any relays');
+        // Start background reconnection attempts
+        setTimeout(() => waitForConnection(), 5000); // Try again in 5 seconds
       }
       
-      return false;
+      return finalConnectedRelays.length > 0;
     };
 
     // Wait for connections
