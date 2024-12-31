@@ -26,12 +26,9 @@
     orgsList = value || [];
   });
 
-  // Watch for NDK connection
-  $: if ($ndkConnected && $ndk) {
-    loadOrganizations();
-  }
+  let subscription: any;
 
-  async function loadOrganizations() {
+  onMount(async () => {
     try {
       loading = true;
       error = null;
@@ -44,8 +41,20 @@
         engagementTypes: params.getAll('engagementTypes') || []
       });
 
+      // Load initial events
       const events = await fetchEvents($ndk);
       organizations.set(events);
+
+      // Setup realtime subscription
+      subscription = setupRealtimeSubscription($ndk, (event: NDKEvent) => {
+        organizations.update(orgs => {
+          // Check if event already exists
+          if (!orgs.some(e => e.id === event.id)) {
+            return [...orgs, event];
+          }
+          return orgs;
+        });
+      });
 
       loading = false;
     } catch (err) {
@@ -53,7 +62,13 @@
       error = `Failed to load organizations: ${err.message}`;
       loading = false;
     }
-  }
+  });
+
+  onDestroy(() => {
+    if (subscription) {
+      subscription.stop();
+    }
+  });
 
   // Filter organizations reactively
   $: filteredOrganizations = orgsList.filter(event => {

@@ -53,42 +53,17 @@ export async function fetchEvents(ndk: NDK): Promise<NDKEvent[]> {
     throw new Error('NDK not initialized or connected');
   }
 
-  return new Promise((resolve, reject) => {
-    const events = new Set<NDKEvent>();
-    const filter = {
-      kinds: [ORGANIZATION],
-      since: 0,
-      limit: 100
-    };
-    
-    const sub = ndk.subscribe(filter, { 
-      closeOnEose: true,
-      groupableDelay: 1000
-    });
+  // Ensure NDK is connected
+  await ndk.connect();
 
-    sub.on('event', (event: NDKEvent) => {
-      try {
-        const content = getOrgContent(event);
-        events.add(event);
-      } catch (e) {
-        console.error('Failed to parse event:', e);
-      }
-    });
+  const filter = {
+    kinds: [ORGANIZATION],
+    since: Math.floor(Date.now() / 1000) - 86400, // Last 24 hours
+    limit: 100
+  };
 
-    sub.on('eose', () => {
-      if (events.size > 0) {
-        resolve(Array.from(events));
-      } else {
-        reject(new Error('No events received before EOSE'));
-      }
-    });
-
-    setTimeout(() => {
-      if (events.size === 0) {
-        reject(new Error('No events received within timeout'));
-      }
-    }, 15000);
-  });
+  const events = await ndk.fetchEvents(filter);
+  return Array.from(events);
 }
 
 export function setupRealtimeSubscription(ndk: NDK, callback: (event: NDKEvent) => void) {
