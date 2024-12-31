@@ -61,18 +61,30 @@
         throw new Error('NDK instance not found');
       }
 
-      // Wait for connection to be fully established
+      // Wait for at least one relay to be connected
       let retries = 0;
-      while (!connectedNdk.connected && retries < 5) {
+      while (retries < 10) {
+        const connectedRelays = Array.from(connectedNdk.pool.relays.values())
+          .filter(relay => relay.status === 1);
+        
+        if (connectedRelays.length > 0) {
+          console.log('Connected to relays:', connectedRelays.map(r => r.url));
+          break;
+        }
+        
         await new Promise(resolve => setTimeout(resolve, 300));
         retries++;
       }
 
-      if (!connectedNdk.connected) {
-        throw new Error('Failed to establish NDK connection after multiple attempts');
+      const finalConnectedRelays = Array.from(connectedNdk.pool.relays.values())
+        .filter(relay => relay.status === 1);
+        
+      if (finalConnectedRelays.length === 0) {
+        throw new Error('Failed to connect to any relays after multiple attempts');
       }
 
-      console.log('NDK connection fully established:', connectedNdk.pool.relays);
+      console.log('NDK connection fully established with relays:', 
+        finalConnectedRelays.map(r => r.url));
 
       // Initialize filters from URL params
       const params = $page.url.searchParams;
