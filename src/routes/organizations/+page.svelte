@@ -57,12 +57,22 @@
 
       // Get the final connected instance
       const connectedNdk = get(ndk);
-      if (!connectedNdk?.connected) {
-        throw new Error('Failed to establish NDK connection');
+      if (!connectedNdk) {
+        throw new Error('NDK instance not found');
       }
 
-      // Wait briefly to ensure connection is fully established
-      await new Promise(resolve => setTimeout(resolve, 300));
+      // Wait for connection to be fully established
+      let retries = 0;
+      while (!connectedNdk.connected && retries < 5) {
+        await new Promise(resolve => setTimeout(resolve, 300));
+        retries++;
+      }
+
+      if (!connectedNdk.connected) {
+        throw new Error('Failed to establish NDK connection after multiple attempts');
+      }
+
+      console.log('NDK connection fully established:', connectedNdk.pool.relays);
 
       // Initialize filters from URL params
       const params = $page.url.searchParams;
