@@ -92,9 +92,10 @@
         engagementTypes: params.getAll('engagementTypes') || []
       });
 
+      console.log('Starting initial events load');
       // Load initial events
       const events = await fetchEvents(ndkInstance);
-      console.log('Initial events loaded:', events.length);
+      console.log('Initial events loaded:', events.length, 'at', new Date().toISOString());
       organizations.set(events);
 
       // Setup realtime subscription

@@ -73,11 +73,13 @@ export async function fetchEvents(ndk: NDK): Promise<NDKEvent[]> {
       console.log('NDK connected successfully in fetchEvents');
     }
 
+    console.log('Starting fetchEvents for organizations');
     const filter = {
       kinds: [ORGANIZATION_KIND]
     };
 
     console.log('Fetching organizations with filter:', {
+      timestamp: new Date().toISOString(),
       filter,
       kind: ORGANIZATION_KIND,
       kindHex: ORGANIZATION_KIND.toString(16)
@@ -91,11 +93,13 @@ export async function fetchEvents(ndk: NDK): Promise<NDKEvent[]> {
       limit: 100
     });
 
+    console.log('Creating subscription for organizations');
     const sub = ndk.subscribe(filter, { 
       closeOnEose: true,
       groupableDelay: 100, // Add small delay for grouping
       limit: 100 // Limit results
     });
+    console.log('Subscription created with filter:', filter);
 
     return new Promise<NDKEvent[]>((resolve, reject) => {
       // Add timeout to prevent hanging
