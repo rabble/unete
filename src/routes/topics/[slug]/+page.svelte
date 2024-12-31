@@ -9,26 +9,24 @@
   let loadingNostr = true;
   let error = null;
 
-  // Handle the promise when data changes
-  $: {
-    loadingNostr = true;
-    error = null;
-    console.log('Starting to load data...');
-    
-    data.promise
-      .then(result => {
-        console.log('Received result:', result);
-        organizations = result.organizations || [];
-        allTopics = result.allTopics || data.allTopics;
-        console.log('Updated organizations:', organizations.length);
-        loadingNostr = false;
-      })
-      .catch(err => {
-        console.error('Failed to load Nostr data:', err);
-        error = err.message;
-        loadingNostr = false;
-      });
+  // Load data once when component mounts
+  async function loadData() {
+    try {
+      loadingNostr = true;
+      error = null;
+      const result = await data.promise;
+      organizations = result.organizations || [];
+      allTopics = result.allTopics || data.allTopics;
+    } catch (err) {
+      console.error('Failed to load Nostr data:', err);
+      error = err.message;
+    } finally {
+      loadingNostr = false;
+    }
   }
+
+  // Initialize data loading
+  loadData();
   
   $: engagementTypes = [...new Set(
     organizations?.flatMap(org => 
