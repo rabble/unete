@@ -256,23 +256,6 @@
                   Error loading profile
                 </div>
               {/await}
-            {:else}
-              <button
-                on:click={async () => {
-                  console.log('Login button clicked');
-                  try {
-                    await login();
-                    // Force a page reload to ensure all components update
-                    window.location.reload();
-                  } catch (error) {
-                    console.error('Login error:', error);
-                    alert(`Login error: ${error.message}`);
-                  }
-                }}
-                class="ml-4 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-purple-600 hover:bg-purple-700 transition-colors"
-              >
-                {localLoginState ? 'Logging in...' : 'Login'}
-              </button>
             {/if}
           </div>
         </div>
@@ -289,6 +272,24 @@
       <div class="flex justify-center space-x-6 md:order-2">
         <a href="/contact" class="text-gray-400 hover:text-gray-500">Contact</a>
         <a href="/organizations/add" class="text-gray-400 hover:text-gray-500">Add Organization</a>
+        {#if !$isLoggedIn}
+          <button
+            on:click={async () => {
+              console.log('Login button clicked');
+              try {
+                await login();
+                // Force a page reload to ensure all components update
+                window.location.reload();
+              } catch (error) {
+                console.error('Login error:', error);
+                alert(`Login error: ${error.message}`);
+              }
+            }}
+            class="text-gray-400 hover:text-gray-500"
+          >
+            Login with Nostr
+          </button>
+        {/if}
       </div>
     </div>
   </footer>
