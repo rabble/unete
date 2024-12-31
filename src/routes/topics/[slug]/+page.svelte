@@ -25,7 +25,7 @@
     
     return {
       kinds: [ORGANIZATION],
-      '#t': [tag],
+      '#f': [tag],
       limit: 100
     };
   }
@@ -86,7 +86,7 @@
         subscription = ndkInstance.subscribe(
           { 
             kinds: [ORGANIZATION], 
-            '#t': [data.topic.slug],
+            '#f': [data.topic.slug],
             since: Math.floor(Date.now() / 1000)
           },
           { closeOnEose: false, groupableDelay: 100 }
@@ -102,7 +102,7 @@
         subscription = ndkInstance.subscribe(
           { 
             kinds: [ORGANIZATION],
-            '#t': [data.topic.title],
+            '#f': [data.topic.title],
             since: Math.floor(Date.now() / 1000)
           },
           { 
