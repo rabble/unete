@@ -245,51 +245,68 @@
             <p class="text-gray-600">No organizations found for this focus area.</p>
           </div>
         {:else}
-          <div class="space-y-8">
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {#each orgsList as event}
               {@const org = JSON.parse(event.content)}
-              <div class="bg-white rounded-lg shadow-lg p-6">
-                <a href="/organizations/{event.id}" class="block">
-                  <h3 class="text-2xl font-semibold mb-2">{org.name}</h3>
-                  {#if org.category}
-                    <p class="text-purple-600 mb-4">{org.category}</p>
+              <a 
+                href="/organizations/{event.id}" 
+                class="block bg-white rounded-lg shadow-lg p-4 hover:shadow-xl transition-shadow min-h-[280px] flex flex-col"
+                data-sveltekit-preload-data
+              >
+                <div class="flex items-start justify-between gap-4 mb-2">
+                  <h2 class="text-xl font-bold truncate flex-1">{org.name}</h2>
+                  {#if org.picture}
+                    <img 
+                      src={org.picture} 
+                      alt={org.name}
+                      class="w-16 h-16 object-cover rounded-lg flex-shrink-0"
+                    />
                   {/if}
-                  <p class="text-gray-700 mb-6">{org.description}</p>
-                  
+                </div>
+
+                <p class="text-gray-700 mb-4 line-clamp-3 text-sm">{org.description}</p>
+                
+                <div class="space-y-2 mt-auto overflow-auto">
                   {#if event.tags.filter(t => t[0] === ORGANIZATION_TAGS.FOCUS_AREA).length > 0}
-                    <div class="mb-4">
-                      <h4 class="font-semibold mb-2">Focus Areas:</h4>
-                      <div class="flex flex-wrap">
-                        {#each event.tags.filter(t => t[0] === ORGANIZATION_TAGS.FOCUS_AREA) as [_, area]}
-                          <TagLink type="topic" value={area} />
+                    <div>
+                      <h3 class="text-sm font-semibold mb-1">Focus Areas:</h3>
+                      <div class="flex flex-wrap gap-1">
+                        {#each event.tags.filter(t => t[0] === ORGANIZATION_TAGS.FOCUS_AREA).slice(0, 5) as [_, area]}
+                          <span class="bg-purple-100 text-purple-800 px-2 py-0.5 rounded-full text-xs">
+                            {area}
+                          </span>
+                        {/each}
+                      </div>
+                    </div>
+                  {/if}
+                
+                  {#if event.tags.filter(t => t[0] === ORGANIZATION_TAGS.LOCATION).length > 0}
+                    <div>
+                      <h3 class="text-sm font-semibold mb-1">Locations:</h3>
+                      <div class="flex flex-wrap gap-1">
+                        {#each event.tags.filter(t => t[0] === ORGANIZATION_TAGS.LOCATION).slice(0, 5) as [_, location]}
+                          <span class="bg-gray-100 text-gray-800 px-2 py-0.5 rounded-full text-xs">
+                            {location}
+                          </span>
                         {/each}
                       </div>
                     </div>
                   {/if}
 
                   {#if event.tags.filter(t => t[0] === ORGANIZATION_TAGS.ENGAGEMENT).length > 0}
-                    <div class="mb-4">
-                      <h4 class="font-semibold mb-2">Ways to Engage:</h4>
-                      <div class="flex flex-wrap">
-                        {#each event.tags.filter(t => t[0] === ORGANIZATION_TAGS.ENGAGEMENT) as [_, type]}
-                          <TagLink type="engagement" value={type} />
-                        {/each}
-                      </div>
-                    </div>
-                  {/if}
-                  
-                  {#if event.tags.filter(t => t[0] === ORGANIZATION_TAGS.LOCATION).length > 0}
                     <div>
-                      <h4 class="font-semibold mb-2">Locations:</h4>
-                      <div class="flex flex-wrap">
-                        {#each event.tags.filter(t => t[0] === ORGANIZATION_TAGS.LOCATION) as [_, location]}
-                          <TagLink type="location" value={location} />
+                      <h3 class="text-sm font-semibold mb-1">Engagement Types:</h3>
+                      <div class="flex flex-wrap gap-1">
+                        {#each event.tags.filter(t => t[0] === ORGANIZATION_TAGS.ENGAGEMENT).slice(0, 5) as [_, type]}
+                          <span class="bg-green-100 text-green-800 px-2 py-0.5 rounded-full text-xs">
+                            {type}
+                          </span>
                         {/each}
                       </div>
                     </div>
                   {/if}
-                </a>
-              </div>
+                </div>
+              </a>
             {/each}
           </div>
         {/if}
