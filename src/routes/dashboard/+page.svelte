@@ -61,33 +61,41 @@
   }
 
   let filteredOrganizations: NDKEvent[] = [];
+  let filterDirty = true;
 
   function sortOrganizations(organizations: NDKEvent[]): NDKEvent[] {
     if (!organizations) return [];
-    return organizations.sort((a, b) => b.created_at - a.created_at);
+    // Create a new array to avoid mutating the original
+    return [...organizations].sort((a, b) => b.created_at - a.created_at);
   }
 
   function applyFilters(organizations: NDKEvent[]) {
-    if (filterTimeout) {
-      clearTimeout(filterTimeout);
-    }
-    
-    filterTimeout = setTimeout(() => {
-      console.log('Applying filters to organizations');
-      filteredOrganizations = organizations.filter(event => {
-        const org = getOrgContent(event);
-        // Add any custom filtering logic here if needed
-        return true; // Default to showing all organizations
-      });
-    }, 100); // 100ms debounce
+    console.log('Applying filters to organizations');
+    return organizations.filter(event => {
+      const org = getOrgContent(event);
+      // Add any custom filtering logic here if needed
+      return true; // Default to showing all organizations
+    });
   }
 
-  // Watch for changes to cachedOrganizations
-  $: {
-    if (cachedOrganizations) {
+  // Only update filteredOrganizations when explicitly needed
+  function updateFilteredOrganizations() {
+    if (cachedOrganizations && filterDirty) {
       const sorted = sortOrganizations(cachedOrganizations);
-      applyFilters(sorted);
+      filteredOrganizations = applyFilters(sorted);
+      filterDirty = false;
     }
+  }
+
+  // Initial load
+  onMount(() => {
+    updateFilteredOrganizations();
+  });
+
+  // Manual refresh when needed
+  function refreshOrganizations() {
+    filterDirty = true;
+    updateFilteredOrganizations();
   }
 
   function getOrgContent(event: NDKEvent): OrganizationContent {
@@ -136,7 +144,7 @@
           });
           
           cachedOrganizations = Array.from(events);
-          userEvents = filterOrganizations(cachedOrganizations);
+          refreshOrganizations();
           
           // Fetch groups separately to avoid blocking the initial render
           getUserGroups($ndk).then(groups => {
