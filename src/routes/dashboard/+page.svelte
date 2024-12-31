@@ -3,7 +3,8 @@
   import { page } from '$app/stores';
   import type { NDKEvent, NDKUser } from '@nostr-dev-kit/ndk';
   import { NDKNip07Signer } from '@nostr-dev-kit/ndk';
-  import { ndk, initNostrLogin } from '$lib/stores/ndk';
+  import { ndk, initNostrLogin, ensureConnection, ndkConnected } from '$lib/stores/ndk';
+  import { get } from 'svelte/store';
   import { isLoggedIn, userProfile } from '$lib/stores/userProfile';
   import { ORGANIZATION, GROUP_MEMBERS, type OrganizationContent } from '$lib/nostr/kinds';
   import { initializeUser } from '$lib/nostr/ndk-utils';
