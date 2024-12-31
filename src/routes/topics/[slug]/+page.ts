@@ -2,6 +2,7 @@ import { error } from '@sveltejs/kit';
 import type { PageLoad } from './$types';
 import { topics } from '$lib/topics';
 import { ndk, ensureConnection, getCachedEvents } from '$lib/stores/ndk';
+import { checkExistingNostrLogin } from '$lib/stores/userProfile';
 import { ORGANIZATION } from '$lib/nostr/kinds';
 
 export const ssr = false;
@@ -18,8 +19,19 @@ export const load: PageLoad = async ({ params }) => {
     });
   }
 
-  // Ensure NDK is connected
-  await ensureConnection();
+  // Check for existing Nostr login and ensure NDK connection
+  try {
+    await checkExistingNostrLogin();
+    await ensureConnection();
+  } catch (err) {
+    console.error('Connection error:', err);
+    return {
+      topic: currentTopic,
+      organizations: [],
+      allTopics: topics,
+      promise: Promise.resolve({ organizations: [], allTopics: topics })
+    };
+  }
 
   // Return initial data immediately
   return {
@@ -33,7 +45,13 @@ export const load: PageLoad = async ({ params }) => {
           '#f': [slug] // Use focus area tag 'f' instead of topic tag 't'
         };
         console.log('Querying Nostr with filters:', JSON.stringify(filters, null, 2));
-        const events = await getCachedEvents(filters);
+        let events;
+        try {
+          events = await getCachedEvents(filters);
+        } catch (err) {
+          console.error('Error fetching events:', err);
+          return { organizations: [], allTopics: topics };
+        }
         console.log('Received events:', events ? Array.from(events).length : 0);
         
         if (!events || events.size === 0) {
