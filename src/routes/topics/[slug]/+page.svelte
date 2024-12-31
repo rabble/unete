@@ -21,6 +21,8 @@
   }
 
   // Load data once when component mounts
+  let ndk: NDK;
+  
   async function loadData() {
     try {
       console.log('Starting data load...');
@@ -28,7 +30,7 @@
       error = null;
       
       // Initialize NDK instance
-      const ndk = await getNDK();
+      ndk = await getNDK();
       await ndk.connect();
       
       // Create filter for current topic
