@@ -82,6 +82,8 @@ export async function checkLoginStatus() {
 // Handle login with debounce
 let loginAttemptTimeout: NodeJS.Timeout;
 export async function handleLogin() {
+  if (typeof document === 'undefined') return;
+
   // Clear any pending login attempts
   if (loginAttemptTimeout) {
     clearTimeout(loginAttemptTimeout);
@@ -100,24 +102,26 @@ export async function handleLogin() {
   }, 100);
 }
 
-// Listen for auth events
-document.addEventListener('nlAuth', (e: CustomEvent) => {
-  const { type } = e.detail;
-  
-  if (type === 'login' || type === 'signup') {
-    const userInfo = window.nostr.getUserInfo();
-    // Persist session to localStorage
-    localStorage.setItem('nostr-session', JSON.stringify(userInfo));
-    authStore.set({
-      isLoggedIn: true,
-      userInfo
-    });
-  } else if (type === 'logout') {
-    // Clear session from localStorage
-    localStorage.removeItem('nostr-session');
-    authStore.set({
-      isLoggedIn: false,
-      userInfo: null
-    });
-  }
-});
+// Listen for auth events (browser only)
+if (typeof document !== 'undefined') {
+  document.addEventListener('nlAuth', (e: CustomEvent) => {
+    const { type } = e.detail;
+    
+    if (type === 'login' || type === 'signup') {
+      const userInfo = window.nostr.getUserInfo();
+      // Persist session to localStorage
+      localStorage.setItem('nostr-session', JSON.stringify(userInfo));
+      authStore.set({
+        isLoggedIn: true,
+        userInfo
+      });
+    } else if (type === 'logout') {
+      // Clear session from localStorage
+      localStorage.removeItem('nostr-session');
+      authStore.set({
+        isLoggedIn: false,
+        userInfo: null
+      });
+    }
+  });
+}
