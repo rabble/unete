@@ -40,42 +40,47 @@ export const load: PageLoad = async ({ params }) => {
           console.log('No events returned from getCachedEvents');
           return { organizations: [], allTopics: topics };
         }
-      const eventsArray = Array.from(events);
-      
-      // Process organizations and counts after data loads
-      const topicsWithCounts = topics.map(topic => ({
-        ...topic,
-        count: eventsArray.filter(event => 
-          event.tags.some(t => t[0] === 'f' && t[1] === topic.slug)
-        ).length
-      }));
 
-      const topicOrganizations = eventsArray
-        .filter(event => event.tags.some(t => t[0] === 'f' && t[1] === slug))
-        .map(event => {
-          try {
-            const content = JSON.parse(event.content);
-            return {
-              id: event.id,
-              name: content.name,
-              category: content.category,
-              description: content.description,
-              focusAreas: event.tags.filter(t => t[0] === 'f').map(t => t[1]),
-              locations: event.tags.filter(t => t[0] === 'l').map(t => t[1]),
-              engagementTypes: event.tags.filter(t => t[0] === 'e').map(t => t[1]),
-              tags: event.tags
-            };
-          } catch (e) {
-            console.error('Failed to parse organization content:', e);
-            return null;
-          }
-        })
-        .filter(org => org !== null); // Remove any failed parses
+        const eventsArray = Array.from(events);
+        
+        // Process organizations and counts after data loads
+        const topicsWithCounts = topics.map(topic => ({
+          ...topic,
+          count: eventsArray.filter(event => 
+            event.tags.some(t => t[0] === 'f' && t[1] === topic.slug)
+          ).length
+        }));
 
-      return {
-        organizations: topicOrganizations,
-        allTopics: topicsWithCounts
-      };
+        const topicOrganizations = eventsArray
+          .filter(event => event.tags.some(t => t[0] === 'f' && t[1] === slug))
+          .map(event => {
+            try {
+              const content = JSON.parse(event.content);
+              return {
+                id: event.id,
+                name: content.name,
+                category: content.category,
+                description: content.description,
+                focusAreas: event.tags.filter(t => t[0] === 'f').map(t => t[1]),
+                locations: event.tags.filter(t => t[0] === 'l').map(t => t[1]),
+                engagementTypes: event.tags.filter(t => t[0] === 'e').map(t => t[1]),
+                tags: event.tags
+              };
+            } catch (e) {
+              console.error('Failed to parse organization content:', e);
+              return null;
+            }
+          })
+          .filter(org => org !== null); // Remove any failed parses
+
+        return {
+          organizations: topicOrganizations,
+          allTopics: topicsWithCounts
+        };
+      } catch (error) {
+        console.error('Error fetching topic data:', error);
+        return { organizations: [], allTopics: topics };
+      }
     })()
   };
 };
