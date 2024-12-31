@@ -1,6 +1,8 @@
 <script lang="ts">
   import { navigating } from '$app/stores';
   import TagLink from '$lib/components/TagLink.svelte';
+  import NDK from '@nostr-dev-kit/ndk';
+  import { getNDK } from '$lib/ndk';
 
   export let data;
   
@@ -24,6 +26,10 @@
       console.log('Starting data load...');
       loadingNostr = true;
       error = null;
+      
+      // Initialize NDK instance
+      const ndk = await getNDK();
+      await ndk.connect();
       
       // Create filter for current topic
       const filter = createTopicFilter(data.topic.slug);
