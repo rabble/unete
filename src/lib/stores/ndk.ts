@@ -84,50 +84,41 @@ export async function initializeNDK() {
     // Update store immediately with instance
     ndkStore.set(ndkInstance);
 
-    // Check current connections first
-    const connectedRelays = Array.from(ndkInstance.pool.relays.values())
-      .filter(relay => relay.status === 1);
+    // Wait for relays to connect with improved connection check
+    const waitForConnection = async () => {
+      const maxAttempts = 30; // 30 attempts
+      const delay = 500; // 500ms between attempts
       
-    if (connectedRelays.length > 0) {
-      console.log('Already connected to relays:', connectedRelays.map(r => r.url));
-      ndkConnected.set(true);
-      return ndkInstance;
-    }
-
-    // Wait for at least one relay to connect with better error handling
-    let connected = false;
-    const maxAttempts = 20; // Increased attempts
-    const delay = 500; // Increased delay
-    
-    const checkConnection = async () => {
       for (let i = 0; i < maxAttempts; i++) {
-        const relays = Array.from(ndkInstance.pool.relays.values());
-        const connectedRelays = relays.filter(r => r.status === 1);
-        
+        const connectedRelays = Array.from(ndkInstance.pool.relays.values())
+          .filter(relay => relay.status === 1);
+          
         if (connectedRelays.length > 0) {
           console.log('Connected to relays:', connectedRelays.map(r => r.url));
-          connected = true;
-          break;
+          ndkConnected.set(true);
+          return true;
         }
         
-        if (i < maxAttempts - 1) { // Don't wait on last attempt
+        if (i < maxAttempts - 1) {
           await new Promise(resolve => setTimeout(resolve, delay));
         }
       }
-      return connected;
+      
+      // After all attempts, do a final check
+      const finalConnectedRelays = Array.from(ndkInstance.pool.relays.values())
+        .filter(relay => relay.status === 1);
+        
+      if (finalConnectedRelays.length === 0) {
+        console.error('Failed to connect to any relays after all attempts');
+        ndkConnected.set(false);
+        throw new Error('Failed to connect to any relays');
+      }
+      
+      return false;
     };
 
-    // Try to connect and continue even if not all relays connect
-    const isConnected = await checkConnection();
-    if (!isConnected) {
-      console.warn('Not all relays connected. Continuing with available relays:', 
-        Array.from(ndkInstance.pool.relays.values())
-          .filter(r => r.status === 1)
-          .map(r => r.url)
-      );
-    }
-
-    ndkConnected.set(true);
+    // Wait for connections
+    await waitForConnection();
     console.log('Successfully connected to NDK with relays:', 
       Array.from(ndkInstance.pool.relays.values())
         .filter(r => r.status === 1)
