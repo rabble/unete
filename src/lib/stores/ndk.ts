@@ -200,8 +200,11 @@ export async function getCachedEvents(filter: any): Promise<Set<NDKEvent>> {
   const sub = ndk.subscribe(filter, { closeOnEose: true });
   
   return new Promise((resolve, reject) => {
+    let subscription: any;
     const timeout = setTimeout(() => {
-      sub.close();
+      if (subscription) {
+        subscription.stop();
+      }
       if (events.size > 0) {
         resolve(events);
       } else {
@@ -209,7 +212,8 @@ export async function getCachedEvents(filter: any): Promise<Set<NDKEvent>> {
       }
     }, 5000);
 
-    sub.on('event', (event: NDKEvent) => {
+    subscription = ndk.subscribe(filter, { closeOnEose: true });
+    subscription.on('event', (event: NDKEvent) => {
       console.log('Received event:', event.id);
       events.add(event);
       
@@ -218,7 +222,7 @@ export async function getCachedEvents(filter: any): Promise<Set<NDKEvent>> {
       eventCache.set(cache);
     });
 
-    sub.on('eose', () => {
+    subscription.on('eose', () => {
       console.log('Received EOSE, total events:', events.size);
       clearTimeout(timeout);
       resolve(events);

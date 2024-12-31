@@ -42,7 +42,7 @@ export const load: PageLoad = async ({ params }) => {
       try {
         const filters = {
           kinds: [ORGANIZATION],
-          '#f': [slug] // Use focus area tag 'f' instead of topic tag 't'
+          '#t': [slug] // Changed back to 't' tag for topics
         };
         console.log('Querying Nostr with filters:', JSON.stringify(filters, null, 2));
         let events;
