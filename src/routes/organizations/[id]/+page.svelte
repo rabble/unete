@@ -2,6 +2,7 @@
   import { page } from '$app/stores';
   import TagLink from '$lib/components/TagLink.svelte';
   import { ndk } from '$lib/stores/ndk';
+  import { userProfile } from '$lib/stores/userProfile';
   import type { OrganizationContent } from '$lib/nostr/kinds';
   import { isAdmin } from '$lib/nostr/admin';
   import { goto } from '$app/navigation';
@@ -29,6 +30,23 @@
       organization = result.organization;
       event = result.event;
       rawEvent = result.event;
+
+      // Check ownership using the existing NDK signer and userProfile
+      if ($ndk?.signer && event && $userProfile) {
+        console.log('Checking ownership - NDK signer and event available');
+        isOwner = $userProfile.pubkey === event.pubkey;
+        console.log('Is owner?', isOwner, {
+          userPubkey: $userProfile.pubkey,
+          eventPubkey: event.pubkey
+        });
+      } else {
+        console.log('Cannot check ownership:', {
+          hasSigner: !!$ndk?.signer,
+          hasEvent: !!event,
+          hasUserProfile: !!$userProfile
+        });
+        isOwner = false;
+      }
     } catch (e) {
       if (e.message.includes('Rate limit exceeded')) {
         console.warn('Relay rate limit exceeded, trying other relays:', e);
@@ -39,48 +57,46 @@
             organization = result.organization;
             event = result.event;
             rawEvent = result.event;
+            
+            // Check ownership after retry
+            if ($ndk?.signer && event && $userProfile) {
+              console.log('Checking ownership - NDK signer and event available');
+              isOwner = $userProfile.pubkey === event.pubkey;
+              console.log('Is owner?', isOwner, {
+                userPubkey: $userProfile.pubkey,
+                eventPubkey: event.pubkey
+              });
+            } else {
+              console.log('Cannot check ownership:', {
+                hasSigner: !!$ndk?.signer,
+                hasEvent: !!event,
+                hasUserProfile: !!$userProfile
+              });
+              isOwner = false;
+            }
           } catch (retryError) {
             error = retryError instanceof Error ? retryError.message : 'Failed to load organization';
           } finally {
             loading = false;
           }
-        }, 2000); // Wait 2 seconds before retry
+        }, 2000);
         return;
       }
       error = e instanceof Error ? e.message : 'Failed to load organization';
-        
-      // Check ownership after event is loaded
-      if ($ndk?.signer) {
-        console.log('Checking ownership - NDK signer and event available');
-        try {
-          const user = await $ndk.signer.user();
-          if (user?.npub) {
-            console.log('User found:', user.npub);
-            console.log('Event pubkey:', event.pubkey);
-            isOwner = user.pubkey === event.pubkey;
-            console.log('Is owner?', isOwner);
-          } else {
-            console.log('No user found from signer');
-            isOwner = false;
-          }
-        } catch (error) {
-          console.error('Failed to get user from signer:', error);
-          isOwner = false;
-        }
-      } else {
-        console.log('Cannot check ownership - no signer available');
-        isOwner = false;
-      }
     } finally {
       loading = false;
     }
   };
 
-  // Run once on mount
+  // Run once on mount and when data.promise changes
   $: if (data.promise) {
     loadData();
   }
 
+  // Watch for changes in userProfile to update ownership status
+  $: if ($userProfile && event) {
+    isOwner = $userProfile.pubkey === event.pubkey;
+  }
 </script>
 
 <div class="container mx-auto px-4 py-12">
