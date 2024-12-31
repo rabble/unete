@@ -68,16 +68,37 @@ export async function initializeNDK() {
     // Connect to relays
     await ndkInstance.connect();
 
-    // Log relay pool status
+    // Track all relay connections
+    const relayConnections = new Map<string, number>();
+
+    // Log relay pool status with connection counts
     ndkInstance.pool.on('relay:connect', (relay) => {
-      console.log('Connected to relay:', relay.url);
+      const count = (relayConnections.get(relay.url) || 0) + 1;
+      relayConnections.set(relay.url, count);
+      console.log('Connected to relay:', {
+        url: relay.url,
+        connectionCount: count,
+        timestamp: new Date().toISOString(),
+        totalConnections: relayConnections,
+        activeConnections: Array.from(ndkInstance.pool.relays.values())
+          .filter(r => r.status === 1)
+          .map(r => r.url)
+      });
     });
 
     ndkInstance.pool.on('relay:disconnect', (relay) => {
+      const count = (relayConnections.get(relay.url) || 1) - 1;
+      if (count <= 0) {
+        relayConnections.delete(relay.url);
+      } else {
+        relayConnections.set(relay.url, count);
+      }
       console.log('Disconnected from relay:', {
         url: relay.url,
+        remainingConnections: count,
         status: relay.status,
         timestamp: new Date().toISOString(),
+        totalConnections: relayConnections,
         activeConnections: Array.from(ndkInstance.pool.relays.values())
           .filter(r => r.status === 1)
           .map(r => r.url)
@@ -85,7 +106,12 @@ export async function initializeNDK() {
     });
 
     ndkInstance.pool.on('relay:error', (relay, error) => {
-      console.error('Relay error:', relay.url, error);
+      console.error('Relay error:', {
+        url: relay.url,
+        error: error,
+        connectionCount: relayConnections.get(relay.url) || 0,
+        timestamp: new Date().toISOString()
+      });
     });
 
     // Update store immediately with instance
