@@ -68,46 +68,11 @@
     'Other'
   ];
 
-  const locationOptions = [
-    'National',
-    'International',
-    'USA',
-    'Canada', 
-    'UK',
-    'California',
-    'New York',
-    'Florida',
-    'Texas',
-    'Massachusetts',
-    'Washington D.C.',
-    'Southern U.S.',
-    'Border regions'
-  ];
-
-  const engagementTypeOptions = [
-    'In-person',
-    'Online', 
-    'Hybrid',
-    'Construction',
-    'Cooking',
-    'Driving/transporting',
-    'Editing',
-    'Event/protest planning & logistics',
-    'Fundraising',
-    'Legal',
-    'Medical',
-    'Messaging and Narrative (arts/media/graphics)',
-    'Outreach',
-    'Participate in trainings',
-    'Research',
-    'Strike Support',
-    'Sanctuary support', 
-    'Tech support (programming, etc.)',
-    'Translation',
-    'Writing'
-  ];
-
-  const languageOptions = ['en', 'es', 'fr'];
+  import { LOCATION_OPTIONS, ENGAGEMENT_TYPE_OPTIONS, LANGUAGE_OPTIONS } from '$lib/constants';
+  
+  const locationOptions = LOCATION_OPTIONS;
+  const engagementTypeOptions = ENGAGEMENT_TYPE_OPTIONS;
+  const languageOptions = LANGUAGE_OPTIONS;
 
   onMount(async () => {
     try {

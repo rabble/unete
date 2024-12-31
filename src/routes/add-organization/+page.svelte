@@ -14,24 +14,8 @@
   } from '$lib/nostr/errors';
 
   // --- Reactive Variables ---
-  let focusAreas: string[] = [
-    'Climate Justice',
-    'Community Organizing',
-    'Economic Justice',
-    'Education',
-    'Electoral Politics',
-    'Feminism',
-    'Housing Justice',
-    'Immigration',
-    'Indigenous Rights',
-    'International Solidarity',
-    'LGBTQIA+ Rights',
-    'Palestine Solidarity',
-    'Racial Justice',
-    'Reproductive Rights',
-    'Workplace Organizing',
-    'Youth Organizing'
-  ];
+  import { FOCUS_AREAS, LOCATION_OPTIONS, ENGAGEMENT_TYPE_OPTIONS, LANGUAGE_OPTIONS } from '$lib/constants';
+  let focusAreas: string[] = FOCUS_AREAS;
   let error: string | null = null;
   let success = false;
   let loading = false;
@@ -85,47 +69,9 @@
     'Other'
   ];
 
-  const locationOptions = [
-    'National',
-    'International',
-    'USA',
-    'Canada', 
-    'UK',
-    'California',
-    'New York',
-    'Florida',
-    'Texas',
-    'Massachusetts',
-    'Washington D.C.',
-    'Southern U.S.',
-    'Border regions'
-  ];
-
-  const engagementTypeOptions = [
-    'In-person',
-    'Online', 
-    'Hybrid',
-    'Construction',
-    'Cooking',
-    'Driving/transporting',
-    'Editing',
-    'Event/protest planning & logistics',
-    'Fundraising',
-    'Legal',
-    'Medical',
-    'Messaging and Narrative (arts/media/graphics)',
-    'Outreach',
-    'Participate in trainings',
-    'Research',
-    'Strike Support',
-    'Sanctuary support', 
-    'Tech support (programming, etc.)',
-    'Translation',
-    'Writing'
-  ];
-
-  // Replace or fill these placeholders as needed
-  const languageOptions = [ /* ... */ ];
+  const locationOptions = LOCATION_OPTIONS;
+  const engagementTypeOptions = ENGAGEMENT_TYPE_OPTIONS;
+  const languageOptions = LANGUAGE_OPTIONS;
   const sizeOptions = [ /* ... */ ];
 
   // Add new states for tracking progress
