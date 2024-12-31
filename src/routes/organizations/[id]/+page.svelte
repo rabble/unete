@@ -184,12 +184,12 @@
 
     <div class="bg-white rounded-lg shadow-lg overflow-hidden">
       <!-- Header Section -->
-      <div class="relative h-48 bg-purple-100">
+      <div class="bg-purple-100 p-8 flex justify-center items-center">
         {#if organization.picture}
           <img
             src={organization.picture}
             alt={organization.name}
-            class="absolute inset-0 w-full h-full object-cover"
+            class="max-h-48 w-auto"
           />
         {/if}
       </div>
