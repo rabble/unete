@@ -3,6 +3,7 @@
   import { writable, get } from 'svelte/store';
   import type { NDKEvent } from '@nostr-dev-kit/ndk';
   import { ndk, ensureConnection, ndkConnected } from '$lib/stores/ndk';
+  import { ORGANIZATION } from '$lib/nostr/kinds';
   import NDK from '@nostr-dev-kit/ndk';
   import { searchFilters } from '$lib/stores/searchStore';
   import { page } from '$app/stores';
@@ -119,8 +120,8 @@
           relays: Array.from(ndkInstance.pool.relays.keys())
         });
         
-        // Define organization event kind (30078 is commonly used for organizations)
-        const orgEventKind = 30078;
+        // Use our custom organization event kind
+        const orgEventKind = ORGANIZATION;
       
         // Create subscription for organization events with proper filtering
         const sub = ndkInstance.subscribe(
@@ -175,7 +176,7 @@
       // Setup realtime subscription for new organization events
       try {
         console.log('Setting up realtime subscription at', new Date().toISOString());
-        const orgEventKind = 30078;
+        const orgEventKind = ORGANIZATION;
         subscription = ndkInstance.subscribe(
           { 
             kinds: [orgEventKind],
