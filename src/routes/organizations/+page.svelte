@@ -2,7 +2,7 @@
   import { onMount, onDestroy } from 'svelte';
   import { writable, get } from 'svelte/store';
   import type { NDKEvent } from '@nostr-dev-kit/ndk';
-  import { ndk, ensureConnection } from '$lib/stores/ndk';
+  import { ndk, ensureConnection, ndkConnected } from '$lib/stores/ndk';
   import NDK from '@nostr-dev-kit/ndk';
   import { searchFilters } from '$lib/stores/searchStore';
   import { page } from '$app/stores';
