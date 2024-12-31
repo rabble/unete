@@ -55,7 +55,7 @@
         relayUrls: Array.from(ndkInstance.pool?.relays?.keys() || [])
       });
 
-      // Initialize filters from URL params
+      // Initialize filters from URL params in parallel
       const params = $page.url.searchParams;
       searchFilters.set({
         locations: params.getAll('locations') || [],
@@ -64,61 +64,52 @@
       });
 
       console.log('Starting initial events load at', new Date().toISOString());
-      // Load initial events
+      
+      // Load initial events with timeout
       try {
-        console.log('Calling fetchEvents with NDK instance:', {
-          connected: ndkInstance.connected,
-          relays: Array.from(ndkInstance.pool.relays.keys())
-        });
-        
-        // Use our custom organization event kind
         const orgEventKind = ORGANIZATION;
-      
-        // Create subscription for organization events with proper filtering
-        const sub = ndkInstance.subscribe(
-          { 
-            kinds: [orgEventKind],
-            limit: 100 // Only fetch 100 most recent events
-          },
-          { 
-            closeOnEose: true, // Close after EOSE
-            groupableDelay: 500 
-          }
-        );
-      
-        // Handle incoming events
-        sub.on('event', (event) => {
-          // Verify it's an organization event
-          if (event.kind !== orgEventKind) {
-            console.warn('Received non-organization event:', event.kind, event.id);
-            return;
-          }
         
-          console.log('Received organization event:', event.id);
-          organizations.update(orgs => {
-            const exists = orgs.some(e => e.id === event.id);
-            return exists ? orgs : [...orgs, event];
+        // Start initial fetch immediately with timeout
+        const initialFetch = new Promise<NDKEvent[]>((resolve, reject) => {
+          const timeout = setTimeout(() => {
+            reject(new Error('Initial fetch timeout'));
+          }, 5000); // 5 second timeout
+
+          const sub = ndkInstance.subscribe(
+            { kinds: [orgEventKind], limit: 100 },
+            { closeOnEose: true, groupableDelay: 100 }
+          );
+
+          const events: NDKEvent[] = [];
+          
+          sub.on('event', (event) => {
+            if (event.kind === orgEventKind) {
+              events.push(event);
+            }
+          });
+
+          sub.on('eose', () => {
+            clearTimeout(timeout);
+            resolve(events);
+          });
+
+          sub.on('error', (err) => {
+            clearTimeout(timeout);
+            reject(err);
           });
         });
 
-        sub.on('eose', () => {
-          console.log('Received EOSE for organization events');
-        });
-        
-        // Also fetch existing events
-        const events = await fetchEvents(ndkInstance);
-        console.log('fetchEvents returned', events?.length, 'events');
-        if (!events || !Array.isArray(events)) {
-          throw new Error('fetchEvents returned invalid data');
-        }
+        // Wait for initial fetch or timeout
+        const events = await initialFetch;
+      
         console.log('Initial events loaded:', events.length, 'at', new Date().toISOString());
-        console.debug('First event:', events[0] ? {
-          id: events[0].id,
-          kind: events[0].kind,
-          tags: events[0].tags,
-          content: events[0].content
-        } : null);
         organizations.set(events);
+        
+        // Start realtime subscription after initial load
+        realtimeSubscription = ndkInstance.subscribe(
+          { kinds: [orgEventKind], since: Math.floor(Date.now() / 1000) },
+          { closeOnEose: false, groupableDelay: 100 }
+        );
       } catch (err) {
         console.error('Error fetching events:', err);
         throw new Error(`Failed to fetch events: ${err.message}`);
