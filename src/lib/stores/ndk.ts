@@ -222,63 +222,41 @@ export async function ensureConnection(): Promise<NDK> {
   // Get current NDK instance
   let ndkInstance = get(ndkStore);
   
-  // If we have an instance and it's connected, return it
+  // If we have an instance and it's connected, return it immediately
   if (ndkInstance && get(ndkConnected)) {
-    // Verify at least one relay is actually connected
-    const connectedRelays = Array.from(ndkInstance.pool.relays.values())
-      .filter(r => r.status === 1);
-    if (connectedRelays.length > 0) {
-      console.log('Using existing connected NDK instance with relays:', 
-        connectedRelays.map(r => r.url)
-      );
+    return ndkInstance;
+  }
+
+  // If we have an instance but not connected, try to reuse it
+  if (ndkInstance) {
+    try {
+      await ndkInstance.connect();
+      ndkConnected.set(true);
       return ndkInstance;
+    } catch (err) {
+      console.warn('Reconnection attempt failed, initializing new instance');
     }
   }
 
-  console.log('Initializing new NDK connection...');
-  
+  // Create new instance with fast connection
   try {
-    ndkInstance = await initializeNDK();
-    if (!ndkInstance) {
-      throw new Error('Failed to initialize NDK');
-    }
-
-    // Return immediately once we have at least one relay connected
-    // Don't wait for all relays to connect
-    const maxWaitTime = 2000; // 2 seconds max wait
-    const startTime = Date.now();
-    
-    return new Promise<NDK>((resolve, reject) => {
-      const maxRetries = 3; // Maximum number of retry attempts
-      let retryCount = 0;
-      
-      const checkConnection = () => {
-        const connectedRelays = Array.from(ndkInstance!.pool.relays.values())
-          .filter(r => r.status === 1);
-          
-        if (connectedRelays.length > 0) {
-          console.log('Connected to at least one relay:', connectedRelays[0].url);
-          resolve(ndkInstance!);
-          return;
-        }
-
-        if (Date.now() - startTime > maxWaitTime) {
-          retryCount++;
-          if (retryCount >= maxRetries) {
-            console.error('Max retries reached, giving up on connection');
-            reject(new Error('Failed to connect to any relays after multiple attempts'));
-            return;
-          }
-          
-          console.warn(`Retrying connection (attempt ${retryCount + 1}/${maxRetries})...`);
-          startTime = Date.now(); // Reset timer for next attempt
-        }
-
-        setTimeout(checkConnection, 100); // Check again in 100ms
-      };
-
-      checkConnection();
+    ndkInstance = new NDK({
+      explicitRelayUrls: [
+        "wss://nos.lol",
+        "wss://relay.nostr.band", 
+        "wss://nostr.mom"
+      ],
+      autoConnect: true
     });
+
+    // Connect without waiting for all relays
+    await ndkInstance.connect(250); // 250ms timeout
+    
+    // Store the instance
+    ndkStore.set(ndkInstance);
+    ndkConnected.set(true);
+    
+    return ndkInstance;
   } catch (err) {
     console.error('NDK connection failed:', err);
     throw new Error('Failed to establish NDK connection');
