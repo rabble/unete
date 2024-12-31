@@ -2,7 +2,8 @@
   import { navigating } from '$app/stores';
   import TagLink from '$lib/components/TagLink.svelte';
   import { onMount, onDestroy } from 'svelte';
-  import { writable, get } from 'svelte/store';
+  import { writable } from 'svelte/store';
+  import { get } from 'svelte/store';
   import type { NDKEvent } from '@nostr-dev-kit/ndk';
   import { ndk, ensureConnection, ndkConnected } from '$lib/stores/ndk';
   import { ORGANIZATION } from '$lib/nostr/kinds';
