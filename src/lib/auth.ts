@@ -97,15 +97,6 @@ export async function checkLoginStatus() {
       
       // Wait for signer to be ready
       await signer.blockUntilReady();
-      
-      // Get relays from signer if available
-      const signerRelays = await signer.getRelays?.();
-      if (signerRelays) {
-        ndk.explicitRelayUrls = Object.keys(signerRelays);
-      }
-      
-      // Connect to relays
-      await ndk.connect();
     } else {
       // Clear any existing session
       localStorage.removeItem('nostr-session');
