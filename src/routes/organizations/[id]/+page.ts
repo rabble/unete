@@ -1,7 +1,7 @@
 import type { PageLoad } from './$types';
 import { getStores } from '$app/stores';
 import { ndk, getCachedEvents } from '$lib/stores/ndk';
-import { ORGANIZATION } from '$lib/nostr/kinds';
+import { ORGANIZATION, ORGANIZATION_TAGS } from '$lib/nostr/kinds';
 
 export const ssr = false;
 export const csr = true;
@@ -25,9 +25,9 @@ const processEvent = (event: NDKEvent) => {
         created_at: event.created_at,
         kind: event.kind,
         sig: event.sig,
-        focusAreas: event.tags.filter(t => t[0] === 'f').map(t => t[1]),
-        locations: event.tags.filter(t => t[0] === 'l').map(t => t[1]),
-        engagementTypes: event.tags.filter(t => t[0] === 'e').map(t => t[1]),
+        focusAreas: event.tags.filter(t => t[0] === ORGANIZATION_TAGS.FOCUS_AREA).map(t => t[1]),
+        locations: event.tags.filter(t => t[0] === ORGANIZATION_TAGS.LOCATION).map(t => t[1]),
+        engagementTypes: event.tags.filter(t => t[0] === ORGANIZATION_TAGS.ENGAGEMENT).map(t => t[1]),
         tags: event.tags
       },
       event: event
