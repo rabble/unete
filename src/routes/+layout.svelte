@@ -194,7 +194,15 @@
   <!-- Debug Info -->
   <div class="bg-gray-100 border-t border-gray-200 p-4 mt-8">
     <div class="max-w-7xl mx-auto">
-      <h3 class="text-lg font-semibold mb-2">Debug Information</h3>
+      <button
+        on:click={() => showDebug = !showDebug}
+        class="bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2 px-4 rounded-lg mb-4"
+      >
+        {showDebug ? 'Hide' : 'Show'} Debug Information
+      </button>
+      
+      {#if showDebug}
+        <h3 class="text-lg font-semibold mb-2">Debug Information</h3>
       <div class="bg-white rounded-lg shadow p-4">
         <!-- Basic Status -->
         <div class="mb-4">
@@ -293,7 +301,12 @@
             <p class="mb-4">Loading user information...</p>
           </div>
         {/if}
+      {/if}
       </div>
     </div>
   </div>
 </div>
+
+<script>
+  let showDebug = false;
+</script>
