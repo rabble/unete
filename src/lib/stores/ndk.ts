@@ -322,4 +322,82 @@ export async function initializeNDK() {
   
   try {
     console.log('Initializing NDK...');
+    
+    // Create new NDK instance with explicit connection timeout
+    const ndkInstance = new NDK({
+      explicitRelayUrls: [
+        "wss://nos.lol",
+        "wss://relay.nostr.band",
+        "wss://relay.current.fyi",
+        "wss://nostr.mom"
+      ]
+    });
+
+    // Initialize signer if window.nostr is available
+    if (window.nostr) {
+      try {
+        ndkInstance.signer = new NDKNip07Signer();
+        console.log('NDK signer initialized from window.nostr');
+      } catch (err) {
+        console.warn('Failed to initialize NDK signer:', err);
+      }
+    }
+
+    // Set up connection with timeout
+    const connectionPromise = Promise.race([
+      ndkInstance.connect(),
+      new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('NDK connection timeout')), 5000)
+      )
+    ]);
+
+    // Log relay pool status
+    ndkInstance.pool.on('relay:connect', (relay) => {
+      console.log('Connected to relay:', relay.url);
+    });
+
+    ndkInstance.pool.on('relay:disconnect', (relay) => {
+      console.log('Disconnected from relay:', relay.url);
+    });
+
+    ndkInstance.pool.on('relay:error', (relay, error) => {
+      console.error('Relay error:', relay.url, error);
+    });
+
+    // Update store immediately with instance
+    ndkStore.set(ndkInstance);
+
+    // Check current connections first
+    const connectedRelays = Array.from(ndkInstance.pool.relays.values())
+      .filter(relay => relay.status === 1);
+      
+    if (connectedRelays.length > 0) {
+      console.log('Already connected to relays:', connectedRelays.map(r => r.url));
+      ndkConnected.set(true);
+      return ndkInstance;
+    }
+
+    // Wait for at least one relay to connect
+    await new Promise((resolve, reject) => {
+      const timeout = setTimeout(() => {
+        reject(new Error('Timeout waiting for relay connections'));
+      }, 10000);
+
+      const onConnect = (relay: any) => {
+        clearTimeout(timeout);
+        console.log('Connected to relay:', relay.url);
+        ndkConnected.set(true);
+        ndkInstance.pool.removeListener('relay:connect', onConnect);
+        resolve(true);
+      };
+
+      ndkInstance.pool.on('relay:connect', onConnect);
+    });
+
+    return ndkInstance;
+  } catch (error) {
+    console.error('Failed to initialize NDK:', error);
+    return null;
+  }
+}
 
