@@ -154,22 +154,12 @@ export async function ensureConnection() {
         throw new Error('Failed to initialize NDK');
       }
       
-      // Wait for connection with timeout
-      await Promise.race([
-        new Promise((resolve) => {
-          const checkConnection = () => {
-            if (get(ndkConnected)) {
-              resolve(true);
-            } else {
-              setTimeout(checkConnection, 100);
-            }
-          };
-          checkConnection();
-        }),
-        new Promise((_, reject) => 
-          setTimeout(() => reject(new Error('Connection timeout')), 5000)
-        )
-      ]);
+      // Check connection status
+      const connectedRelays = Array.from(ndk.pool.relays.values())
+        .filter(r => r.status === 1);
+      if (connectedRelays.length > 0) {
+        ndkConnected.set(true);
+      }
       if (!ndk) {
         throw new Error('Failed to initialize NDK');
       }
