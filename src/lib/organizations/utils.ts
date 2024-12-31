@@ -94,16 +94,15 @@ export async function fetchEvents(ndk: NDK): Promise<NDKEvent[]> {
     // Create a subscription to collect events
     const events = new Set<NDKEvent>();
     console.log('Creating subscription with options:', {
-      closeOnEose: true,
-      groupableDelay: 0,
-      limit: 100
+      closeOnEose: false, // Keep subscription open longer
+      groupableDelay: 500, // Increased delay for better grouping
+      timeout: 30000 // 30 second timeout
     });
 
     console.log('Creating subscription for organizations');
     const sub = ndk.subscribe(filter, { 
-      closeOnEose: true,
-      groupableDelay: 100, // Add small delay for grouping
-      limit: 100 // Limit results
+      closeOnEose: false,
+      groupableDelay: 500,
     });
     console.log('Subscription created:', {
       filter,
@@ -123,15 +122,20 @@ export async function fetchEvents(ndk: NDK): Promise<NDKEvent[]> {
     return new Promise<NDKEvent[]>((resolve, reject) => {
       // Add timeout to prevent hanging
       const timeout = setTimeout(() => {
-        console.warn('Subscription timeout after 10s');
+        console.warn('Subscription timeout after 30s');
+        sub.stop(); // Explicitly stop the subscription
         if (events.size > 0) {
           console.log('Resolving with partial events:', events.size);
           resolve(Array.from(events));
         } else {
           reject(new Error('Subscription timeout with no events'));
         }
-      }, 10000);
+      }, 30000);
+
+      // Track subscription state
+      let hasReceivedEvents = false;
       sub.on('event', (event: NDKEvent) => {
+        hasReceivedEvents = true;
         try {
           console.log('Received event:', {
             id: event.id,
@@ -183,12 +187,18 @@ export async function fetchEvents(ndk: NDK): Promise<NDKEvent[]> {
       });
 
       sub.on('eose', () => {
-        clearTimeout(timeout); // Clear timeout on EOSE
         console.log('EOSE received:', {
           totalEvents: events.size,
+          hasReceivedEvents,
           eventIds: Array.from(events).map(e => e.id)
         });
-        resolve(Array.from(events));
+        
+        // Only resolve if we have events or haven't received any yet
+        if (events.size > 0 || !hasReceivedEvents) {
+          clearTimeout(timeout);
+          resolve(Array.from(events));
+        }
+        // Otherwise keep waiting for potential events
       });
     });
 
