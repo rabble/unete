@@ -45,28 +45,15 @@
 
       console.log('Starting organizations page mount');
       
-      // Ensure we have a connected NDK instance
-      let ndkInstance;
-      try {
-        // Just await the connection without timeout
-        await ensureConnection();
-        // Get the NDK instance from the store after connection
-        ndkInstance = get(ndk);
-        
-        console.log('NDK connection result:', {
-          instance: !!ndkInstance,
-          connected: ndkInstance?.connected,
-          poolSize: ndkInstance?.pool?.relays?.size,
-          relayUrls: Array.from(ndkInstance?.pool?.relays?.keys() || [])
-        });
-        
-        if (!ndkInstance) {
-          throw new Error('Failed to establish NDK connection');
-        }
-      } catch (err) {
-        console.error('NDK connection failed:', err);
-        throw new Error(`Failed to connect to NDK: ${err.message}`);
-      }
+      // Get connected NDK instance directly from ensureConnection
+      const ndkInstance = await ensureConnection();
+      
+      console.log('NDK connection result:', {
+        instance: !!ndkInstance,
+        connected: ndkInstance.connected,
+        poolSize: ndkInstance.pool?.relays?.size,
+        relayUrls: Array.from(ndkInstance.pool?.relays?.keys() || [])
+      });
 
       // Wait for connection to be ready with retries
       let retries = 0;
