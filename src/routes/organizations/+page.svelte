@@ -3,7 +3,7 @@
   import { writable, get } from 'svelte/store';
   import type { NDKEvent } from '@nostr-dev-kit/ndk';
   import { ndk, ensureConnection, ndkConnected } from '$lib/stores/ndk';
-  import { ORGANIZATION } from '$lib/nostr/kinds';
+  import { ORGANIZATION, ORGANIZATION_TAGS } from '$lib/nostr/kinds';
   import NDK from '@nostr-dev-kit/ndk';
   import { searchFilters } from '$lib/stores/searchStore';
   import { page } from '$app/stores';
@@ -313,7 +313,7 @@
             <div>
               <h3 class="text-sm font-semibold mb-1">Focus Areas:</h3>
               <div class="flex flex-wrap gap-1">
-                {#each event.tags.filter(t => t[0] === 't').slice(0, 3) as [_, area]}
+                {#each event.tags.filter(t => t[0] === ORGANIZATION_TAGS.FOCUS_AREA).slice(0, 3) as [_, area]}
                   <span class="bg-purple-100 text-purple-800 px-2 py-0.5 rounded-full text-xs">
                     {area}
                   </span>
