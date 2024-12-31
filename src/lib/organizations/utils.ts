@@ -62,9 +62,7 @@ export async function fetchEvents(ndk: NDK): Promise<NDKEvent[]> {
     }
 
     const filter = {
-      kinds: [ORGANIZATION_KIND],
-      limit: 100,
-      since: 0 // Get all historical events
+      kinds: [ORGANIZATION_KIND]
     };
 
     console.log('Fetching organizations with filter:', JSON.stringify(filter));
@@ -73,7 +71,8 @@ export async function fetchEvents(ndk: NDK): Promise<NDKEvent[]> {
     const events = new Set<NDKEvent>();
     const sub = ndk.subscribe(filter, { 
       closeOnEose: true,
-      groupableDelay: 0 // Disable grouping for initial fetch
+      groupableDelay: 0, // Disable grouping for initial fetch
+      limit: 100 // Limit results
     });
 
     return new Promise<NDKEvent[]>((resolve, reject) => {
