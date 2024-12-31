@@ -108,6 +108,26 @@
           connected: ndkInstance.connected,
           relays: Array.from(ndkInstance.pool.relays.keys())
         });
+        
+        // Define organization event kind (30078 is commonly used for organizations)
+        const orgEventKind = 30078;
+        
+        // Create subscription for organization events
+        const sub = ndkInstance.subscribe(
+          { kinds: [orgEventKind] },
+          { closeOnEose: false, groupableDelay: 500 }
+        );
+        
+        // Handle incoming events
+        sub.on('event', (event) => {
+          console.log('Received organization event:', event.id);
+          organizations.update(orgs => {
+            const exists = orgs.some(e => e.id === event.id);
+            return exists ? orgs : [...orgs, event];
+          });
+        });
+        
+        // Also fetch existing events
         const events = await fetchEvents(ndkInstance);
         console.log('fetchEvents returned', events?.length, 'events');
         if (!events || !Array.isArray(events)) {
@@ -126,10 +146,16 @@
         throw new Error(`Failed to fetch events: ${err.message}`);
       }
 
-      // Setup realtime subscription
+      // Setup realtime subscription for new organization events
       try {
         console.log('Setting up realtime subscription at', new Date().toISOString());
-        subscription = setupRealtimeSubscription(ndkInstance, (event: NDKEvent) => {
+        const orgEventKind = 30078;
+        subscription = ndkInstance.subscribe(
+          { kinds: [orgEventKind] },
+          { closeOnEose: false, groupableDelay: 500 }
+        );
+        
+        subscription.on('event', (event: NDKEvent) => {
           console.log('Received realtime event:', event.id);
           console.debug('Event details:', {
             id: event.id,
