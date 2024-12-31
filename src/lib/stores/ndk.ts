@@ -74,7 +74,14 @@ export async function initializeNDK() {
     });
 
     ndkInstance.pool.on('relay:disconnect', (relay) => {
-      console.log('Disconnected from relay:', relay.url);
+      console.log('Disconnected from relay:', {
+        url: relay.url,
+        status: relay.status,
+        timestamp: new Date().toISOString(),
+        activeConnections: Array.from(ndkInstance.pool.relays.values())
+          .filter(r => r.status === 1)
+          .map(r => r.url)
+      });
     });
 
     ndkInstance.pool.on('relay:error', (relay, error) => {
