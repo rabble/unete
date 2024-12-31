@@ -48,12 +48,14 @@
       let ndkInstance;
       try {
         const connectionTimeout = 10000; // 10 seconds
-        ndkInstance = await Promise.race([
+        await Promise.race([
           ensureConnection(),
           new Promise((_, reject) => 
             setTimeout(() => reject(new Error('NDK connection timeout')), connectionTimeout)
           )
         ]);
+        // Get the NDK instance from the store after connection
+        ndkInstance = get(ndk);
         
         console.log('NDK connection result:', {
           instance: !!ndkInstance,
