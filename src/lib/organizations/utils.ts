@@ -1,8 +1,6 @@
 import { writable, derived } from 'svelte/store';
 import { type OrganizationContent } from '$lib/nostr/kinds';
-
-// Organization event kind (30818)
-const ORGANIZATION = 30818;
+import { ORGANIZATION_KIND } from '$lib/constants';
 import NDK, { NDKEvent } from '@nostr-dev-kit/ndk';
 import { LOCATION_OPTIONS, FOCUS_AREAS, ENGAGEMENT_TYPE_OPTIONS } from '$lib/constants';
 
@@ -64,7 +62,7 @@ export async function fetchEvents(ndk: NDK): Promise<NDKEvent[]> {
     }
 
     const filter = {
-      kinds: [ORGANIZATION],
+      kinds: [ORGANIZATION_KIND],
       limit: 100,
       since: 0 // Get all historical events
     };
@@ -122,7 +120,7 @@ export async function fetchEvents(ndk: NDK): Promise<NDKEvent[]> {
 
 export function setupRealtimeSubscription(ndk: NDK, callback: (event: NDKEvent) => void) {
   const subscription = ndk.subscribe({
-    kinds: [ORGANIZATION],
+    kinds: [ORGANIZATION_KIND],
     since: Math.floor(Date.now() / 1000) // Only get new events from now
   }, {
     closeOnEose: false,
