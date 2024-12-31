@@ -80,22 +80,27 @@ export async function initializeNDK() {
       return ndkInstance;
     }
 
-    // Wait for at least one relay to connect
-    await new Promise((resolve, reject) => {
-      const timeout = setTimeout(() => {
-        reject(new Error('Timeout waiting for relay connections'));
-      }, 10000);
+    // Wait for at least one relay to connect with better error handling
+    let connected = false;
+    for (let i = 0; i < 10; i++) {
+      const relays = Array.from(ndkInstance.pool.relays.values());
+      if (relays.some(r => r.status === 1)) {
+        connected = true;
+        break;
+      }
+      await new Promise(resolve => setTimeout(resolve, 300));
+    }
 
-      const onConnect = (relay: any) => {
-        clearTimeout(timeout);
-        console.log('Connected to relay:', relay.url);
-        ndkConnected.set(true);
-        ndkInstance.pool.removeListener('relay:connect', onConnect);
-        resolve(true);
-      };
+    if (!connected) {
+      throw new Error('Failed to connect to any relays');
+    }
 
-      ndkInstance.pool.on('relay:connect', onConnect);
-    });
+    ndkConnected.set(true);
+    console.log('Successfully connected to NDK with relays:', 
+      Array.from(ndkInstance.pool.relays.values())
+        .filter(r => r.status === 1)
+        .map(r => r.url)
+    );
 
     // Signer will be initialized by initNostrLogin when needed
 

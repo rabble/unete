@@ -35,25 +35,32 @@
       loading = true;
       error = null;
 
-      // Ensure we have a connected NDK instance
-      const ndkInstance = await ensureConnection();
-      if (!ndkInstance) {
-        throw new Error('Failed to establish NDK connection');
-      }
-
-      // Wait for at least one relay to be connected
+      // Ensure we have a connected NDK instance with retries
+      let ndkInstance;
       let connected = false;
-      for (let i = 0; i < 10; i++) {
-        const relays = Array.from(ndkInstance.pool.relays.values());
-        if (relays.some(r => r.status === 1)) {
-          connected = true;
-          break;
+      
+      for (let attempt = 0; attempt < 3; attempt++) {
+        try {
+          ndkInstance = await ensureConnection();
+          if (!ndkInstance) continue;
+
+          // Check relay connections
+          const relays = Array.from(ndkInstance.pool.relays.values());
+          if (relays.some(r => r.status === 1)) {
+            connected = true;
+            break;
+          }
+          
+          // Wait before retrying
+          await new Promise(resolve => setTimeout(resolve, 500 * (attempt + 1)));
+        } catch (err) {
+          console.warn(`Connection attempt ${attempt + 1} failed:`, err);
+          if (attempt === 2) throw err;
         }
-        await new Promise(resolve => setTimeout(resolve, 300));
       }
 
       if (!connected) {
-        throw new Error('Failed to connect to any relays');
+        throw new Error('Failed to establish NDK connection after multiple attempts');
       }
 
       // Initialize filters from URL params
