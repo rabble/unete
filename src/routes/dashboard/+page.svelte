@@ -69,7 +69,19 @@
     }
     
     // Sort organizations by creation date (newest first)
-    return organizations.sort((a, b) => b.created_at - a.created_at);
+    const sorted = organizations.sort((a, b) => b.created_at - a.created_at);
+    
+    // Apply filtering with debounce
+    filterTimeout = setTimeout(() => {
+      console.log('Applying filters to organizations');
+      return sorted.filter(event => {
+        const org = getOrgContent(event);
+        // Add any custom filtering logic here if needed
+        return true; // Default to showing all organizations
+      });
+    }, 100); // 100ms debounce
+    
+    return sorted;
   }
 
   function getOrgContent(event: NDKEvent): OrganizationContent {
