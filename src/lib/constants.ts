@@ -68,3 +68,5 @@ export const ENGAGEMENT_TYPE_OPTIONS = [
 ];
 
 export const LANGUAGE_OPTIONS = ['en', 'es', 'fr'];
+
+export const ORGANIZATION_KIND = 31312;
