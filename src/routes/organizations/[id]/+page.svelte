@@ -49,30 +49,28 @@
       }
       error = e instanceof Error ? e.message : 'Failed to load organization';
         
-        // Check ownership after event is loaded
-        if ($ndk?.signer) {
-          console.log('Checking ownership - NDK signer and event available');
-          try {
-            const user = await $ndk.signer.user();
-            if (user?.npub) {
-              console.log('User found:', user.npub);
-              console.log('Event pubkey:', event.pubkey);
-              isOwner = user.pubkey === event.pubkey;
-              console.log('Is owner?', isOwner);
-            } else {
-              console.log('No user found from signer');
-              isOwner = false;
-            }
-          } catch (error) {
-            console.error('Failed to get user from signer:', error);
+      // Check ownership after event is loaded
+      if ($ndk?.signer) {
+        console.log('Checking ownership - NDK signer and event available');
+        try {
+          const user = await $ndk.signer.user();
+          if (user?.npub) {
+            console.log('User found:', user.npub);
+            console.log('Event pubkey:', event.pubkey);
+            isOwner = user.pubkey === event.pubkey;
+            console.log('Is owner?', isOwner);
+          } else {
+            console.log('No user found from signer');
             isOwner = false;
           }
-        } else {
-          console.log('Cannot check ownership - no signer available');
+        } catch (error) {
+          console.error('Failed to get user from signer:', error);
           isOwner = false;
         }
-    } catch (e) {
-      error = e instanceof Error ? e.message : 'Failed to load organization';
+      } else {
+        console.log('Cannot check ownership - no signer available');
+        isOwner = false;
+      }
     } finally {
       loading = false;
     }
