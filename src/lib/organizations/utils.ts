@@ -58,24 +58,33 @@ export async function fetchEvents(ndk: NDK): Promise<NDKEvent[]> {
 
   const filter = {
     kinds: [ORGANIZATION],
-    since: Math.floor(Date.now() / 1000) - 86400, // Last 24 hours
     limit: 100
   };
 
-  const events = await ndk.fetchEvents(filter);
+  // Use explicit relay URLs for better reliability
+  const events = await ndk.fetchEvents(filter, {}, [
+    'wss://relay.nos.social',
+    'wss://relay.damus.io',
+    'wss://relay.nostr.band'
+  ]);
+
+  console.log('Fetched organization events:', events.size);
   return Array.from(events);
 }
 
 export function setupRealtimeSubscription(ndk: NDK, callback: (event: NDKEvent) => void) {
   const subscription = ndk.subscribe({
-    kinds: [ORGANIZATION],
-    since: Math.floor(Date.now() / 1000) - 3600,
-    limit: 50
+    kinds: [ORGANIZATION]
   }, {
     closeOnEose: false,
     groupableDelay: 2000
-  });
+  }, [
+    'wss://relay.nos.social',
+    'wss://relay.damus.io',
+    'wss://relay.nostr.band'
+  ]);
 
   subscription.on('event', callback);
+  console.log('Setup realtime subscription for organizations');
   return subscription;
 }
