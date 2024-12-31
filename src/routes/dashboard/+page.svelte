@@ -12,6 +12,7 @@
   let profile: { name?: string; about?: string; picture?: string; } | undefined;
   let userEvents: NDKEvent[] | null = null;
   let cachedOrganizations: NDKEvent[] | null = null;
+  let filterTimeout: ReturnType<typeof setTimeout> | null = null;
   let loading = true;
   let error: string | null = null;
   let userGroups: GroupMetadata[] = [];
@@ -49,13 +50,30 @@
           getUserGroups($ndk)
         ]);
         
-        userEvents = Array.from(events).sort((a, b) => b.created_at - a.created_at);
+        userEvents = await filterOrganizations(Array.from(events));
         userGroups = groups;
       }
     } catch (err) {
       console.error('Login failed:', err);
       error = err.message;
     }
+  }
+
+  function filterOrganizations(organizations: NDKEvent[]): NDKEvent[] {
+    if (!organizations) return [];
+    
+    // Clear any existing timeout
+    if (filterTimeout) {
+      clearTimeout(filterTimeout);
+    }
+    
+    // Return a debounced version of the filtered organizations
+    return new Promise(resolve => {
+      filterTimeout = setTimeout(() => {
+        const filtered = organizations.sort((a, b) => b.created_at - a.created_at);
+        resolve(filtered);
+      }, 100); // 100ms debounce
+    });
   }
 
   function getOrgContent(event: NDKEvent): OrganizationContent {
@@ -98,17 +116,18 @@
       // Only fetch organizations if we haven't already
       if (user?.pubkey && cachedOrganizations === null) {
         try {
-          const [events, groups] = await Promise.all([
-            $ndk.fetchEvents({
-              authors: [user.pubkey],
-              kinds: [ORGANIZATION]
-            }),
-            getUserGroups($ndk)
-          ]);
+          const events = await $ndk.fetchEvents({
+            authors: [user.pubkey],
+            kinds: [ORGANIZATION]
+          });
           
           cachedOrganizations = Array.from(events);
           userEvents = cachedOrganizations.sort((a, b) => b.created_at - a.created_at);
-          userGroups = groups;
+          
+          // Fetch groups separately to avoid blocking the initial render
+          getUserGroups($ndk).then(groups => {
+            userGroups = groups;
+          });
         } catch (err) {
           console.error('Error fetching organizations:', err);
           error = 'Failed to load organizations';
