@@ -121,20 +121,36 @@
         
         // Define organization event kind (30078 is commonly used for organizations)
         const orgEventKind = 30078;
-        
-        // Create subscription for organization events
+      
+        // Create subscription for organization events with proper filtering
         const sub = ndkInstance.subscribe(
-          { kinds: [orgEventKind] },
-          { closeOnEose: false, groupableDelay: 500 }
+          { 
+            kinds: [orgEventKind],
+            limit: 100 // Only fetch 100 most recent events
+          },
+          { 
+            closeOnEose: true, // Close after EOSE
+            groupableDelay: 500 
+          }
         );
-        
+      
         // Handle incoming events
         sub.on('event', (event) => {
+          // Verify it's an organization event
+          if (event.kind !== orgEventKind) {
+            console.warn('Received non-organization event:', event.kind, event.id);
+            return;
+          }
+        
           console.log('Received organization event:', event.id);
           organizations.update(orgs => {
             const exists = orgs.some(e => e.id === event.id);
             return exists ? orgs : [...orgs, event];
           });
+        });
+
+        sub.on('eose', () => {
+          console.log('Received EOSE for organization events');
         });
         
         // Also fetch existing events
@@ -161,12 +177,24 @@
         console.log('Setting up realtime subscription at', new Date().toISOString());
         const orgEventKind = 30078;
         subscription = ndkInstance.subscribe(
-          { kinds: [orgEventKind] },
-          { closeOnEose: false, groupableDelay: 500 }
+          { 
+            kinds: [orgEventKind],
+            since: Math.floor(Date.now() / 1000) // Only get events since now
+          },
+          { 
+            closeOnEose: false, 
+            groupableDelay: 500 
+          }
         );
         
         subscription.on('event', (event: NDKEvent) => {
-          console.log('Received realtime event:', event.id);
+          // Verify it's an organization event
+          if (event.kind !== orgEventKind) {
+            console.warn('Received non-organization event in realtime:', event.kind, event.id);
+            return;
+          }
+          
+          console.log('Received new organization event:', event.id);
           console.debug('Event details:', {
             id: event.id,
             kind: event.kind,
