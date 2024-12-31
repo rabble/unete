@@ -26,9 +26,28 @@
     loading = true;
     try {
       const result = await data.promise;
-        organization = result.organization;
-        event = result.event;
-        rawEvent = result.event;
+      organization = result.organization;
+      event = result.event;
+      rawEvent = result.event;
+    } catch (e) {
+      if (e.message.includes('Rate limit exceeded')) {
+        console.warn('Relay rate limit exceeded, trying other relays:', e);
+        // Try fetching again after a short delay
+        setTimeout(async () => {
+          try {
+            const result = await data.promise;
+            organization = result.organization;
+            event = result.event;
+            rawEvent = result.event;
+          } catch (retryError) {
+            error = retryError instanceof Error ? retryError.message : 'Failed to load organization';
+          } finally {
+            loading = false;
+          }
+        }, 2000); // Wait 2 seconds before retry
+        return;
+      }
+      error = e instanceof Error ? e.message : 'Failed to load organization';
         
         // Check ownership after event is loaded
         if ($ndk?.signer) {
