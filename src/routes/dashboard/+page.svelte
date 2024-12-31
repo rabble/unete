@@ -1,11 +1,11 @@
 <script lang="ts">
   import { onMount, onDestroy } from 'svelte';
-  import { page } from '$app/stores';
+  import { getStores } from '$app/stores';
+  const { page } = getStores();
   import type { NDKEvent, NDKUser, NDKRelay } from '@nostr-dev-kit/ndk';
   import { writable } from 'svelte/store';
   import { NDKNip07Signer } from '@nostr-dev-kit/ndk';
   import { ndk, initNostrLogin, ensureConnection, ndkConnected } from '$lib/stores/ndk';
-  import { get } from 'svelte/store';
   import { isLoggedIn, userProfile } from '$lib/stores/userProfile';
   import { ORGANIZATION, GROUP_MEMBERS, type OrganizationContent } from '$lib/nostr/kinds';
   import { initializeUser } from '$lib/nostr/ndk-utils';
@@ -145,24 +145,6 @@
       if (!ndkInstance) {
         throw new Error('Failed to establish NDK connection');
       }
-
-      // Wait for connection to be ready
-      await new Promise<void>((resolve, reject) => {
-        const checkConnection = () => {
-          if (get(ndkConnected)) {
-            resolve();
-          } else {
-            setTimeout(checkConnection, 100);
-          }
-        };
-        
-        // Add timeout
-        setTimeout(() => {
-          reject(new Error('Connection timeout'));
-        }, 5000);
-        
-        checkConnection();
-      });
 
       // Check if we're already logged in
       if ($isLoggedIn && $userProfile) {

@@ -2,23 +2,26 @@
   import { onMount } from 'svelte';
   import { page } from '$app/stores';
   import { initNostrLogin } from '$lib/nostr/login';
-  import type { OrganizationContent, OrganizationCategory } from '$lib/nostr/kinds';
+  import type { OrganizationContent } from '$lib/types';
+  import type { OrganizationCategory } from '$lib/nostr/kinds';
   import { updateOrganization, deleteOrganization } from '$lib/nostr/organizations';
   import { getTopics } from '$lib/topics';
   import NDK, { NDKNip07Signer, NDKEvent } from '@nostr-dev-kit/ndk';
+  import { ndk, getCachedEvents } from '$lib/stores/ndk';
   import {
     ValidationError,
     SignerRequiredError,
     PublishError,
   } from '$lib/nostr/errors';
+  import { ORGANIZATION } from '$lib/nostr/kinds';
 
   // --- Reactive Variables ---
-  let ndk: NDK;
   let focusAreas: string[] = [];
   let error: string | null = null;
   let success = false;
-  let loading = false;
+  let loading = true;
   let originalEvent: NDKEvent;
+  let hasCachedData = false;
 
   // Form data object
   let otherLocation = '';
@@ -74,53 +77,55 @@
   const engagementTypeOptions = ENGAGEMENT_TYPE_OPTIONS;
   const languageOptions = LANGUAGE_OPTIONS;
 
-  onMount(async () => {
+  async function loadData() {
     try {
-      // Use the centralized NDK connection handling
-      const ndkInstance = await ensureConnection();
-      if (!ndkInstance) {
-        throw new Error('Failed to establish NDK connection');
-      }
-      ndk = ndkInstance;
-
-      // Wait for at least one relay to be connected
-      let connected = false;
-      for (let i = 0; i < 10; i++) {
-        const relays = Array.from(ndk.pool.relays.values());
-        if (relays.some(r => r.status === 1)) {
-          connected = true;
-          break;
-        }
-        await new Promise(resolve => setTimeout(resolve, 300));
-      }
-
-      if (!connected) {
-        throw new Error('Failed to connect to any relays');
-      }
+      // Get cached data first
+      const cachedEvents = await getCachedEvents({
+        kinds: [ORGANIZATION],
+        ids: [$page.params.id],
+        limit: 1,
+        since: 0
+      });
       
+      const cachedEvent = Array.from(cachedEvents)[0];
+      if (cachedEvent) {
+        originalEvent = cachedEvent;
+        formData = JSON.parse(cachedEvent.content);
+        hasCachedData = true;
+        loading = false;
+      }
+
       // Initialize Nostr login
       await initNostrLogin();
       
-      // Load organization data
-      const events = await ndk.fetchEvents({
-        ids: [$page.params.id]
-      });
+      // Load fresh data
+      if ($ndk) {
+        const events = await $ndk.fetchEvents({
+          ids: [$page.params.id]
+        });
 
-      originalEvent = Array.from(events)[0];
-      if (!originalEvent) {
-        throw new Error('Organization not found');
+        const event = Array.from(events)[0];
+        if (event) {
+          originalEvent = event;
+          formData = JSON.parse(event.content);
+        } else if (!hasCachedData) {
+          throw new Error('Organization not found');
+        }
       }
-
-      // Parse and populate form data
-      formData = JSON.parse(originalEvent.content);
       
       // Load focus areas
-      focusAreas = await getTopics(ndk);
+      focusAreas = await getTopics($ndk);
 
     } catch (err) {
       console.error('Error initializing:', err);
       error = 'Failed to load organization. Please try again.';
+    } finally {
+      loading = false;
     }
+  }
+
+  onMount(() => {
+    loadData();
   });
 
   function toggleSelection(array: string[], item: string) {
@@ -139,7 +144,7 @@
     loading = true;
 
     try {
-      if (!ndk?.signer) {
+      if (!$ndk?.signer) {
         throw new SignerRequiredError();
       }
 
@@ -147,7 +152,7 @@
         throw new Error('Original event not found');
       }
 
-      const event = await updateOrganization(ndk, formData, originalEvent);
+      const event = await updateOrganization($ndk, formData, originalEvent);
       console.log('Organization updated successfully:', event);
 
       success = true;
@@ -184,460 +189,312 @@
     </div>
   {/if}
 
-  <form on:submit|preventDefault={handleSubmit} class="bg-white rounded-lg shadow-lg p-8">
-    <!-- Basic Information -->
-    <div class="space-y-6 mb-8">
-      <h2 class="text-2xl font-bold">Basic Information</h2>
-      
-      <div>
-        <label for="name" class="block text-sm font-medium text-gray-700">
-          Organization Name *
-        </label>
-        <input
-          type="text"
-          id="name"
-          bind:value={formData.name}
-          required
-          class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500"
-        />
-      </div>
-
-      <div>
-        <label for="category" class="block text-sm font-medium text-gray-700">Category *</label>
-        <select
-          id="category"
-          bind:value={formData.category}
-          required
-          class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500"
-        >
-          {#each categoryOptions as category}
-            <option value={category}>{category}</option>
-          {/each}
-        </select>
-      </div>
-
-      <div>
-        <label for="description" class="block text-sm font-medium text-gray-700">
-          Description *
-        </label>
-        <textarea
-          id="description"
-          bind:value={formData.description}
-          required
-          rows="4"
-          class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500"
-        ></textarea>
-      </div>
+  {#if loading}
+    <div class="text-center py-12">
+      <div class="inline-block animate-spin rounded-full h-8 w-8 border-4 border-purple-500 border-t-transparent"></div>
+      <p class="mt-2 text-gray-600">Loading organization details...</p>
     </div>
-
-    <!-- Focus Areas -->
-    <div class="space-y-6 mb-8">
-      <h2 class="text-2xl font-bold">Focus Areas *</h2>
-      <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
-        {#each focusAreas as area}
-          <label class="flex items-center space-x-2">
-            <input
-              type="checkbox"
-              checked={formData.focusAreas.includes(area)}
-              on:change={() => toggleSelection(formData.focusAreas, area)}
-              class="rounded border-gray-300 text-purple-600 focus:ring-purple-500"
-            />
-            <span>{area}</span>
-          </label>
-        {/each}
-      </div>
-    </div>
-
-    <!-- Locations -->
-    <div class="space-y-6 mb-8">
-      <h2 class="text-2xl font-bold">Locations *</h2>
-      <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
-        {#each locationOptions as location}
-          <label class="flex items-center space-x-2">
-            <input
-              type="checkbox"
-              checked={formData.locations.includes(location)}
-              on:change={() => toggleSelection(formData.locations, location)}
-              class="rounded border-gray-300 text-purple-600 focus:ring-purple-500"
-            />
-            <span>{location}</span>
-          </label>
-        {/each}
-      </div>
-      
-      <!-- Other Location -->
-      <div class="mt-4">
-        <label class="flex items-center space-x-2 mb-2">
+  {:else if originalEvent}
+    <form on:submit|preventDefault={handleSubmit} class="bg-white rounded-lg shadow-lg p-8 space-y-6">
+      <!-- Basic Information -->
+      <div class="space-y-4">
+        <h2 class="text-2xl font-bold">Basic Information</h2>
+        
+        <!-- Name -->
+        <div>
+          <label for="name" class="block text-sm font-medium text-gray-700">Organization Name *</label>
           <input
-            type="checkbox"
-            checked={formData.locations.includes(otherLocation)}
-            on:change={() => {
-              if (otherLocation.trim()) {
-                toggleSelection(formData.locations, otherLocation);
-              }
-            }}
-            class="rounded border-gray-300 text-purple-600 focus:ring-purple-500"
+            type="text"
+            id="name"
+            bind:value={formData.name}
+            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500"
+            required
           />
-          <span>Other:</span>
-        </label>
-        <input
-          type="text"
-          bind:value={otherLocation}
-          placeholder="Enter other location"
-          on:input={() => {
-            const oldOtherIndex = formData.locations.indexOf(otherLocation);
-            if (oldOtherIndex !== -1) {
-              formData.locations.splice(oldOtherIndex, 1);
-            }
-            if (formData.locations.includes(otherLocation) && otherLocation.trim()) {
-              formData.locations = [...formData.locations, otherLocation];
-            }
-          }}
-          class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500"
-        />
-      </div>
-    </div>
-
-    <!-- Engagement Types -->
-    <div class="space-y-6 mb-8">
-      <h2 class="text-2xl font-bold">Engagement Types *</h2>
-      <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
-        {#each engagementTypeOptions as type}
-          <label class="flex items-center space-x-2">
-            <input
-              type="checkbox"
-              checked={formData.engagementTypes.includes(type)}
-              on:change={() => toggleSelection(formData.engagementTypes, type)}
-              class="rounded border-gray-300 text-purple-600 focus:ring-purple-500"
-            />
-            <span>{type}</span>
-          </label>
-        {/each}
-      </div>
-    </div>
-
-    <!-- Contact Information -->
-    <div class="space-y-6 mb-8">
-      <h2 class="text-2xl font-bold">Contact Information</h2>
-      
-      <div>
-        <label for="website" class="block text-sm font-medium text-gray-700">
-          Website
-        </label>
-        <input
-          type="url"
-          id="website"
-          bind:value={formData.website}
-          placeholder="https://"
-          class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500"
-        />
-      </div>
-
-      <div>
-        <label for="email" class="block text-sm font-medium text-gray-700">
-          Email
-        </label>
-        <input
-          type="email"
-          id="email"
-          bind:value={formData.email}
-          class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500"
-        />
-      </div>
-
-      <div>
-        <label for="picture" class="block text-sm font-medium text-gray-700">
-          Logo/Picture URL
-        </label>
-        <input
-          type="url"
-          id="picture"
-          bind:value={formData.picture}
-          placeholder="https://"
-          class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500"
-        />
-      </div>
-    </div>
-
-    <!-- Additional Information -->
-    <div class="space-y-6 mb-8">
-      <h2 class="text-2xl font-bold">Additional Information</h2>
-      
-      <div>
-        <label for="about" class="block text-sm font-medium text-gray-700">
-          About
-        </label>
-        <textarea
-          id="about"
-          bind:value={formData.about}
-          rows="4"
-          class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500"
-        ></textarea>
-      </div>
-
-      <div>
-        <label for="mission" class="block text-sm font-medium text-gray-700">
-          Mission
-        </label>
-        <textarea
-          id="mission"
-          bind:value={formData.mission}
-          rows="4"
-          class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500"
-        ></textarea>
-      </div>
-
-      <div>
-        <label for="vision" class="block text-sm font-medium text-gray-700">
-          Vision
-        </label>
-        <textarea
-          id="vision"
-          bind:value={formData.vision}
-          rows="4"
-          class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500"
-        ></textarea>
-      </div>
-
-      <div>
-        <label for="founded" class="block text-sm font-medium text-gray-700">
-          Founded Year
-        </label>
-        <input
-          type="text"
-          id="founded"
-          bind:value={formData.founded}
-          class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500"
-        />
-      </div>
-
-
-      <div class="space-y-4">
-        <label class="block text-sm font-medium text-gray-700">
-          Supporters (estimated)
-        </label>
-        <div class="flex gap-4">
-          <div class="flex-1">
-            <label class="block text-xs text-gray-500">Minimum range</label>
-            <input
-              type="number"
-              min="0"
-              bind:value={formData.supporter.range[0]}
-              class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500"
-            />
-          </div>
-          <div class="flex-1">
-            <label class="block text-xs text-gray-500">Maximum range</label>
-            <input
-              type="number"
-              min="0"
-              bind:value={formData.supporter.range[1]}
-              class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500"
-            />
-          </div>
         </div>
+
+        <!-- Category -->
         <div>
-          <label class="block text-xs text-gray-500">Description</label>
-          <textarea
-            bind:value={formData.supporter.description}
-            rows="2"
-            placeholder="Describe your supporter base..."
+          <label for="category" class="block text-sm font-medium text-gray-700">Category *</label>
+          <select
+            id="category"
+            bind:value={formData.category}
             class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500"
+            required
+          >
+            {#each categoryOptions as option}
+              <option value={option}>{option}</option>
+            {/each}
+          </select>
+        </div>
+
+        <!-- Description -->
+        <div>
+          <label for="description" class="block text-sm font-medium text-gray-700">Description *</label>
+          <textarea
+            id="description"
+            bind:value={formData.description}
+            rows="3"
+            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500"
+            required
           ></textarea>
         </div>
-      </div>
 
-      <div class="space-y-4">
-        <label class="block text-sm font-medium text-gray-700">
-          Staff (estimated)
-        </label>
-        <div class="flex gap-4">
-          <div class="flex-1">
-            <label class="block text-xs text-gray-500">Minimum range</label>
-            <input
-              type="number"
-              min="0"
-              bind:value={formData.staff.range[0]}
-              class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500"
-            />
-          </div>
-          <div class="flex-1">
-            <label class="block text-xs text-gray-500">Maximum range</label>
-            <input
-              type="number"
-              min="0"
-              bind:value={formData.staff.range[1]}
-              class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500"
-            />
-          </div>
-        </div>
+        <!-- Focus Areas -->
         <div>
-          <label class="block text-xs text-gray-500">Description</label>
-          <textarea
-            bind:value={formData.staff.description}
-            rows="2"
-            placeholder="Describe your staff structure..."
-            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500"
-          ></textarea>
+          <label class="block text-sm font-medium text-gray-700 mb-2">Focus Areas *</label>
+          <div class="grid grid-cols-2 md:grid-cols-3 gap-2">
+            {#each focusAreas as area}
+              <label class="inline-flex items-center">
+                <input
+                  type="checkbox"
+                  value={area}
+                  checked={formData.focusAreas.includes(area)}
+                  on:change={() => toggleSelection(formData.focusAreas, area)}
+                  class="rounded border-gray-300 text-purple-600 focus:ring-purple-500"
+                />
+                <span class="ml-2 text-sm text-gray-700">{area}</span>
+              </label>
+            {/each}
+          </div>
+        </div>
+
+        <!-- Locations -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">Locations *</label>
+          <div class="grid grid-cols-2 md:grid-cols-3 gap-2">
+            {#each locationOptions as location}
+              <label class="inline-flex items-center">
+                <input
+                  type="checkbox"
+                  value={location}
+                  checked={formData.locations.includes(location)}
+                  on:change={() => toggleSelection(formData.locations, location)}
+                  class="rounded border-gray-300 text-purple-600 focus:ring-purple-500"
+                />
+                <span class="ml-2 text-sm text-gray-700">{location}</span>
+              </label>
+            {/each}
+          </div>
+        </div>
+
+        <!-- Engagement Types -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">Ways to Engage *</label>
+          <div class="grid grid-cols-2 md:grid-cols-3 gap-2">
+            {#each engagementTypeOptions as type}
+              <label class="inline-flex items-center">
+                <input
+                  type="checkbox"
+                  value={type}
+                  checked={formData.engagementTypes.includes(type)}
+                  on:change={() => toggleSelection(formData.engagementTypes, type)}
+                  class="rounded border-gray-300 text-purple-600 focus:ring-purple-500"
+                />
+                <span class="ml-2 text-sm text-gray-700">{type}</span>
+              </label>
+            {/each}
+          </div>
         </div>
       </div>
 
-      <div>
-        <label class="block text-sm font-medium text-gray-700 mb-2">
-          Languages
-        </label>
-        <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
-          {#each languageOptions as language}
-            <label class="flex items-center space-x-2">
+      <!-- Contact Information -->
+      <div class="space-y-4">
+        <h2 class="text-2xl font-bold">Contact Information</h2>
+        
+        <!-- Website -->
+        <div>
+          <label for="website" class="block text-sm font-medium text-gray-700">Website</label>
+          <input
+            type="url"
+            id="website"
+            bind:value={formData.website}
+            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500"
+          />
+        </div>
+
+        <!-- Email -->
+        <div>
+          <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
+          <input
+            type="email"
+            id="email"
+            bind:value={formData.email}
+            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500"
+          />
+        </div>
+
+        <!-- Social Links -->
+        <div class="space-y-2">
+          <h3 class="text-lg font-semibold">Social Links</h3>
+          
+          {#each Object.entries(formData.socialLinks) as [platform, url]}
+            <div>
+              <label for={platform} class="block text-sm font-medium text-gray-700 capitalize">{platform}</label>
               <input
-                type="checkbox"
-                checked={formData.languages?.includes(language)}
-                on:change={() => toggleSelection(formData.languages, language)}
-                class="rounded border-gray-300 text-purple-600 focus:ring-purple-500"
+                type="url"
+                id={platform}
+                bind:value={formData.socialLinks[platform]}
+                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500"
               />
-              <span>{language}</span>
-            </label>
+            </div>
           {/each}
         </div>
       </div>
+
+      <!-- Additional Information -->
+      <div class="space-y-4">
+        <h2 class="text-2xl font-bold">Additional Information</h2>
+        
+        <!-- About -->
+        <div>
+          <label for="about" class="block text-sm font-medium text-gray-700">About</label>
+          <textarea
+            id="about"
+            bind:value={formData.about}
+            rows="4"
+            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500"
+          ></textarea>
+        </div>
+
+        <!-- Mission -->
+        <div>
+          <label for="mission" class="block text-sm font-medium text-gray-700">Mission</label>
+          <textarea
+            id="mission"
+            bind:value={formData.mission}
+            rows="3"
+            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500"
+          ></textarea>
+        </div>
+
+        <!-- Vision -->
+        <div>
+          <label for="vision" class="block text-sm font-medium text-gray-700">Vision</label>
+          <textarea
+            id="vision"
+            bind:value={formData.vision}
+            rows="3"
+            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500"
+          ></textarea>
+        </div>
+
+        <!-- Founded -->
+        <div>
+          <label for="founded" class="block text-sm font-medium text-gray-700">Founded Year</label>
+          <input
+            type="text"
+            id="founded"
+            bind:value={formData.founded}
+            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500"
+          />
+        </div>
+
+        <!-- Languages -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">Languages</label>
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
+            {#each languageOptions as language}
+              <label class="inline-flex items-center">
+                <input
+                  type="checkbox"
+                  value={language}
+                  checked={formData.languages.includes(language)}
+                  on:change={() => toggleSelection(formData.languages, language)}
+                  class="rounded border-gray-300 text-purple-600 focus:ring-purple-500"
+                />
+                <span class="ml-2 text-sm text-gray-700">{language}</span>
+              </label>
+            {/each}
+          </div>
+        </div>
+
+        <!-- Staff Information -->
+        <div>
+          <h3 class="text-lg font-semibold mb-2">Staff Information</h3>
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label for="staffMin" class="block text-sm font-medium text-gray-700">Minimum Staff</label>
+              <input
+                type="number"
+                id="staffMin"
+                bind:value={formData.staff.range[0]}
+                min="0"
+                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500"
+              />
+            </div>
+            <div>
+              <label for="staffMax" class="block text-sm font-medium text-gray-700">Maximum Staff</label>
+              <input
+                type="number"
+                id="staffMax"
+                bind:value={formData.staff.range[1]}
+                min="0"
+                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500"
+              />
+            </div>
+          </div>
+          <div class="mt-2">
+            <label for="staffDescription" class="block text-sm font-medium text-gray-700">Staff Description</label>
+            <textarea
+              id="staffDescription"
+              bind:value={formData.staff.description}
+              rows="2"
+              class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500"
+            ></textarea>
+          </div>
+        </div>
+
+        <!-- Supporter Information -->
+        <div>
+          <h3 class="text-lg font-semibold mb-2">Supporter Information</h3>
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label for="supporterMin" class="block text-sm font-medium text-gray-700">Minimum Supporters</label>
+              <input
+                type="number"
+                id="supporterMin"
+                bind:value={formData.supporter.range[0]}
+                min="0"
+                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500"
+              />
+            </div>
+            <div>
+              <label for="supporterMax" class="block text-sm font-medium text-gray-700">Maximum Supporters</label>
+              <input
+                type="number"
+                id="supporterMax"
+                bind:value={formData.supporter.range[1]}
+                min="0"
+                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500"
+              />
+            </div>
+          </div>
+          <div class="mt-2">
+            <label for="supporterDescription" class="block text-sm font-medium text-gray-700">Supporter Description</label>
+            <textarea
+              id="supporterDescription"
+              bind:value={formData.supporter.description}
+              rows="2"
+              class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500"
+            ></textarea>
+          </div>
+        </div>
+      </div>
+
+      <!-- Submit Button -->
+      <div class="flex justify-end pt-6">
+        <button
+          type="submit"
+          class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-lg transition-colors"
+          disabled={loading}
+        >
+          {loading ? 'Saving...' : 'Save Changes'}
+        </button>
+      </div>
+    </form>
+  {:else}
+    <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4">
+      <p class="text-yellow-700">Organization not found</p>
     </div>
-
-    <!-- Social Links -->
-    <div class="space-y-6 mb-8">
-      <h2 class="text-2xl font-bold">Social Media Links</h2>
-      
-      <div>
-        <label for="twitter" class="block text-sm font-medium text-gray-700">
-          Twitter
-        </label>
-        <input
-          type="url"
-          id="twitter"
-          bind:value={formData.socialLinks.twitter}
-          placeholder="https://twitter.com/username"
-          class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500"
-        />
-      </div>
-
-      <div>
-        <label for="github" class="block text-sm font-medium text-gray-700">
-          GitHub
-        </label>
-        <input
-          type="url"
-          id="github"
-          bind:value={formData.socialLinks.github}
-          placeholder="https://github.com/organization"
-          class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500"
-        />
-      </div>
-
-      <div>
-        <label for="linkedin" class="block text-sm font-medium text-gray-700">
-          LinkedIn
-        </label>
-        <input
-          type="url"
-          id="linkedin"
-          bind:value={formData.socialLinks.linkedin}
-          placeholder="https://linkedin.com/company/name"
-          class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500"
-        />
-      </div>
-
-      <div>
-        <label for="facebook" class="block text-sm font-medium text-gray-700">
-          Facebook
-        </label>
-        <input
-          type="url"
-          id="facebook"
-          bind:value={formData.socialLinks.facebook}
-          placeholder="https://facebook.com/pagename"
-          class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500"
-        />
-      </div>
-
-      <div>
-        <label for="instagram" class="block text-sm font-medium text-gray-700">
-          Instagram
-        </label>
-        <input
-          type="url"
-          id="instagram"
-          bind:value={formData.socialLinks.instagram}
-          placeholder="https://instagram.com/username"
-          class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500"
-        />
-      </div>
-
-      <div>
-        <label for="nostr" class="block text-sm font-medium text-gray-700">
-          Nostr Public Key
-        </label>
-        <input
-          type="text"
-          id="nostr"
-          bind:value={formData.socialLinks.nostr}
-          placeholder="npub1..."
-          class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500"
-        />
-      </div>
-    </div>
-
-    <!-- Submit and Delete Buttons -->
-    <div class="flex justify-center gap-4">
-      <button
-        type="submit"
-        disabled={loading}
-        class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-8 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-      >
-        {loading ? 'Updating Organization...' : 'Update Organization'}
-      </button>
-      <button
-        type="button"
-        disabled={loading}
-        on:click={async () => {
-          if (confirm('Are you sure you want to delete this organization? This action cannot be undone.')) {
-            error = null;
-            loading = true;
-            try {
-              if (!ndk?.signer) {
-                throw new SignerRequiredError();
-              }
-              if (!originalEvent) {
-                throw new Error('Original event not found');
-              }
-              const reason = prompt('Please provide a reason for deletion (optional):');
-              console.log('Starting deletion process with:', {
-                ndkState: ndk?.connected,
-                signerExists: !!ndk?.signer,
-                eventId: originalEvent?.id,
-                reason: reason
-              });
-              const deletionEvent = await deleteOrganization(ndk, originalEvent, reason);
-              console.log('Organization deleted successfully:', deletionEvent.id);
-              // Wait briefly to allow deletion event to propagate
-              setTimeout(() => {
-                window.location.href = '/organizations';
-              }, 1000);
-            } catch (e) {
-              if (e instanceof SignerRequiredError) {
-                error = 'Please login with a Nostr extension first';
-              } else if (e instanceof PublishError) {
-                error = 'Failed to delete organization. Please try again.';
-              } else {
-                error = 'An unexpected error occurred';
-                console.error(e);
-              }
-              loading = false;
-            }
-          }
-        }}
-        class="bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-8 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-      >
-        Delete Organization
-      </button>
-    </div>
-  </form>
+  {/if}
 </div>

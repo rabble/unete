@@ -11,9 +11,9 @@
 
   export let data;
   
-  let organization: OrganizationContent | null = null;
-  let event: NDKEvent | null = null;
-  let loading = false;
+  let organization: OrganizationContent | null = data.initialData?.organization || null;
+  let event: NDKEvent | null = data.initialData?.event || null;
+  let loading = !data.initialData;
   let error: string | null = null;
   let showJson = false;
   let rawEvent: any = null;
@@ -40,31 +40,25 @@
 
   // Load data once on mount
   const loadData = async () => {
-    loading = true; // Set loading at start
-    await checkRelays();
-    if (!data.promise) {
-      loading = false; // Reset if no promise
-      return;
+    if (!data.promise) return;
+    
+    if (!data.initialData) {
+      loading = true;
     }
     
     try {
       const result = await data.promise;
       organization = result.organization;
       event = result.event;
-      rawEvent = result.event;
       
       // Check ownership using the existing NDK signer
       if ($ndk?.signer && event && $userProfile) {
         isOwner = $userProfile.pubkey === event.pubkey;
-        console.log('Is owner?', isOwner, {
-          userPubkey: $userProfile.pubkey,
-          eventPubkey: event.pubkey
-        });
       }
     } catch (e) {
       error = e instanceof Error ? e.message : 'Failed to load organization';
     } finally {
-      loading = false; // Always reset loading when done
+      loading = false;
     }
   };
 
@@ -480,18 +474,6 @@
           </div>
         {/if}
         
-        {#if showRawData}
-          <div class="mt-4 w-full max-w-4xl bg-gray-900 text-gray-100 p-6 rounded-lg overflow-x-auto">
-            <pre>{JSON.stringify({
-              id: event?.id,
-              pubkey: event?.pubkey,
-              kind: event?.kind,
-              tags: event?.tags,
-              content: organization,
-              created_at: event?.created_at
-            }, null, 2)}</pre>
-          </div>
-        {/if}
       </div>
   {:else}
     <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4">

@@ -1,61 +1,111 @@
 import type { PageLoad } from './$types';
-import { getCachedEvents, ensureConnection } from '$lib/stores/ndk';
+import { getStores } from '$app/stores';
+import { ndk, getCachedEvents } from '$lib/stores/ndk';
 import { ORGANIZATION } from '$lib/nostr/kinds';
 
 export const ssr = false;
 export const csr = true;
 
+// Add rate limiting
+let lastFetchTime = 0;
+const RATE_LIMIT_DELAY = 2000; // 2 seconds between fetches
+
+const processEvent = (event: NDKEvent) => {
+  if (!event) {
+    throw new Error('Organization not found');
+  }
+
+  try {
+    const content = JSON.parse(event.content);
+    return {
+      organization: {
+        ...content,
+        id: event.id,
+        pubkey: event.pubkey,
+        created_at: event.created_at,
+        kind: event.kind,
+        sig: event.sig,
+        focusAreas: event.tags.filter(t => t[0] === 'f').map(t => t[1]),
+        locations: event.tags.filter(t => t[0] === 'l').map(t => t[1]),
+        engagementTypes: event.tags.filter(t => t[0] === 'e').map(t => t[1]),
+        tags: event.tags
+      },
+      event: event
+    };
+  } catch (e) {
+    console.error('Failed to parse organization content:', e, 'Event:', event);
+    throw new Error('Invalid organization data');
+  }
+};
+
 export const load: PageLoad = async ({ params }) => {
   const { id } = params;
 
-  // Ensure NDK is connected before fetching
-  await ensureConnection();
+  // Check rate limit
+  const now = Date.now();
+  if (now - lastFetchTime < RATE_LIMIT_DELAY) {
+    // Return only cached data if we're rate limited
+    const cachedEvents = await getCachedEvents({
+      kinds: [ORGANIZATION],
+      ids: [id],
+      limit: 1,
+      since: 0
+    });
+    
+    const cachedEvent = Array.from(cachedEvents)[0];
+    if (cachedEvent) {
+      return {
+        initialData: processEvent(cachedEvent),
+        promise: Promise.resolve(processEvent(cachedEvent))
+      };
+    }
+    throw new Error('Please wait a moment before refreshing');
+  }
+  
+  lastFetchTime = now;
 
   try {
-    // Return initial data and promise
-    return {
-      promise: getCachedEvents({
-        kinds: [ORGANIZATION],
-        ids: [id],
-        limit: 1,
-        since: 0
-      }).then(events => {
-        // Convert Set to Array and get first event
-        const eventsArray = Array.from(events);
-        console.log('Found events:', eventsArray.length, 'for id:', id);
-        
-        const event = eventsArray[0];
-        if (!event) {
-          console.error('No event found for id:', id);
-          throw new Error('Organization not found');
-        }
+    // Get cached data first
+    const cachedEvents = await getCachedEvents({
+      kinds: [ORGANIZATION],
+      ids: [id],
+      limit: 1,
+      since: 0
+    });
+    
+    const cachedEvent = Array.from(cachedEvents)[0];
+    const initialData = cachedEvent ? processEvent(cachedEvent) : null;
 
-        try {
-          console.log('Parsing event content:', event);
-          const content = JSON.parse(event.content);
-          return {
-            organization: {
-              ...content,
-              id: event.id,
-              pubkey: event.pubkey,
-              created_at: event.created_at,
-              kind: event.kind,
-              sig: event.sig,
-              focusAreas: event.tags.filter(t => t[0] === 'f').map(t => t[1]),
-              locations: event.tags.filter(t => t[0] === 'l').map(t => t[1]),
-              engagementTypes: event.tags.filter(t => t[0] === 'e').map(t => t[1]),
-              tags: event.tags
-            },
-            event: event
-          };
-        } catch (e) {
-          console.error('Failed to parse organization content:', e, 'Event:', event);
-          throw new Error('Invalid organization data');
-        }
+    // Return both initial data and promise for fresh data
+    return {
+      initialData,
+      promise: new Promise((resolve, reject) => {
+        // Add slight delay to prevent rate limiting
+        setTimeout(() => {
+          const ndkInstance = ndk.subscribe(value => {
+            if (!value) {
+              reject(new Error('NDK not initialized'));
+              return;
+            }
+            
+            value.fetchEvents({
+              kinds: [ORGANIZATION],
+              ids: [id],
+              limit: 1
+            }).then(events => {
+              const eventsArray = Array.from(events);
+              if (eventsArray.length === 0) {
+                reject(new Error('Organization not found'));
+                return;
+              }
+              resolve(processEvent(eventsArray[0]));
+            }).catch(reject);
+          });
+        }, 500);
       })
     };
   } catch (err) {
     console.error('Failed to load organization:', err);
-    throw new Error(`Failed to load organization: ${err.message}`);
+    throw new Error(`Failed to load organization: ${err instanceof Error ? err.message : 'Unknown error'}`);
   }
 };
