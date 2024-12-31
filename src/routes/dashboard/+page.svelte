@@ -50,9 +50,9 @@
           getUserGroups($ndk)
         ]);
         
-        userEvents = filterOrganizations(Array.from(events));
+        cachedOrganizations = Array.from(events);
+        refreshOrganizations();
         userGroups = groups;
-        cachedOrganizations = userEvents; // Update cache
       }
     } catch (err) {
       console.error('Login failed:', err);
