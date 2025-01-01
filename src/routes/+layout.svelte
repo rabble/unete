@@ -21,8 +21,10 @@
     try {
       if ($ndk) {
         $ndk.signer = undefined;
-        await $ndk.disconnect();
         loginState.set(false);
+        
+        // Optional: Clear any cached user data or state
+        // You may want to add additional cleanup here
       }
     } catch (error) {
       console.error('Logout failed:', error);

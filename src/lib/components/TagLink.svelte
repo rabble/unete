@@ -2,7 +2,9 @@
   export let type: 'topic' | 'engagement' | 'location';
   export let value: string;
 
-  const getHref = (type: string, value: string) => {
+  const getHref = (type: string, value: string | null | undefined) => {
+    if (!value) return '#';
+    
     const slug = value.toLowerCase().replace(/\s+/g, '-');
     switch(type) {
       case 'topic':
@@ -23,5 +25,5 @@
   data-sveltekit-noscroll
   class="inline-block px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-sm font-medium hover:bg-purple-200 transition-colors mr-2 mb-2"
 >
-  {value}
+  {value || 'Unknown'}
 </a>

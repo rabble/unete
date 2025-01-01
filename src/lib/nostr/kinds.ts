@@ -132,3 +132,28 @@ export const ORGANIZATION_TAGS = {
   SOCIAL: 'social',         // Social media links
   RELAY: 'relay'           // Recommended relay
 };
+
+// Define OrganizationCategory as a type
+export type OrganizationCategory = 
+  | 'Nonprofit'
+  | 'Mutual Aid'
+  | 'Coalition'
+  | 'Community Organization'
+  | 'Advocacy Group'
+  | 'Labor Union'
+  | 'Worker Cooperative'
+  | 'Social Movement'
+  | 'Other';
+
+// Alternatively, you can define it as an enum if you prefer
+// export enum OrganizationCategory {
+//   Nonprofit = 'Nonprofit',
+//   MutualAid = 'Mutual Aid',
+//   Coalition = 'Coalition',
+//   CommunityOrganization = 'Community Organization',
+//   AdvocacyGroup = 'Advocacy Group',
+//   LaborUnion = 'Labor Union',
+//   WorkerCooperative = 'Worker Cooperative',
+//   SocialMovement = 'Social Movement',
+//   Other = 'Other'
+// }

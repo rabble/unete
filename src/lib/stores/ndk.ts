@@ -19,6 +19,21 @@ export const ndkState = {
   update: ndkStore.update
 };
 
+// Add a constant for relay URLs
+const DEFAULT_RELAY_URLS = [
+  "wss://nos.lol",
+  "wss://relay.nostr.band",
+  "wss://nostr.mom"
+];
+
+// Create a helper function for NDK initialization
+function createNDKInstance() {
+  return new NDK({
+    explicitRelayUrls: DEFAULT_RELAY_URLS,
+    autoConnect: true
+  });
+}
+
 // Initialize NDK with relays
 export async function initializeNDK() {
   if (!browser) return null;
@@ -38,16 +53,7 @@ export async function initializeNDK() {
 
   try {
     console.log('Initializing new NDK instance...');
-    
-    // Create new NDK instance with explicit connection timeout
-    const ndkInstance = new NDK({
-      explicitRelayUrls: [
-        "wss://nos.lol",
-        "wss://relay.nostr.band",
-        "wss://nostr.mom"
-      ],
-      autoConnect: true
-    });
+    const ndkInstance = createNDKInstance();
 
     // Explicitly connect to relays
     await ndkInstance.connect();
@@ -240,16 +246,7 @@ export async function ensureConnection(): Promise<NDK> {
 
   // Create new instance with fast connection
   try {
-    ndkInstance = new NDK({
-      explicitRelayUrls: [
-        "wss://nos.lol",
-        "wss://relay.nostr.band", 
-        "wss://nostr.mom"
-      ],
-      autoConnect: true
-    });
-
-    // Connect without waiting for all relays
+    const ndkInstance = createNDKInstance();
     await ndkInstance.connect(250); // 250ms timeout
     
     // Store the instance

@@ -3,6 +3,7 @@
   import type { NDKUser, NDKEvent } from '@nostr-dev-kit/ndk';
   import { onMount } from 'svelte';
   import { authStore, handleLogin } from '$lib/auth';
+  import { getMediaUrls, getMediaType, fetchUserContent } from '$lib/nostr/ndk-utils';
 
   let ndk: NDK;
   
@@ -18,22 +19,6 @@
 
   let selectedRelaySet: RelaySet | null = null;
   let relaySets: RelaySet[] = [];
-
-  // Media detection helpers
-  function getMediaUrls(content: string): string[] {
-    const urlRegex = /(https?:\/\/[^\s<]+[^<.,:;"')\]\s])/g;
-    const urls = content.match(urlRegex) || [];
-    return urls.filter(url => {
-      return url.match(/\.(jpg|jpeg|png|gif|mp4|webm|mp3|wav)$/i);
-    });
-  }
-
-  function getMediaType(url: string): 'image' | 'video' | 'audio' | null {
-    if (url.match(/\.(jpg|jpeg|png|gif)$/i)) return 'image';
-    if (url.match(/\.(mp4|webm)$/i)) return 'video';
-    if (url.match(/\.(mp3|wav)$/i)) return 'audio';
-    return null;
-  }
 
   let user: NDKUser | undefined;
   let isLoggedIn = false;
@@ -99,15 +84,8 @@
   }
 
   async function fetchUserContent() {
-    if (!user) return;
-
-    // Fetch recent posts (kind 1)
-    const postsEvents = await ndk.fetchEvents({
-      kinds: [NDKKind.Text],
-      authors: [user.pubkey],
-      limit: 10
-    });
-    userPosts = Array.from(postsEvents);
+    if (!user || !ndk) return;
+    userPosts = await fetchUserContent(ndk, user);
   }
 
   async function fetchListContent(listType: string) {
