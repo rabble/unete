@@ -1,4 +1,4 @@
-import { writable, derived, type Writable } from 'svelte/store';
+import { writable, derived, type Writable, get } from 'svelte/store';
 import type { NDKUser } from '@nostr-dev-kit/ndk';
 
 // Create a writable store for NDK instance
