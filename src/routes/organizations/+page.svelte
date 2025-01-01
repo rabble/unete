@@ -78,6 +78,8 @@
       }
 
       // Load initial events with filters
+      console.log('Starting initial events load at', new Date().toISOString());
+      
       try {
         const initialFetch = new Promise<NDKEvent[]>((resolve, reject) => {
           const timeout = setTimeout(() => {
@@ -90,20 +92,6 @@
               limit: 100,
               '#t': filterTags.map(t => t[1]) // Include filter tags in subscription
             },
-            { closeOnEose: true, groupableDelay: 100 }
-          );
-
-      console.log('Starting initial events load at', new Date().toISOString());
-      
-      // Load initial events with timeout
-      try {
-        const initialFetch = new Promise<NDKEvent[]>((resolve, reject) => {
-          const timeout = setTimeout(() => {
-            reject(new Error('Initial fetch timeout'));
-          }, 5000); // 5 second timeout
-
-          const sub = ndkInstance.subscribe(
-            { kinds: [ORGANIZATION], limit: 100 },
             { closeOnEose: true, groupableDelay: 100 }
           );
 
