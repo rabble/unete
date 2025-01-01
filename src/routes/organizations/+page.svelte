@@ -57,11 +57,41 @@
 
       // Initialize filters from URL params
       const params = $page.url.searchParams;
-      searchFilters.set({
+      const initialFilters = {
         locations: params.getAll('locations') || [],
         focusAreas: params.getAll('focusAreas') || [],
         engagementTypes: params.getAll('engagementTypes') || []
-      });
+      };
+      console.log('Initializing filters from URL:', initialFilters);
+      searchFilters.set(initialFilters);
+
+      // Update subscription to include initial filters
+      const filterTags = [];
+      if (initialFilters.locations.length) {
+        filterTags.push(...initialFilters.locations.map(loc => [ORGANIZATION_TAGS.LOCATION, loc]));
+      }
+      if (initialFilters.focusAreas.length) {
+        filterTags.push(...initialFilters.focusAreas.map(area => ['t', area]));
+      }
+      if (initialFilters.engagementTypes.length) {
+        filterTags.push(...initialFilters.engagementTypes.map(type => [ORGANIZATION_TAGS.ENGAGEMENT, type]));
+      }
+
+      // Load initial events with filters
+      try {
+        const initialFetch = new Promise<NDKEvent[]>((resolve, reject) => {
+          const timeout = setTimeout(() => {
+            reject(new Error('Initial fetch timeout'));
+          }, 5000); // 5 second timeout
+
+          const sub = ndkInstance.subscribe(
+            { 
+              kinds: [ORGANIZATION], 
+              limit: 100,
+              '#t': filterTags.map(t => t[1]) // Include filter tags in subscription
+            },
+            { closeOnEose: true, groupableDelay: 100 }
+          );
 
       console.log('Starting initial events load at', new Date().toISOString());
       
