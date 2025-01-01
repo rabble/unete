@@ -285,7 +285,7 @@
                       <div class="flex flex-wrap gap-1">
                         {#each event?.tags.filter(t => t[0] === ORGANIZATION_TAGS.LOCATION) as [_, location]}
                           <a 
-                            href="/topics/{encodeURIComponent(location.toLowerCase())}"
+                            href="/organizations?locations={encodeURIComponent(location)}"
                             class="bg-gray-100 text-gray-800 px-2 py-0.5 rounded-full text-xs hover:bg-gray-200 transition-colors"
                           >
                             {location}

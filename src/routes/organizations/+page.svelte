@@ -325,9 +325,12 @@
               <h3 class="text-sm font-semibold mb-1">Locations:</h3>
               <div class="flex flex-wrap gap-1">
                 {#each event.tags.filter(t => t[0] === ORGANIZATION_TAGS.LOCATION).slice(0, 5) as [_, location]}
-                  <span class="bg-gray-100 text-gray-800 px-2 py-0.5 rounded-full text-xs">
+                  <a 
+                    href="/organizations?locations={encodeURIComponent(location)}"
+                    class="bg-gray-100 text-gray-800 px-2 py-0.5 rounded-full text-xs hover:bg-gray-200 transition-colors"
+                  >
                     {location}
-                  </span>
+                  </a>
                 {/each}
               </div>
             </div>
