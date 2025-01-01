@@ -230,15 +230,22 @@
       loading = true;
       const ndkInstance = await ensureConnection();
       
-      const filterTags = [];
+      // Build filter object for subscription
+      const filter: any = { kinds: [ORGANIZATION], limit: 100 };
+      
+      // Add location filters if any
       if ($searchFilters.locations.length) {
-        filterTags.push(...$searchFilters.locations.map(loc => [ORGANIZATION_TAGS.LOCATION, loc]));
+        filter[`#${ORGANIZATION_TAGS.LOCATION}`] = $searchFilters.locations;
       }
+      
+      // Add focus area filters if any
       if ($searchFilters.focusAreas.length) {
-        filterTags.push(...$searchFilters.focusAreas.map(area => ['t', area]));
+        filter['#t'] = $searchFilters.focusAreas;
       }
+      
+      // Add engagement type filters if any
       if ($searchFilters.engagementTypes.length) {
-        filterTags.push(...$searchFilters.engagementTypes.map(type => [ORGANIZATION_TAGS.ENGAGEMENT, type]));
+        filter[`#${ORGANIZATION_TAGS.ENGAGEMENT}`] = $searchFilters.engagementTypes;
       }
 
       const events = await new Promise<NDKEvent[]>((resolve, reject) => {
@@ -247,11 +254,7 @@
         }, 5000);
 
         const sub = ndkInstance.subscribe(
-          { 
-            kinds: [ORGANIZATION], 
-            limit: 100,
-            '#t': filterTags.map(t => t[1])
-          },
+          filter,
           { closeOnEose: true, groupableDelay: 100 }
         );
 
