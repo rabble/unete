@@ -208,7 +208,7 @@
   });
 
   // Add this function to handle form submission
-  function handleSubmit() {
+  async function handleSubmit() {
     // Update URL with current filters
     const params = new URLSearchParams();
     
@@ -224,6 +224,63 @@
 
     // Update the URL without triggering a page reload
     window.history.replaceState({}, '', `?${params.toString()}`);
+
+    // Fetch new organizations based on updated filters
+    try {
+      loading = true;
+      const ndkInstance = await ensureConnection();
+      
+      const filterTags = [];
+      if ($searchFilters.locations.length) {
+        filterTags.push(...$searchFilters.locations.map(loc => [ORGANIZATION_TAGS.LOCATION, loc]));
+      }
+      if ($searchFilters.focusAreas.length) {
+        filterTags.push(...$searchFilters.focusAreas.map(area => ['t', area]));
+      }
+      if ($searchFilters.engagementTypes.length) {
+        filterTags.push(...$searchFilters.engagementTypes.map(type => [ORGANIZATION_TAGS.ENGAGEMENT, type]));
+      }
+
+      const events = await new Promise<NDKEvent[]>((resolve, reject) => {
+        const timeout = setTimeout(() => {
+          reject(new Error('Fetch timeout'));
+        }, 5000);
+
+        const sub = ndkInstance.subscribe(
+          { 
+            kinds: [ORGANIZATION], 
+            limit: 100,
+            '#t': filterTags.map(t => t[1])
+          },
+          { closeOnEose: true, groupableDelay: 100 }
+        );
+
+        const fetchedEvents: NDKEvent[] = [];
+        
+        sub.on('event', (event) => {
+          if (event.kind === ORGANIZATION) {
+            fetchedEvents.push(event);
+          }
+        });
+
+        sub.on('eose', () => {
+          clearTimeout(timeout);
+          resolve(fetchedEvents);
+        });
+
+        sub.on('error', (err) => {
+          clearTimeout(timeout);
+          reject(err);
+        });
+      });
+
+      organizations.set(events);
+      loading = false;
+    } catch (err) {
+      console.error('Error fetching organizations:', err);
+      error = `Failed to fetch organizations: ${err.message}`;
+      loading = false;
+    }
   }
 </script>
 
