@@ -300,7 +300,7 @@
                       <div class="flex flex-wrap gap-1">
                         {#each event?.tags.filter(t => t[0] === ORGANIZATION_TAGS.ENGAGEMENT) as [_, type]}
                           <a 
-                            href="/topics/{encodeURIComponent(type.toLowerCase())}"
+                            href="/organizations?engagementTypes={encodeURIComponent(type)}"
                             class="bg-green-100 text-green-800 px-2 py-0.5 rounded-full text-xs hover:bg-green-200 transition-colors"
                           >
                             {type}

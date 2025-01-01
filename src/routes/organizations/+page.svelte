@@ -339,9 +339,12 @@
               <h3 class="text-sm font-semibold mb-1">Engagement Types:</h3>
               <div class="flex flex-wrap gap-1">
                 {#each event.tags.filter(t => t[0] === ORGANIZATION_TAGS.ENGAGEMENT).slice(0, 5) as [_, type]}
-                  <span class="bg-green-100 text-green-800 px-2 py-0.5 rounded-full text-xs">
+                  <a 
+                    href="/organizations?engagementTypes={encodeURIComponent(type)}"
+                    class="bg-green-100 text-green-800 px-2 py-0.5 rounded-full text-xs hover:bg-green-200 transition-colors"
+                  >
                     {type}
-                  </span>
+                  </a>
                 {/each}
               </div>
             </div>
