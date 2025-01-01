@@ -45,8 +45,8 @@
 
       console.log('Starting organizations page mount');
       
-      // Get NDK instance (no signer needed)
-      const ndkInstance = ndk;
+      // Ensure NDK is connected
+      const ndkInstance = await ensureConnection();
       
       console.log('NDK connection result:', {
         instance: !!ndkInstance,
