@@ -65,34 +65,32 @@
       console.log('Initializing filters from URL:', initialFilters);
       searchFilters.set(initialFilters);
 
-      // Update subscription to include initial filters
-      const filterTags = [];
+      // Build initial filter object
+      const initialFilter: any = { kinds: [ORGANIZATION], limit: 100 };
+      
       if (initialFilters.locations.length) {
-        filterTags.push(...initialFilters.locations.map(loc => [ORGANIZATION_TAGS.LOCATION, loc]));
+        initialFilter[`#${ORGANIZATION_TAGS.LOCATION}`] = initialFilters.locations;
       }
       if (initialFilters.focusAreas.length) {
-        filterTags.push(...initialFilters.focusAreas.map(area => ['t', area]));
+        initialFilter['#t'] = initialFilters.focusAreas;
       }
       if (initialFilters.engagementTypes.length) {
-        filterTags.push(...initialFilters.engagementTypes.map(type => [ORGANIZATION_TAGS.ENGAGEMENT, type]));
+        initialFilter[`#${ORGANIZATION_TAGS.ENGAGEMENT}`] = initialFilters.engagementTypes;
       }
 
       // Load initial events with filters
       console.log('Starting initial events load at', new Date().toISOString());
+      console.log('Using initial filter:', initialFilter);
       
       try {
         const initialFetch = new Promise<NDKEvent[]>((resolve, reject) => {
           const timeout = setTimeout(() => {
             reject(new Error('Initial fetch timeout'));
-          }, 5000); // 5 second timeout
+          }, 10000); // 10 second timeout
 
           const sub = ndkInstance.subscribe(
-            { 
-              kinds: [ORGANIZATION], 
-              limit: 100,
-              '#t': filterTags.map(t => t[1]) // Include filter tags in subscription
-            },
-            { closeOnEose: true, groupableDelay: 100 }
+            initialFilter,
+            { closeOnEose: true, groupableDelay: 500 }
           );
 
           const events: NDKEvent[] = [];
@@ -121,9 +119,15 @@
         organizations.set(events);
         
         // Start realtime subscription after initial load
+        // Use the same filter for realtime subscription but without limit
+        const realtimeFilter = { ...initialFilter };
+        delete realtimeFilter.limit;
+        realtimeFilter.since = Math.floor(Date.now() / 1000);
+        
+        console.log('Setting up realtime subscription with filter:', realtimeFilter);
         subscription = ndkInstance.subscribe(
-          { kinds: [ORGANIZATION], since: Math.floor(Date.now() / 1000) },
-          { closeOnEose: false, groupableDelay: 100 }
+          realtimeFilter,
+          { closeOnEose: false, groupableDelay: 500 }
         );
       } catch (err) {
         console.error('Error fetching events:', err);
@@ -272,6 +276,7 @@
         });
 
         sub.on('error', (err) => {
+          console.error('Subscription error:', err);
           clearTimeout(timeout);
           reject(err);
         });
